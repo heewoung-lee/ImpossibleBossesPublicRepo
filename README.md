@@ -1,4 +1,5 @@
-![ChatGPT Image 2025년 5월 21일 오전 07_58_25](https://github.com/user-attachments/assets/78780fee-a54d-4b52-90dc-0bca75f68ba7)
+
+<img width="1536" height="1024" alt="1titleImage" src="https://github.com/user-attachments/assets/66f55318-9bdb-498f-847a-7edc3d3aa09d" />
 
 ## 📘 목차
 - **[프로젝트 소개](#-프로젝트-소개)**
