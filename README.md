@@ -431,7 +431,7 @@
     </td>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="22StrategyPattren" src="https://github.com/user-attachments/assets/9605ea6f-bdcb-487a-8ac4-283dc5f6c9fc"
+        <img src="https://github.com/user-attachments/assets/e342dd54-8c9d-43ad-90fb-b1b3c7602416"
              alt="전략패턴" height="300">
         <figcaption>
           <br/>
