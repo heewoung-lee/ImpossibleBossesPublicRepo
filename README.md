@@ -152,9 +152,10 @@
   <strong>&lt;DataManger의 타입확인&gt;</strong>
 </p>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/f0fcfdb3-cd07-494a-9edd-267df547bfd1" alt="타입 스캔 이미지 1" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/0c779137-163d-42ea-9b53-06abfecbeba5" alt="타입 스캔 이미지 1" width="70%"/>
 </div>
 <br>
+
 
 2.  **Google 스프레드시트 연동**:
     <ul>
@@ -166,9 +167,10 @@
   <strong>&lt;구글 스프레드시트 불러오기&gt;</strong>
 </p>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/47be08dd-43b7-4740-9853-89e74ab992f3" alt="스프레드시트 연동" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/fc9c65e6-c48b-4b4b-ae1d-600aae8696a6" alt="스프레드시트 연동" width="70%"/>
 </div>
 <br>
+
 
 3.  **데이터 파싱 및 구조화**:
     * `LoadDataFromGoogleSheets()`는 인증된 서비스와 스프레드시트 ID로 각 시트의 데이터를 요청합니다.
@@ -182,7 +184,7 @@
   <strong>&lt;JSON 문자열 역직렬화&gt;</strong>
 </p>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/5d878784-0047-4341-a7d5-eaf3cad0e707" alt="데이터 파싱" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/26519a6e-e5ef-41a9-901d-af0590b3070f" alt="데이터 파싱" width="70%"/>
 </div>
 <br>
 
@@ -193,10 +195,9 @@
   <strong>&lt;아이템 클래스의 데이터 캐싱&gt;</strong>
 </p>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/3a36e9ed-a833-4e30-b9ac-41880a50a860" alt="데이터 캐싱" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/d0669e1f-c4c7-407f-a049-a5153eda783a" alt="데이터 캐싱" width="70%"/>
 </div>
 <br>
-
 
 5.  **로컬 데이터 활용**:
     * Google 스프레드시트 접근 불가 시, `LoadAllDataFromLocal()` 메서드가 로컬에 JSON 파일로 저장된 데이터를 로드합니다.
@@ -205,7 +206,7 @@
   <strong>&lt;데이터 변경 확인(바이너리비교)&gt;</strong>
 </p>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/56236faf-6a3d-4658-bc5e-fdad2c12e310" alt="데이터 변경확인" width="30%"/>
+  <img src="https://github.com/user-attachments/assets/151fc2ba-32ac-4d26-a628-5fdf6439ea1d" alt="데이터 변경확인" width="30%"/>
 </div>
 <br>
 
