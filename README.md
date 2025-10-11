@@ -84,7 +84,7 @@
   <tr>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/957a7605-b327-47a6-8d63-3974d3362d9b" alt="이미 가입된 ID" height="300">
+        <img src="https://github.com/user-attachments/assets/fb894553-6fd5-42c1-bb28-56304c32567f" alt="이미 가입된 ID" height="300">
         <figcaption>
           <br/>
           <strong>&lt;이미 가입된 ID&gt;</strong><br>
@@ -93,7 +93,7 @@
     </td>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/fd6953ff-8d11-43f3-b34a-72abe7985f77" alt="회원가입 성공" height="300">
+        <img src="https://github.com/user-attachments/assets/0cf5fc9e-3f29-4c95-a0f2-cbecd03b1551" alt="회원가입 성공" height="300">
         <figcaption>
           <br/>
           <strong>&lt;회원가입 성공&gt;</strong><br>
@@ -104,8 +104,6 @@
 </table>
 
 <br/>
-
-
 
 
 
@@ -120,13 +118,14 @@
 
 <br/>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/a63eec10-7526-4920-bd92-319d0a640e82" alt="로그인 흐름" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/331d4e07-1ed3-4bfa-9e96-e09b0e97b034" alt="로그인 흐름" width="70%"/>
   <br/>
   <sub><strong>&lt;로그인 및 회원가입 처리 흐름도&gt;</strong></sub>
 </p>
 <br/>
 
 ---
+
 
 ### 📥 데이터 불러오기
 > ImpossibleBosses의 데이터 관리는 Managers.DataManager를 중심으로 이루어집니다. 이 매니저는 Google 스프레드시트에서 게임에 필요한 각종 데이터(플레이어 정보, 몬스터 정보, 아이템 목록 등)를 로드하고, 애플리케이션 내에서 효율적으로 사용할 수 있도록 처리합니다.
@@ -135,9 +134,9 @@
   <strong>&lt;데이터 시트&gt;</strong>
 </p>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/5fa4ab70-ba04-403b-b229-c403439998e1" alt="데이터 시트 이미지 1" width="70%"/>
-  <img src="https://github.com/user-attachments/assets/66638094-07c2-48ad-b48e-744c3f8d9183" alt="데이터 시트 이미지 2" width="70%"/>
-  <img src="https://github.com/user-attachments/assets/8c104aa5-92eb-44ea-82e5-c77787290c39" alt="데이터 시트 이미지 3" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/8c15ca5b-7cf5-4683-bd2b-9aa5443d85f9" alt="데이터 시트 이미지 1" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/cc336ef9-69a4-4299-bd06-ea805cb90479" alt="데이터 시트 이미지 2" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/d645cd8a-2d4b-4c66-b0f2-9c6fae4f56e1" alt="데이터 시트 이미지 3" width="70%"/>
 </p>
 
 
