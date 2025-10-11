@@ -213,7 +213,6 @@
 ---
 
 
-
 ### 🏠 로비 (Lobby)
 
 > 플레이어는 계정 인증 후 **로비 화면**으로 이동하여, 다른 플레이어와 소통하고 함께 게임을 즐길 **방을 찾거나 만들 수 있습니다.**
@@ -224,7 +223,7 @@
   <strong>&lt;로비화면&gt;</strong>
 </p>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/bd999c4a-0074-49a7-a73b-a84fe01a6a85" alt="로비화면" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/cb47f1e7-d994-4a03-8962-1257cdcb8bc7" alt="로비화면" width="70%"/>
 </div>
 
 <br/>
@@ -247,7 +246,7 @@
 * 이를 통해 함께 게임 할 파티원을 구하거나, 게임에 대한 정보를 나누는 등 다양한 상호작용이 가능합니다.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f3e38ca6-cecf-412b-8071-312cc87864b6" alt="로비 채팅" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/7efb6baa-1ff3-4d0f-a9ba-d496d7999fae" alt="로비 채팅" width="80%"/>
   <br/>
   <sub><strong>&lt;로비 채팅창&gt;</strong><br/>다른 플레이어와 텍스트로 대화할 수 있습니다. (Vivox 연동)</sub>
 </p>
@@ -269,7 +268,7 @@
   <tr>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/50ed75db-9775-49b1-ab05-3fce2d648a9d" alt="방 목록" height="300">
+        <img src="https://github.com/user-attachments/assets/6c405fff-d585-4e5c-9c8e-433363d4fe30" alt="방 목록" height="300">
         <figcaption>
           <br/>
           <strong>&lt;게임 방 목록&gt;</strong><br>
@@ -281,7 +280,7 @@
     </td>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/7ef4241f-fe63-49e4-8675-91a6ca7e26af" alt="비밀번호 입력" height="300">
+        <img src="https://github.com/user-attachments/assets/0322b79d-21ea-40c1-b096-1965cb316663" alt="비밀번호 입력" height="300">
         <figcaption>
           <br/>
           <strong>&lt;비밀번호 입력창&gt;</strong><br>
@@ -294,6 +293,7 @@
 
 <br/>
 
+
 #### ➕ 게임 방 생성
 
 원한다면 직접 새로운 게임 방을 만들 수도 있습니다.
@@ -303,7 +303,7 @@
 * 설정을 완료하고 방을 만들면, 이 방은 다른 플레이어들의 방 목록에도 나타나 함께 플레이할 팀원을 모을 수 있습니다.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/adf8bd6f-3f22-4dff-89ba-5fbac08a2c82" alt="방 생성" width="30%"/>
+  <img src="https://github.com/user-attachments/assets/8a3ca177-2405-4a81-b735-8c58dca66a54" alt="방 생성" width="30%"/>
   <br/>
   <sub><strong>&lt;게임 방 생성 설정&gt;</strong><br/>새로운 방의 이름, 최대 인원, 비밀번호 등을 설정합니다.</sub>
 </p>
@@ -319,7 +319,7 @@
 * 모든 플레이어가 "준비 완료" 상태가 되면, 방을 만든 방장이 게임을 시작할 수 있습니다.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/494afb30-753a-4553-bd4f-158943e5877e" alt="캐릭터 선택" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/efe05ffa-fa0c-42ff-b05d-7f6aebfa46e8" alt="캐릭터 선택" width="80%"/>
   <br/>
   <sub><strong>&lt;캐릭터 선택 및 준비 완료&gt;</strong><br/>방에 참가한 플레이어들이 각자 플레이할 캐릭터를 고르고 "준비" 상태를 표시합니다.</sub>
 </p>
@@ -346,7 +346,7 @@
     * 이는 로비 매니저에서 호스트 변경 이벤트를 감지하고, 새로운 호스트에게 릴레이 서버 재설정 권한을 부여하는 방식으로 처리됩니다.
       
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/ba3a59e4-f8af-4adb-94a1-db202a7630c2" alt="캐릭터 선택" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/5cd90617-aae4-4045-84e2-939418a27c05" alt="캐릭터 선택" width="80%"/>
   <br/>
   <sub><strong>&lt;호스트 이전(호스트 마이그레이션)&gt;</strong><br/>호스트가 방을 떠나면 다른 플레이어가 호스트를 위임 받습니다.</sub>
 </p>
