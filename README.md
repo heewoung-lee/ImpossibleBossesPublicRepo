@@ -369,20 +369,21 @@
 <br/>
 
 
+
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/9abf36f1-7fe1-4f9a-85f1-89af8b17e58c" alt="이동 동기화" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/05cd0d58-a25e-4a4f-9438-1c7f441d54b4" alt="이동 동기화" width="80%"/>
   <br/>
   <sub><strong>&lt;이동동기화: 캐릭터의 실시간 위치, 방향, 상태를 공유합니다.&gt</strong></sub>
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/506415af-713b-4fa6-928b-96762fd55116" alt="오브젝트 동기화" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/525b5789-ae1a-4c74-8a25-51425d417f59" alt="오브젝트 동기화" width="80%"/>
   <br/>
   <sub><strong>&lt;오브젝트 동기화: 게임 내 중요 객체의 생성, 소멸, 상태 변화를 모든 플레이어에게 실시간으로 동일하게 반영합니다.&gt</strong></sub>
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/93d9c3e4-3665-46d8-9fb8-b5c64922bfb6" alt="스킬 동기화" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/1132884a-fedc-4d55-b9f7-8535dd485021" alt="스킬 동기화" width="80%"/>
   <br/>
   <sub><strong>&lt;이펙트 동기화: 모든 스킬의 발동, 시각적 표현을 실시간으로 동일하게 반영합니다.&gt</strong></sub>
 </p>
@@ -415,12 +416,12 @@
     * 각 상태 로직이 분리되어 테스트와 디버깅이 용이해졌습니다.
 
 <div align="center">
-
+   
 <table style="border:0;">
   <tr>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/b9c02182-966e-491d-94fc-1f4f80e4b197"
+        <img src="https://github.com/user-attachments/assets/74a769e2-88da-498b-ae74-19f7687137f4"
              alt="FSM(유한상태머신)" height="300">
         <figcaption>
           <br/>
@@ -430,7 +431,7 @@
     </td>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/f6ff4b98-a188-44ec-a402-236324895f0e"
+        <img src="22StrategyPattren" src="https://github.com/user-attachments/assets/9605ea6f-bdcb-487a-8ac4-283dc5f6c9fc"
              alt="전략패턴" height="300">
         <figcaption>
           <br/>
@@ -464,7 +465,7 @@
   &lt;<strong>비헤이비어 트리</strong>&gt;
 </p>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/d8d387e4-433d-4c18-9c93-50162a3ec318" alt="비헤이비어 트리" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/e3d468e1-3853-4536-b5f1-bd971a6796f6" alt="비헤이비어 트리" width="70%"/>
 </div>
 
 <br/>
@@ -492,7 +493,7 @@
   <tr>
     <td align="center" valign="top" style="width:45%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/51c157c4-5627-47d6-8258-cc3f8ecd773f"
+        <img src="https://github.com/user-attachments/assets/94938335-c80f-4c64-925b-49e3cc2a1501"
              alt="멀티플레이 서비스 SDK 오류발생" height="300">
         <figcaption>
           <br/>
@@ -504,9 +505,9 @@
     </td>
     <td align="center" valign="top"style="width:5%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/60b8ab1a-d86b-48db-ad13-c84293e5f6ae"
+        <img src="https://github.com/user-attachments/assets/49698f5e-5cba-43a0-b29c-fefce47107cf"
              alt="유니티 멀티플레이 서비스팀 답변" height="100">
-          <img src="https://github.com/user-attachments/assets/977fbaa4-172a-493e-8d17-5eb2398fef8c"
+          <img src="https://github.com/user-attachments/assets/c83a1c46-3f5a-48e1-a5e6-438dcff38bbb"
              alt="유니티 멀티플레이 서비스팀 답변" height="200">
         <figcaption>
           <br/>
@@ -516,7 +517,7 @@
     </td>
     <td align="center" valign="top" style="width:45%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/d22de9c8-279c-4085-8023-e221e82b8d91"
+        <img src="https://github.com/user-attachments/assets/18ef42c1-090b-4cb5-8473-f3724dc0582e"
              alt="25년 2월 6일 업데이트 완료" height="300">
         <figcaption>
           <br/>
@@ -555,10 +556,11 @@
     * 파티클과 같은 네트워크 오브젝트의 빈번한 생성/소멸로 인한 GC 발생 빈도가 현저히 감소하여 게임의 전반적인 프레임 안정성이 향상되었습니다.
     * Unity Netcode의 기본 메커니즘을 프로젝트 특성에 맞게 커스터마이징하여 네트워크 부하를 줄이고, 오브젝트 재사용을 통해 반응 속도 또한 개선되었습니다.
 
+
 <br/>
 </p>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f276410b-8d07-4085-b43b-8f4a1d93eeb7" alt="오브젝트 풀링" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/935b232b-42fe-477a-9b1d-3cb82cf4f7d9" alt="오브젝트 풀링" width="80%"/>
   <br/>
   <sub><strong>&lt;네트워크 오브젝트 풀링&gt</strong></sub>
 </p>
@@ -576,7 +578,7 @@
       결과적으로 호스트 환경에서는 정상적인 연출이 이루어지는 반면, 클라이언트에서는 애니메이션의 주요 구간을 놓치거나 갑작스러운 장면 전환을 경험하는 문제가 발생했습니다.
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/c609fc28-d0c8-447f-baaa-b2af3c07af48" alt="동기화 오류: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/8fb9154c-bd5a-4799-b29f-2f6d7698c0d4" alt="동기화 오류: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
   <br/>
   <sub><strong>&lt;일반적인 동기화 방식 사용 시 발생한 문제: 좌측(호스트)과 달리 우측(클라이언트)은 애니메이션이 부자연스럽게 시작됨&gt;</strong></sub>
 </div>
@@ -590,8 +592,9 @@
     * 본 시스템 적용을 통해, 네트워크 지연이 존재하는 환경에서도 클라이언트 측 애니메이션이 중간 생략 없이 처음부터 부드럽게 재생되며, 호스트와의 시각적 동기화 수준이 크게 향상되었습니다.
     * 특히, 공격 애니메이션과 실제 피해 판정 발생 시점 간의 일관성이 증대되어, 모든 플레이어에게 동일한 게임 플레이 경험을 제공하게 되었습니다.
 
+
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/41481eb8-f3aa-4a4e-9b81-e39a61dcb18f" alt="동기화 성공: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/77f04486-2c53-48cc-a22a-737cf03fce80" alt="동기화 성공: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
   <br/>
   <sub><strong>&lt;개선된 시스템 적용 후: 모든 환경에서 애니메이션이 일관되고 부드럽게 동기화되는 모습&gt;</strong></sub>
 </div>
@@ -638,7 +641,7 @@
 <br/>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/3380c136-dd76-41a7-8d78-e3b1d5bb315b" alt="커스텀 인스펙터 결과물" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/5cff0332-b284-4424-a231-e48705b2b16e" alt="커스텀 인스펙터 결과물" width="70%"/>
   <br/>
   <sub><strong>&lt; 인스펙터에서 테스트 환경 제어&gt;</strong></sub>
 </p>
