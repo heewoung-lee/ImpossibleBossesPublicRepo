@@ -51,7 +51,7 @@
 **주요 구현 방식:**
 
 1.  **Installer를 통한 의존성 설정**:
-    * `ProjectContext`, `SceneContext`, `GameObjectContext` 등 계층별로 어떤 의존성을 주입할지 정의합니다. 이를 통해 의존성 주입 설정이 한곳에 모여있어 전체적인 구조 파악이 용이합니다.(의존성 가시화)
+    * `ProjectContext`, `SceneContext`, `GameObjectContext` 등 계층별로 어떤 의존성을 주입할지 정의합니다. 이를 통해 의존성 주입 설정이 한곳에 모여있어 전체적인 구조 파악이 용이합니다.
     
 2.  **Unity Netcode 호환성을 위한 커스텀 팩토리 및 핸들러 구현**:
     * 프로젝트 초기, 젠젝트의 기본 객체 생성(스폰) 방식은 유니티 넷코드(Unity Netcode)의 동작 방식과 충돌을 일으켰습니다.
