@@ -470,30 +470,71 @@
 
 <br/>
 
-#### 3. 로비(Unity Lobby SDK)서비스 버그 제기 및 해결
+#### 3. 로비 콜백 및 데이터 동기화 문제 해결: Unity Lobby SDK 버그 식별 및 공식 해결
 
 * 🤔 문제점:
     * Unity Netcode 기반 멀티플레이 게임 개발 중, Unity Lobby 서비스에서 특정 시나리오(호스트 이전 후 이전 호스트 재접속)에서 플레이어의 로비 참가 및 행동 변화에 따른 이벤트 콜백이 정상적으로 호출되지 않는 오류가 발생했습니다.
-    * 이로 인해 다른 플레이어의 로비 내 활동이 실시간으로 반영되지 않고 로비 데이터가 불일치하는 등, 로비 시스템의 핵심 기능에 문제가 발생했습니다.
+    * 이로 인해 다른 플레이어의 로비 내 활동이 실시간으로 반영되지 않고 로비 데이터가 불일치하는 등, 로비 시스템의 핵심 기능에 문제가 발생하여 사용자 경험을 저해했습니다.
 
 * 💡 해결 과정:
-    * **초기 검증 및 원인 분석:** 처음에는 턴→ 젠젝트(Zenject) DI 프레임워크로 전환
-
-* 🤔 문제점:
-    * 초기에 싱글톤으로 빠르게 기능을 붙였지만, 시간이 지나며 싱글톤 의존도가 커지고 객체가 비대화됨에 따라 하나를 수정하면 다른 곳에서 문제가 터지는 도미노 현상이 발생했습니다.
-      이를 줄이기 위해 싱글톤을 분해하여 일반 DI 모듈을 만들고, 나머지는 컴포넌트 패턴으로 채워 갔으나, 의존성 주입 컨트롤러가 곳곳에 흩어져 주입 경로 추적과 테스트 교체가 어려웠습니다.
-
-* 💡 해결 과정:
-    * Zenject를 도입하여 주입 지점을 Installer로 일원화하고(의존 모듈에 대한 가시성 향상), ProjectContext → SceneContext → GameObjectContext의 상향 단일 흐름으로 컴포지션 루트를 표준화했습니다.
-    * 인터페이스 중심 바인딩과 환경별(프로덕션/테스트) Installer 분리로, 동일 코드에 Real/Mock을 손쉽게 교체할 수 있게 했습니다.
+    * **초기 검증 및 원인 분석:** 처음에는 자체 코드의 로직 오류를 의심하여 다양한 테스트와 코드 검증을 진행했으나, 문제가 지속되어 Unity Multiplayer 패키지(Lobby) 자체의 문제일 가능성을 인지했습니다.
+    * **심층 분석 및 문제 구체화:** 네트워크 트래픽과 콜백 호출 경로를 면밀히 추적하며 Lobby 패키지의 내부 로직을 분석한 결과, Unity 6에서 새로 도입된 패키지의 특정 부분(`LobbyPatcher.GetLobbyDiff` 관련 추정)에서 이전 호스트의 캐시된 정보로 인해 콜백이 내부적으로 막히는 현상을 발견했습니다.
+    * **공식 리포트 및 임시 조치, 최종 해결:** 분석한 내용을 바탕으로 해당 문제를 Unity Technologies에 공식적으로 버그 리포트했습니다. Unity 팀으로부터 해당 문제가 Lobby SDK의 버그임을 확인받았으며, 즉각적인 패치가 어려운 상황에서 SDK 코드의 일부 로직을 임시로 수정하여 개발을 지속했습니다. 이후 2025년 2월 6일 자 업데이트를 통해 해당 버그가 공식적으로 수정되었음을 확인했습니다.
 
 * ✨ 개선 결과:
-    * 의존성 가시화: “무엇이 어디서 주입되는지”가 한눈에 보이며, 변경 영향 범위가 명확해졌습니다.
-    * 유지보수성 향상: 결합도가 낮아져 수정·확장이 수월해졌고, 도미노 이슈가 크게 감소했습니다.
-    * 작업속도 개선: 테스트에서는 Installer만 바꿔 끼우면 되므로 세팅 시간이 단축되고, 기능 개발과 디버깅 사이클이 빨라졌습니다.
-    * 초기 학습곡선을 넘기기 어려웠지만 이후 생산성과 안정성이 눈에 띄게 향상되었습니다.
+    * Unity의 공식 패치 이후, 로비 이벤트 콜백이 정상적으로 작동하게 되어 호스트 이전 및 플레이어 재접속 시에도 로비 데이터가 안정적으로 동기화됩니다.
+    * 이 경험을 통해 외부 라이브러리 문제 발생 시에도 적극적으로 원인을 분석하고, 공식 채널을 통해 리포트하며, 때로는 임시적인 해결책을 모색하여 프로젝트를 진행시키는 문제 해결 능력을 경험했습니다.
+  
+  <br/>
+  
+<div align="center">
 
----
+<table style="border:0;">
+  <tr>
+    <td align="center" valign="top" style="width:45%;">
+      <figure style="margin:0;">
+        <img src="https://github.com/user-attachments/assets/51c157c4-5627-47d6-8258-cc3f8ecd773f"
+             alt="멀티플레이 서비스 SDK 오류발생" height="300">
+        <figcaption>
+          <br/>
+          <strong>멀티플레이 서비스 
+             <br/>
+             SDK 오류발생</strong><br>
+        </figcaption>
+      </figure>
+    </td>
+    <td align="center" valign="top"style="width:5%;">
+      <figure style="margin:0;">
+        <img src="https://github.com/user-attachments/assets/60b8ab1a-d86b-48db-ad13-c84293e5f6ae"
+             alt="유니티 멀티플레이 서비스팀 답변" height="100">
+          <img src="https://github.com/user-attachments/assets/977fbaa4-172a-493e-8d17-5eb2398fef8c"
+             alt="유니티 멀티플레이 서비스팀 답변" height="200">
+        <figcaption>
+          <br/>
+          <strong>유니티 멀티플레이 서비스팀 답변</strong><br>
+        </figcaption>
+      </figure>
+    </td>
+    <td align="center" valign="top" style="width:45%;">
+      <figure style="margin:0;">
+        <img src="https://github.com/user-attachments/assets/d22de9c8-279c-4085-8023-e221e82b8d91"
+             alt="25년 2월 6일 업데이트 완료" height="300">
+        <figcaption>
+          <br/>
+          <strong>2025년 2월 6일 업데이트 완료</strong><br>
+        </figcaption>
+      </figure>
+    </td>
+  </tr>
+</table>
+
+</div>
+
+<p align="center">
+  <a href="https://blog.naver.com/hiwoong12/223742840805">[개발일지] Unity Lobby SDK 콜백 오류 추적 및 해결 기록</a>
+</p>
+
+<br/>
 
 
 #### 7. 테스트 효율성 증대: 커스텀 인스펙터를 통한 Play Mode Scenario 제어
