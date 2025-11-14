@@ -555,11 +555,10 @@
 * **✨ 개선 결과:**
     * 파티클과 같은 네트워크 오브젝트의 빈번한 생성/소멸로 인한 GC 발생 빈도가 현저히 감소하여 게임의 전반적인 프레임 안정성이 향상되었습니다.
     * Unity Netcode의 기본 메커니즘을 프로젝트 특성에 맞게 커스터마이징하여 네트워크 부하를 줄이고, 오브젝트 재사용을 통해 반응 속도 또한 개선되었습니다.
-
 <br/>
 </p>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f276410b-8d07-4085-b43b-8f4a1d93eeb7" alt="오브젝트 풀링" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/5695704f-052a-4b2c-9bd3-5da3369f578e" alt="오브젝트 풀링" width="80%"/>
   <br/>
   <sub><strong>&lt;네트워크 오브젝트 풀링&gt</strong></sub>
 </p>
@@ -577,7 +576,7 @@
       결과적으로 호스트 환경에서는 정상적인 연출이 이루어지는 반면, 클라이언트에서는 애니메이션의 주요 구간을 놓치거나 갑작스러운 장면 전환을 경험하는 문제가 발생했습니다.
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/c609fc28-d0c8-447f-baaa-b2af3c07af48" alt="동기화 오류: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/c8edd241-9b23-43be-b10d-3861fa9408b8" alt="동기화 오류: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
   <br/>
   <sub><strong>&lt;일반적인 동기화 방식 사용 시 발생한 문제: 좌측(호스트)과 달리 우측(클라이언트)은 애니메이션이 부자연스럽게 시작됨&gt;</strong></sub>
 </div>
@@ -592,7 +591,7 @@
     * 특히, 공격 애니메이션과 실제 피해 판정 발생 시점 간의 일관성이 증대되어, 모든 플레이어에게 동일한 게임 플레이 경험을 제공하게 되었습니다.
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/41481eb8-f3aa-4a4e-9b81-e39a61dcb18f" alt="동기화 성공: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/ca4bdf53-42db-41c2-8bbf-95e03c3f8041" alt="동기화 성공: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
   <br/>
   <sub><strong>&lt;개선된 시스템 적용 후: 모든 환경에서 애니메이션이 일관되고 부드럽게 동기화되는 모습&gt;</strong></sub>
 </div>
