@@ -493,7 +493,7 @@
   <tr>
     <td align="center" valign="top" style="width:45%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/51c157c4-5627-47d6-8258-cc3f8ecd773f"
+        <img src="https://github.com/user-attachments/assets/d2bac3ae-0e4b-4665-af6a-9ba298147d1f"
              alt="멀티플레이 서비스 SDK 오류발생" height="300">
         <figcaption>
           <br/>
@@ -505,9 +505,9 @@
     </td>
     <td align="center" valign="top"style="width:5%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/60b8ab1a-d86b-48db-ad13-c84293e5f6ae"
+        <img src="https://github.com/user-attachments/assets/2e7e63e2-37e9-4dad-85c8-675f85971a5d"
              alt="유니티 멀티플레이 서비스팀 답변" height="100">
-          <img src="https://github.com/user-attachments/assets/977fbaa4-172a-493e-8d17-5eb2398fef8c"
+          <img src="https://github.com/user-attachments/assets/1879b28c-036d-4785-ae7f-a16828f12c1f"
              alt="유니티 멀티플레이 서비스팀 답변" height="200">
         <figcaption>
           <br/>
@@ -517,7 +517,7 @@
     </td>
     <td align="center" valign="top" style="width:45%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/d22de9c8-279c-4085-8023-e221e82b8d91"
+        <img src="https://github.com/user-attachments/assets/d0008387-e15a-4c26-8d22-3739ca87cfb4"
              alt="25년 2월 6일 업데이트 완료" height="300">
         <figcaption>
           <br/>
