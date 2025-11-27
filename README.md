@@ -608,7 +608,7 @@
       이를 줄이기 위해 싱글톤을 분해하여 일반 DI 모듈을 만들고, 나머지는 컴포넌트 패턴으로 채워 갔으나, 의존성 주입 컨트롤러가 곳곳에 흩어져 주입 경로 추적과 테스트 교체가 어렵고 불안정했습니다.
 
 * 💡 해결 과정:
-    * Zenject를 도입하여 주입 지점을 Installer로 일원화하고(의존 모듈에 대한 가시성 향상), ProjectContext → SceneContext → GameObjectContext의 상향 단일 흐름으로 컴포지션 루트를 표준화했습니다.
+    * Zenject를 도입하여 주입 지점을 Installer로 일원화하고(의존성성 모듈에 대한 가시성 향상), ProjectContext → SceneContext → GameObjectContext의 상향 단일 흐름으로 컴포지션 루트를 표준화했습니다.
     * 인터페이스 중심 바인딩과 환경별(프로덕션/테스트) Installer 분리로, 동일 코드에 Real/Mock을 손쉽게 교체할 수 있게 했습니다.
 
 * ✨ 개선 결과:
