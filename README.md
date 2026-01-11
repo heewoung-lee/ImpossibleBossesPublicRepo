@@ -134,9 +134,7 @@
   <strong>&lt;데이터 시트&gt;</strong>
 </p>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/e48f121f-4644-4756-897d-ed95fe725d19" alt="데이터 시트 이미지 1" width="70%"/>
-  <img src="https://github.com/user-attachments/assets/07f5d705-665a-4e44-9cb9-4da816dc005d" alt="데이터 시트 이미지 2" width="70%"/>
-  <img src="https://github.com/user-attachments/assets/7b68f474-5819-414b-a1e7-6140bab15e9a" alt="데이터 시트 이미지 3" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/7b68f474-5819-414b-a1e7-6140bab15e9a" alt="데이터 시트 이미지 3" width="100%"/>
 </p>
 
 
