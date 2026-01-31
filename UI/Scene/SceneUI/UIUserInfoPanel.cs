@@ -1,7 +1,8 @@
 using System;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface.LoginManager;
-using GameManagers.Interface.UIManager;
+using GameManagers.Scene;
 using TMPro;
 using UI.Popup.PopupUI;
 using Unity.Services.Vivox;
@@ -14,11 +15,22 @@ namespace UI.Scene.SceneUI
 {
     public class UIUserInfoPanel : UIScene
     {
-        [Inject] private IUIManagerServices _uiManagerServices;
-        [Inject] private IPlayerIngameLogininfo _playerIngameLogininfo;
-        [Inject] private LobbyManager _lobbyManager;
-        [Inject] SceneManagerEx _sceneManagerEx;
-        [Inject] SocketEventManager _socketEventManager;
+        private IUIManagerServices _uiManagerServices;
+        private IPlayerIngameLogininfo _playerIngameLogininfo;
+        private LobbyManager _lobbyManager;
+        private SceneManagerEx _sceneManagerEx;
+        private SocketEventManager _socketEventManager;
+
+        [Inject]
+        public void Construct(IUIManagerServices uiManagerServices, IPlayerIngameLogininfo playerIngameLogininfo, LobbyManager lobbyManager, SceneManagerEx sceneManagerEx, SocketEventManager socketEventManager)
+        {
+            _uiManagerServices = uiManagerServices;
+            _playerIngameLogininfo = playerIngameLogininfo;
+            _lobbyManager = lobbyManager;
+            _sceneManagerEx = sceneManagerEx;
+            _socketEventManager = socketEventManager;
+        }
+        
         enum Buttons
         {
             CreateRoomButton,
@@ -38,7 +50,9 @@ namespace UI.Scene.SceneUI
         UICreateRoom _createRoomUI;
 
         TMP_Text _userNickNamaText;
+
         
+
         private PlayerIngameLoginInfo PlayerIngameLoginInfo => _playerIngameLogininfo.GetPlayerIngameLoginInfo();
         
         protected override void AwakeInit()
@@ -49,10 +63,16 @@ namespace UI.Scene.SceneUI
             _createRoomButton = Get<Button>((int)Buttons.CreateRoomButton);
             _createRoomButton.onClick.AddListener(ShowCreateRoomUI);
             _refreshLobbyButton = Get<Button>((int)Buttons.RefreshLobbyButton);
-            _refreshLobbyButton.onClick.AddListener(RefreshButton);
+            _refreshLobbyButton.onClick.AddListener(()=>RefreshButton().Forget());
             _loginSceneBackButton = Get<Button>((int)Buttons.LoginSceneBackButton);
-            _loginSceneBackButton.onClick.AddListener(MoveLoginScene);
+            _loginSceneBackButton.onClick.AddListener(() => MoveLoginScene().Forget());
             _userNickNamaText = Get<TMP_Text>((int)Texts.PlayerNickNameText);
+
+        }
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
             ButtonDisInteractable();
             ShowUserNickName();
         }
@@ -63,7 +83,7 @@ namespace UI.Scene.SceneUI
             InitButtonInteractable();
         }
 
-        public async void RefreshButton()
+        public async UniTaskVoid RefreshButton()
         {
             _refreshLobbyButton.interactable = false;
             UIRoomInventory inventory = _uiManagerServices.Get_Scene_UI<UIRoomInventory>();
@@ -79,11 +99,14 @@ namespace UI.Scene.SceneUI
                 if (_uiManagerServices.TryGetPopupDictAndShowPopup(out UIAlertDialog alertPopup) == true)
                 {
                     alertPopup.SetText("오류", $"{ex}");
-                    _refreshLobbyButton.interactable = true;
-                }                
+                }
 
             }
+            finally
+            {
             _refreshLobbyButton.interactable = true;
+                
+            }
             GetActiveVivoxChannels();
         }
 
@@ -145,7 +168,7 @@ namespace UI.Scene.SceneUI
             _userNickNamaText.text += PlayerIngameLoginInfo.PlayerNickName;
         }
 
-        public async void MoveLoginScene()
+        public async UniTaskVoid MoveLoginScene()
         {
             try
             {

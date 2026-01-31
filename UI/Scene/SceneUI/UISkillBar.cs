@@ -39,6 +39,11 @@ namespace UI.Scene.SceneUI
                 _skillContextFrames[i] = Get<Transform>((int)skillIcons[i]);
                 _skillSlot[i] = _skillContextFrames[i].GetComponent<SkillSlot>();
             }
+        }
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
             BindKeyBoard();
         }
 
@@ -75,8 +80,10 @@ namespace UI.Scene.SceneUI
             _getEKey.started += GetKey;
             _getRKey.started += GetKey;
         }
-        private void OnDisable()
+
+        protected override void ZenjectDisable()
         {
+            base.ZenjectDisable();
             _getQKey.started -= GetKey;
             _getWKey.started -= GetKey;
             _getEKey.started -= GetKey;

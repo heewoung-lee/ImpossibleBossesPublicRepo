@@ -1,5 +1,6 @@
 using System;
 using GameManagers;
+using GameManagers.Scene;
 using NUnit.Framework.Constraints;
 using Scene.CommonInstaller.Interfaces;
 
@@ -30,7 +31,7 @@ namespace Scene.CommonInstaller
         {
             get
             {
-                if (SceneManagerEx.IsNormalBoot) return SceneMode.NormalBoot;
+                if (SceneManagerEx.IsCurrentBootNormal) return SceneMode.NormalBoot;
 
                 if (_sceneTestMode.GetTestMode() == TestMode.Local)
                     return SceneMode.LocalTest;

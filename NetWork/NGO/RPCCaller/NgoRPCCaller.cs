@@ -1,21 +1,25 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Buffer;
+using System.Linq;
+using Cysharp.Threading.Tasks;
 using Data.DataType.ItemType.Interface;
 using GameManagers;
 using GameManagers.Interface.BufferManager;
 using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ItemDataManager;
-using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.VFXManager;
 using GameManagers.Interface.VivoxManager;
+using GameManagers.ItamData.Interface;
+using GameManagers.ItamDataManager;
+using GameManagers.Pool;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
+using GameManagers.Scene;
 using NetWork.BaseNGO;
+using NetWork.Item;
 using NetWork.NGO.Interface;
-using NUnit.Framework;
 using Scene.CommonInstaller;
 using Scene.GamePlayScene;
-using Stats;
+using Stats.BaseStats;
 using UI.Scene.Interface;
 using UI.Scene.SceneUI;
 using UI.SubItem;
@@ -26,37 +30,87 @@ using UnityEngine;
 using Util;
 using Zenject;
 using ZenjectContext.GameObjectContext;
-using LootItem = NetWork.LootItem.LootItem;
+using ZenjectContext.ProjectContextInstaller;
 
 namespace NetWork.NGO
 {
-    public class NgoRPCCaller : NetworkBehaviour,IRegistrar<ISpawnController>
+    public interface INetworkDeSpawner
+    {
+        public void DeSpawnByReferenceServerRpc(NetworkObjectReference ngoRef, RpcParams rpcParams = default);
+    }
+
+    public class NgoRPCCaller : NetworkBehaviour, IRegistrar<ISpawnController>, INetworkDeSpawner
     {
         public class NgoRPCCallerFactory : NgoZenjectFactory<NgoRPCCaller>
         {
-            public NgoRPCCallerFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public NgoRPCCallerFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NgoRPCCaller");
             }
         }
 
-        [Inject] private IUIManagerServices _uiManagerServices;
-        [Inject] private IResourcesServices _resourcesServices;
-        [Inject] private IItemGetter _itemGetter;
-        [Inject] private ILootItemGetter _lootItemGetter;
-        [Inject] private IBufferManager _bufferManager;
-        [Inject] private IPlayerSpawnManager _gameManagerEx;
-        [Inject] private LobbyManager _lobbyManager;
-        [Inject] private IVivoxSession _vivoxSession;
-        [Inject] private SceneManagerEx _sceneManagerEx;
-        [Inject] private RelayManager _relayManager;
-        [Inject] private NgoPoolManager _poolManager;
-        [Inject] private IVFXManagerServices _vfxManager;
-        [Inject] private LootItemManager _lootItemManager;
-        [Inject] private ICoroutineRunner _coroutineRunner;
         
+        private IUIManagerServices _uiManagerServices;
+        private IResourcesServices _resourcesServices;
+        private IBufferManager _bufferManager;
+        private IPlayerSpawnManager _gameManagerEx;
+        private IItemDataManager _itemDataManager;
+        private LootItemFactory _lootItemFactory;
+        private LobbyManager _lobbyManager;
+        private IVivoxSession _vivoxSession;
+        private SceneManagerEx _sceneManagerEx;
+        private RelayManager _relayManager;
+        private NgoPoolManager _poolManager;
+        private IVFXManagerServices _vfxManager;
+        private LootItemManager _lootItemManager;
+        private SignalBus _signalBus;
+
+        private IRegistrar<INetworkDeSpawner> _networkDeSpawner;
+
+        [Inject]
+        public void Construct(
+            IUIManagerServices uiManagerServices,
+            IResourcesServices resourcesServices,
+            IItemDataManager itemDataManager,
+              LootItemFactory lootItemFactory,
+            IBufferManager bufferManager,
+            IPlayerSpawnManager gameManagerEx,
+            LobbyManager lobbyManager,
+            IVivoxSession vivoxSession,
+            SceneManagerEx sceneManagerEx,
+            RelayManager relayManager,
+            NgoPoolManager poolManager,
+            IVFXManagerServices vfxManager,
+            LootItemManager lootItemManager,
+            SignalBus signalBus)
+        {
+            _uiManagerServices = uiManagerServices;
+            _resourcesServices = resourcesServices;
+            _itemDataManager = itemDataManager;
+            _lootItemFactory = lootItemFactory;
+            _bufferManager = bufferManager;
+            _gameManagerEx = gameManagerEx;
+            _lobbyManager = lobbyManager;
+            _vivoxSession = vivoxSession;
+            _sceneManagerEx = sceneManagerEx;
+            _relayManager = relayManager;
+            _poolManager = poolManager;
+            _vfxManager = vfxManager;
+            _lootItemManager = lootItemManager;
+            _signalBus = signalBus;
+        }
+
+        [Inject]
+        public void IDConstruct(
+            [Inject(Id = ResourcesLoaderInstaller.ResourceBindCode)]
+            IRegistrar<INetworkDeSpawner> networkDeSpawner)
+        {
+            _networkDeSpawner = networkDeSpawner;
+        }
+
+
         private ISpawnController _spawnController;
 
         public const ulong Invalidobjectid = ulong.MaxValue; //타겟 오브젝트가 있고 없고를 가려내기 위한 상수
@@ -92,44 +146,35 @@ namespace NetWork.NGO
             }
         }
 
-        NetworkManager _networkManager;
-
-        NetworkManager RelayNetworkManager
-        {
-            get
-            {
-                if (_networkManager == null)
-                {
-                    _networkManager = _relayManager.NetworkManagerEx;
-                }
-
-                return _networkManager;
-            }
-        }
 
         [Rpc(SendTo.Server)]
-        public void GetPlayerChoiceCharacterRpc(ulong clientId,RpcParams rpcParams= default)
+        public void GetPlayerChoiceCharacterRpc(ulong clientId, RpcParams rpcParams = default)
         {
- 
             string choiceCharacterName = _relayManager.ChoicePlayerCharactersDict[clientId].ToString();
             Vector3 targetPosition = new Vector3(1 * clientId, 0, 1);
-            
+
             _relayManager.SpawnNetworkObjInjectionOwner(clientId,
                 $"Prefabs/Player/SpawnCharacter/{choiceCharacterName}Base",
                 targetPosition, _relayManager.NgoRoot.transform, false);
         }
-         
+
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
             _relayManager.SetRPCCaller(gameObject);
-            _relayManager.Invoke_Spawn_RPCCaller_Event();
-
             SpawnRpcCallerTools();
-            
+
             _loadedPlayerCount.OnValueChanged += LoadedPlayerCountValueChanged;
             _isAllPlayerLoaded.OnValueChanged += IsAllPlayerLoadedValueChanged;
+
+            _networkDeSpawner.Register(this);
+            
+            _signalBus.Fire(new RpcCallerReadySignal()
+            {
+                CallerInstance = this
+            });
+            
         }
 
 
@@ -137,15 +182,16 @@ namespace NetWork.NGO
         {
             if (_relayManager.NetworkManagerEx.IsHost == false)
                 return;
-                
-            _relayManager.SpawnNetworkObj("Prefabs/NGO/NgoRPCSpawnController",transform);
+
+            _relayManager.SpawnNetworkObj("Prefabs/NGO/NgoRPCSpawnController", transform);
         }
-        
+
         public override void OnNetworkDespawn()
         {
             base.OnNetworkDespawn();
             _loadedPlayerCount.OnValueChanged -= LoadedPlayerCountValueChanged;
             _isAllPlayerLoaded.OnValueChanged -= IsAllPlayerLoadedValueChanged;
+            _networkDeSpawner.Unregister(this);
         }
 
 
@@ -160,14 +206,8 @@ namespace NetWork.NGO
             LoadedPlayerCountRpc();
         }
 
-        [Rpc(SendTo.Server)]
-        public void DeSpawnByIDServerRpc(ulong networkID, RpcParams rpcParams = default)
-        {
-            RelayNetworkManager.SpawnManager.SpawnedObjects.TryGetValue(networkID, out NetworkObject ngo);
-            ngo.Despawn(true);
-        }
 
-        [Rpc(SendTo.Server, RequireOwnership = false)]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         public void DeSpawnByReferenceServerRpc(NetworkObjectReference ngoRef, RpcParams rpcParams = default)
         {
             if (ngoRef.TryGet(out NetworkObject ngo))
@@ -181,37 +221,42 @@ namespace NetWork.NGO
         public void Spawn_Loot_ItemRpc(IteminfoStruct itemStruct, Vector3 dropPosition, bool destroyOption = true,
             NetworkObjectReference addLootItemBehaviour = default)
         {
-            //여기에서 itemStruct를 IItem으로 변환
-            GameObject networkLootItem = null;
-            IItem iteminfo = _itemGetter.GetItemByItemNumber(itemStruct.ItemNumber);
-            switch (itemStruct.ItemType)
+            if (_itemDataManager.TryGetItemData(itemStruct.ItemNumber, out var data))
             {
-                case ItemType.Equipment:
-                    networkLootItem = _lootItemGetter.GetEquipLootItem(iteminfo);
-                    break;
-                case ItemType.Consumable:
-                    networkLootItem = _lootItemGetter.GetConsumableLootItem(iteminfo);
-                    break;
-                case ItemType.ETC:
-                    break;
-            }
+                GameObject lootObj = _lootItemFactory.CreateLootItem(data, dropPosition);
 
-            //여기에서는 어떤 아이템을 스폰할껀지 아이템의 형상만 가져올 것.
-            LootItem.LootItem lootitem = networkLootItem.GetComponent<LootItem.LootItem>();
-            lootitem.SetPosition(dropPosition);
-            _relayManager.SpawnNetworkObj(lootitem.gameObject, _lootItemManager.ItemRoot, dropPosition);
-            lootitem.SetItemInfoStructRpc(itemStruct);
+                if (addLootItemBehaviour.Equals(default(NetworkObjectReference)) == false)
+                {
+                    if (addLootItemBehaviour.TryGet(out NetworkObject ngo))
+                    {
+                        ILootItemBehaviour lootItemBehaviour = ngo.GetComponent<ILootItemBehaviour>();
+                        if (lootItemBehaviour is MonoBehaviour monoBehaviour)
+                        {
+                            _resourcesServices.GetOrAddComponent(monoBehaviour.GetType(), lootObj);
+                        }
+                    }
+                }
+                
+                LootItem lootItem = lootObj.GetComponent<LootItem>();
+                lootItem.SetPosition(dropPosition);
+                lootItem.Initialize(data);
+                _relayManager.SpawnNetworkObj(lootItem.gameObject, _lootItemManager.ItemRoot, dropPosition);
+            }
+            else
+            {
+                Debug.LogWarning($"아이템 데이터를 찾을 수 없습니다. ID: {itemStruct.ItemNumber}");
+            }
         }
-        
+
 
         [Rpc(SendTo.Server)]
-        public void SpawnPrefabNeedToInitializeRpc(string path)
+        public void SpawnPrefabNeedToInitializeRpc(string path,Vector3 position,Quaternion rotation)
         {
-            NetworkObject networkObj = SpawnObjectToResources(path);
+            NetworkObject networkObj = SpawnObjectToResources(path,position,rotation);
             NotifyPrefabSpawnedClientRpc(networkObj.NetworkObjectId);
         }
-        
-        
+
+
         [Rpc(SendTo.ClientsAndHost)]
         private void NotifyPrefabSpawnedClientRpc(ulong networkObjectId)
         {
@@ -224,107 +269,145 @@ namespace NetWork.NGO
             }
         }
 
-        private NetworkObject SpawnVFXObjectToResources(string path, Vector3 position = default)
+        private NetworkObject SpawnVFXObjectToResources(string path, Vector3 position = default, Quaternion rotation = default,Vector3 scale = default)
         {
-            if (_poolManager.PooledObjects.ContainsKey(path) || _resourcesServices.Load<NgoPoolingInitializeBase>(path) != null)
+            if (rotation.Equals(default(Quaternion))) //(0,0,0,0)은 유효하지 않는 회전 일 수 있으므로 identity
+                rotation = Quaternion.identity;
+            
+            
+            if (_poolManager.PooledObjects.ContainsKey(path) ||
+                _resourcesServices.Load<NgoPoolingInitializeBase>(path) != null)
             {
                 //0908 수정 VFX가 풀 오브젝트이면 해당 함수를 실행하도록 했는데 문제는, 풀 오브젝트가 처음 생성될때 풀 오브젝트에 자신을 등록하도록
                 //하는 동적방식을 채택한 이후로 _poolManager.PooledObjects.ContainsKey(path) 이부분이 fasle가 되는바람에 아랫부분이 실행됨.
                 //그래서 처음에는 Load된 객체에 NgoPoolingInitializeBase이 있는 지를 처음만 체크 해두게 납둠.
                 //이방식이 맘에 들진 않지만, 나중에 문제가 생기면 수정할 것 
-                return SpawnObjectToResources(path, position);
+                
+                return SpawnObjectToResources(path, position,rotation,localScale:scale);
             }
+
             
             //4.28일 NGO_CALLER가 부모까지 지정하는건 책임소재에서 문제가 될 수 있어서 이부분은 각자 풀 오브젝트 초기화 부분에서 부모를 지정하도록 함
-            return SpawnObjectToResources(path, position, _vfxManager.VFXRootNgo);
-            
+            return SpawnObjectToResources(path, position,rotation ,_vfxManager.VFXRootNgo,scale);
         }
 
 
-        private NetworkObject SpawnObjectToResources(string path, Vector3 position = default, Transform parentTr = null)
+        private NetworkObject SpawnObjectToResources(string path, Vector3 position, Quaternion rotation, 
+            Transform parentTr = null,Vector3 localScale = default)
         {
+
             GameObject obj = _resourcesServices.InstantiateByKey(path);
-            obj.transform.position = position;
-            NetworkObject networkObj = _relayManager.SpawnNetworkObj(obj, parentTr, position).GetComponent<NetworkObject>();
+            if (rotation == Quaternion.identity)
+            {
+                //1.8일 수정. 로테이션 값이 안들어가면 프리펩고유의 회전값을 수행하도록 설정
+                rotation = obj.transform.rotation;
+            }
+            obj.transform.SetPositionAndRotation(position, rotation);
+            if(localScale.Equals(default)) localScale = obj.transform.localScale;
+            obj.transform.localScale = localScale;
+            NetworkObject networkObj =
+                _relayManager.SpawnNetworkObj(obj, parentTr, position).GetComponent<NetworkObject>();
             return networkObj;
         }
-
+        
+        /// <summary>
+        /// 전에 쓰던 SpawnVFXPrefabServerRpc에 결함이 있었음.
+        /// 호스트가 VFX를 생성하고 난 뒤 초기화를 진행할때
+        /// 호스트는 당연히 스폰뒤에 초기화 메서드를 실행하지만
+        /// 클라이언트는 네트워크 사정에 따라 스폰이 뒤에 될 수 있음
+        /// 그래서 VFX의 초기화는 VFX오브젝트의 RPC를 만들어서 해당 RPC로 보내는걸로 수정
+        /// 이렇게 하면 순서 상관없이 스폰 뒤에 함수를 붙여서 실행할 수 있다고 함
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="duration"></param>
+        /// <param name="targerObjectID"></param>
+        
         [Rpc(SendTo.Server)]
-        public void SpawnVFXPrefabServerRpc(string path, float duration, ulong targerObjectID = Invalidobjectid)
+        public void SpawnVFXPrefabServerRpc(string path, float duration,bool isUnique ,ulong targerObjectID,Quaternion rotation,Vector3 localScale)
         {
-            Vector3 pariclePos = Vector3.zero;
-            Assert.AreEqual(targerObjectID != Invalidobjectid, true, $"targerObject is not spawn");
-            if (_relayManager.NetworkManagerEx.SpawnManager.SpawnedObjects.TryGetValue(targerObjectID,
-                    out NetworkObject targetNgo)) //쫒아가는 타겟 오브젝트 꺼네기
+            //파티클 중복을 막기위한 로직 얘를들어 버프 이펙트들이 중복으로 겹치지 않게 만든 로직 단, 여러발의 투사체가 필요한경우는 예외로 거름
+            if (isUnique)
             {
-                pariclePos = targetNgo.transform.position;
+                HashSet<NetworkObject> allSpawnedObjects = _relayManager.NetworkManagerEx.SpawnManager.SpawnedObjectsList;
+                List<NetworkObject> vfxToDelete = new List<NetworkObject>();
+                foreach (NetworkObject vfxNetWorkObj in allSpawnedObjects)
+                {
+                    if (vfxNetWorkObj.TryGetComponent(out NgoPoolingInitializeBase ngoPoolingInitialize))
+                    {
+                        if (ngoPoolingInitialize.PoolingNgoPath == path && 
+                            ngoPoolingInitialize.TargetObjectId == targerObjectID)
+                        {
+                            vfxToDelete.Add(vfxNetWorkObj);
+                        }
+                    }
+                }
+                foreach (var targetVfx in vfxToDelete)
+                {
+                    if (targetVfx.IsSpawned)
+                    {
+                        _resourcesServices.DestroyObject(targetVfx.gameObject);
+                    }
+                }
             }
-
-            NetworkObject vfxObj = SpawnVFXObjectToResources(path, position: pariclePos);
-            SpawnVFXPrefabClientRpc(vfxObj.NetworkObjectId, path, duration, targerObjectID);
+            
+            NetworkObject vfxObj = SpawnVFXObjectToResources(path,Vector3.zero,rotation,localScale);
+            
+            //매니저가 RPC를 쏘는 게 아니라, 스폰된 객체의 컴포넌트를 가져와서 그 객체의 RPC를 호출
+            if (vfxObj.TryGetComponent(out NgoPoolingInitializeBase vfxScript))
+            {
+                
+                vfxScript.InitializeVfxClientRpc(targerObjectID, duration);
+            }
         }
 
         [Rpc(SendTo.Server)]
-        public void SpawnVFXPrefabServerRpc(string path, float duration, Vector3 spawnPosition = default)
+        public void SpawnVFXPrefabServerRpc(string path, float duration, Vector3 spawnPosition, Quaternion rotation,Vector3 localScale,NetworkParams networkParams)
         {
-            Vector3 pariclePos = spawnPosition;
-            NetworkObject vfxObj = SpawnVFXObjectToResources(path, position: pariclePos);
-            SpawnVFXPrefabClientRpc(vfxObj.NetworkObjectId, path, duration);
+            NetworkObject vfxObj = SpawnVFXObjectToResources(path, spawnPosition,rotation,localScale);
+    
+            if (vfxObj.TryGetComponent(out NgoPoolingInitializeBase vfxScript))
+            {
+                vfxScript.InitializeVfxClientRpc(duration,networkParams);
+            }
+        }
+        
+        [Rpc(SendTo.Server)]
+        public void Call_InitBuffer_ServerRpc(StatEffect effect, string buffIconImagePath, float duration,ulong targerObjectID)
+        {
+            Call_InitBuffer_ClientRpc(effect, buffIconImagePath,duration,targerObjectID);
         }
 
 
         [Rpc(SendTo.ClientsAndHost)]
-        public void SpawnVFXPrefabClientRpc(ulong particleNgoid, string path,
-            float duration, ulong targetNGOID = Invalidobjectid)
+        private void Call_InitBuffer_ClientRpc(StatEffect effect ,string buffIconImagePath, float duration,ulong targerObjectID)
         {
-            Action<GameObject> positionAndBehaviorSetterEvent = null;
-            if (_relayManager.NetworkManagerEx.SpawnManager.SpawnedObjects.TryGetValue(particleNgoid,
-                    out NetworkObject paricleNgo))
+            Debug.Assert(_gameManagerEx.GetPlayer() != null ,  "[Call_InitBuffer_ClientRpc] Player hasn't been registered" +
+                                                               "Check the GameManagerEx.GetPlayer()");
+            
+            //1.3일 수정 원래 PlayerStats만 받았는데 몬스터 디버프를 걸어야 하는 상황이 생겨 BaseStats로 변경
+            BaseStats baseStats = _relayManager.NetworkManagerEx.SpawnManager.SpawnedObjects[targerObjectID].GetComponent<BaseStats>();
+            
+            
+            //1.5일 수정[중요] 1.3일에 몬스터를 디버프 걸어야 하는 상황을 고려해서 네트워크 스폰객체들로 판명을 했는데
+            //문제는 호스트와 클라이언트 둘다 이로직을 수행하는 문제가 발생함. 따라서 타겟이 자기가 소유한
+            //객체라면 자기가 버프를 관리하도록 수정함 몬스터는 대부분 호스트 소유이므로 문제없음
+            if (baseStats.TryGetComponent(out NetworkObject networkObj) == true && networkObj.IsOwner == true)
             {
-                if (paricleNgo.TryGetComponent(out NgoParticleInitializeBase skillInitailze))
+                if (networkObj.NetworkObjectId == targerObjectID)
                 {
-                    skillInitailze.SetInitialize(paricleNgo);
-                    if (_relayManager.NetworkManagerEx.SpawnManager.SpawnedObjects.TryGetValue(targetNGOID,
-                            out NetworkObject targetNgo))
+                    if (duration > 0)
                     {
-                        skillInitailze.SetTargetInitialize(targetNgo);
-                        positionAndBehaviorSetterEvent += (particleGameObject) =>
-                        {
-                            _vfxManager.FollowParticleRoutine(targetNgo.transform, particleGameObject, path,
-                                duration);
-                        };
+                        _bufferManager.InitBuff(baseStats, duration, effect, buffIconImagePath);
                     }
-
-                    skillInitailze.StartParticleOption(positionAndBehaviorSetterEvent);
+                    else
+                    {
+                        _bufferManager.ImmediatelyBuffStart(baseStats, effect.statType, effect.value);
+                    }
                 }
             }
         }
 
-        [Rpc(SendTo.Server)]
-        public void Call_InitBuffer_ServerRpc(StatEffect effect, string buffIconImagePath = null, float duration = -1)
-        {
-            Call_InitBuffer_ClientRpc(effect, buffIconImagePath, duration);
-        }
-
-
-        [Rpc(SendTo.ClientsAndHost)]
-        private void Call_InitBuffer_ClientRpc(StatEffect effect, string buffIconImagePath = null, float duration = -1)
-        {
-            PlayerStats playerstats = _gameManagerEx.GetPlayer().GetComponent<PlayerStats>();
-
-            if (_bufferManager.GetModifier(effect) is DurationBuff durationbuff)
-            {
-                Sprite buffImageIcon = _resourcesServices.Load<Sprite>(buffIconImagePath);
-                durationbuff.SetBuffIconImage(buffImageIcon);
-                _bufferManager.InitBuff(playerstats, duration, durationbuff, effect.value);
-            }
-            else
-            {
-                _bufferManager.InitBuff(playerstats, duration, effect);
-            }
-        }
-
-        private async Task DisconnectFromVivoxAndLobby()
+        private async UniTask DisconnectFromVivoxAndLobby()
         {
             try
             {
@@ -378,14 +461,14 @@ namespace NetWork.NGO
             _relayManager.RegisterSelectedCharacterInDict(clientId, selectCharacter);
         }
 
-        public void SpawnLocalObject(Vector3 pos, string objectPath, SpawnParamBase spawnParamBase)
+        public void SpawnLocalObject(Vector3 pos, string objectPath, NetworkParams networkParams)
         {
             FixedList32Bytes<Vector3> list = new FixedList32Bytes<Vector3>();
             list.Add(pos); // 한 개만 담기
-            SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), spawnParamBase);
+            SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), networkParams);
         }
 
-        public void SpawnNonNetworkObject(List<Vector3> pos, string objectPath, SpawnParamBase spawnParamBase)
+        public void SpawnNonNetworkObject(List<Vector3> pos, string objectPath, NetworkParams networkParams)
         {
             if (pos == null)
                 return;
@@ -397,35 +480,35 @@ namespace NetWork.NGO
                 {
                     FixedList32Bytes<Vector3> list = new FixedList32Bytes<Vector3>();
                     foreach (var p in pos) list.Add(p);
-                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), spawnParamBase);
+                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), networkParams);
                     break;
                 }
                 case <= 5:
                 {
                     FixedList64Bytes<Vector3> list = new FixedList64Bytes<Vector3>();
                     foreach (var p in pos) list.Add(p);
-                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), spawnParamBase);
+                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), networkParams);
                     break;
                 }
                 case <= 10:
                 {
                     FixedList128Bytes<Vector3> list = new FixedList128Bytes<Vector3>();
                     foreach (var p in pos) list.Add(p);
-                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), spawnParamBase);
+                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), networkParams);
                     break;
                 }
                 case <= 42:
                 {
                     FixedList512Bytes<Vector3> list = new FixedList512Bytes<Vector3>();
                     foreach (var p in pos) list.Add(p);
-                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), spawnParamBase);
+                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), networkParams);
                     break;
                 }
                 case <= 340:
                 {
                     FixedList4096Bytes<Vector3> list = new FixedList4096Bytes<Vector3>();
                     foreach (var p in pos) list.Add(p);
-                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), spawnParamBase);
+                    SpwanLocalObjectRpc(list, new FixedString512Bytes(objectPath), networkParams);
                     break;
                 }
                 default:
@@ -437,41 +520,41 @@ namespace NetWork.NGO
 
         [Rpc(SendTo.ClientsAndHost)]
         public void SpwanLocalObjectRpc(ForceNetworkSerializeByMemcpy<FixedList32Bytes<Vector3>> posList,
-            FixedString512Bytes path, SpawnParamBase spawnParamBase)
+            FixedString512Bytes path, NetworkParams networkParams)
         {
-            ProcessLocalSpawn(posList.Value, path, spawnParamBase);
+            ProcessLocalSpawn(posList.Value, path, networkParams);
         }
-        
+
 
         [Rpc(SendTo.ClientsAndHost)]
         public void SpwanLocalObjectRpc(ForceNetworkSerializeByMemcpy<FixedList64Bytes<Vector3>> posList,
-            FixedString512Bytes path, SpawnParamBase spawnParamBase)
+            FixedString512Bytes path, NetworkParams networkParams)
         {
-            ProcessLocalSpawn(posList.Value, path, spawnParamBase);
+            ProcessLocalSpawn(posList.Value, path, networkParams);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
         public void SpwanLocalObjectRpc(ForceNetworkSerializeByMemcpy<FixedList128Bytes<Vector3>> posList,
-            FixedString512Bytes path, SpawnParamBase spawnParamBase)
+            FixedString512Bytes path, NetworkParams networkParams)
         {
-            ProcessLocalSpawn(posList.Value, path, spawnParamBase);
+            ProcessLocalSpawn(posList.Value, path, networkParams);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
         public void SpwanLocalObjectRpc(ForceNetworkSerializeByMemcpy<FixedList512Bytes<Vector3>> posList,
-            FixedString512Bytes path, SpawnParamBase spawnParamBase)
+            FixedString512Bytes path, NetworkParams networkParams)
         {
-            ProcessLocalSpawn(posList.Value, path, spawnParamBase);
+            ProcessLocalSpawn(posList.Value, path, networkParams);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
         public void SpwanLocalObjectRpc(ForceNetworkSerializeByMemcpy<FixedList4096Bytes<Vector3>> posList,
-            FixedString512Bytes path, SpawnParamBase spawnParamBase)
+            FixedString512Bytes path, NetworkParams networkParams)
         {
-            ProcessLocalSpawn(posList.Value, path, spawnParamBase);
+            ProcessLocalSpawn(posList.Value, path, networkParams);
         }
 
-        private void ProcessLocalSpawn<TList>(TList posList, FixedString512Bytes path, SpawnParamBase spawnParamBase)
+        private void ProcessLocalSpawn<TList>(TList posList, FixedString512Bytes path, NetworkParams networkParams)
             where TList : struct, INativeList<Vector3>
         {
             string objectPath = path.ConvertToString();
@@ -485,8 +568,15 @@ namespace NetWork.NGO
                 GameObject spawnGo = _resourcesServices.InstantiateByKey(objectPath);
                 if (spawnGo.TryGetComponent<ISpawnBehavior>(out var spawnBehaviour))
                 {
-                    SpawnParamBase spawnParams = spawnParamBase;
-                    spawnParams.ArgPosVector3 = fixedList[i];
+                    NetworkParams spawnParams = new NetworkParams
+                        (
+                            argFloat:networkParams.ArgFloat,
+                            argInteger:networkParams.ArgInt,
+                            argString:networkParams.ArgString,
+                            argPosVector3 : fixedList[i],
+                            argBoolean:networkParams.ArgBoolean,
+                            argUlong: networkParams.ArgUlong
+                            ){};
                     spawnBehaviour.SpawnObjectToLocal(spawnParams, objectPath);
                 }
                 //여기는 인스턴스를 바로 생성하는게 맞음
@@ -494,59 +584,66 @@ namespace NetWork.NGO
             }
         }
 
-            [Rpc(SendTo.ClientsAndHost)]
-            public void ResetManagersRpc()
-            {
-                //Managers.Clear();
-                Debug.Log("Call RPCCaller in ResetManagersRpc");
-            }
+        [Rpc(SendTo.ClientsAndHost)]
+        public void ResetManagersRpc()
+        {
+            //Managers.Clear();
+            Debug.Log("Call RPCCaller in ResetManagersRpc");
+        }
 
-            [Rpc(SendTo.Server, RequireOwnership = false)]
-            public void OnBeforeSceneUnloadRpc()
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        public void OnBeforeSceneUnloadRpc()
+        {
+            //이부분 배열로 변경함. 기존에 네트워크 오브젝트 해쉬셋에서
+            //디스폰을 시도하면 해쉬셋의 버전이 도중에 달라져서 에러를 내 뿜음
+            var snapshot = _relayManager.NetworkManagerEx.SpawnManager.SpawnedObjectsList.ToArray();
+
+            foreach (NetworkObject ngo in snapshot)
             {
-                foreach (NetworkObject ngo in _relayManager.NetworkManagerEx.SpawnManager.SpawnedObjectsList)
+                if (ngo == null)
+                    continue;
+
+                if (ngo.TryGetComponent(out ISceneChangeBehaviour behaviour))
                 {
-                    if (ngo.TryGetComponent(out ISceneChangeBehaviour behaviour))
-                    {
-                        Debug.Log((behaviour as Component).name + "초기화 처리 됨");
-                        behaviour.OnBeforeSceneUnload();
-                    }
+                    Debug.Log((behaviour as Component).name + " 초기화 처리 됨");
+                    behaviour.OnBeforeSceneUnload();
                 }
             }
+        }
 
 
-            [Rpc(SendTo.ClientsAndHost)]
-            public void OnBeforeSceneUnloadLocalRpc()
+        [Rpc(SendTo.ClientsAndHost)]
+        public void OnBeforeSceneUnloadLocalRpc()
+        {
+            _sceneManagerEx.InvokeOnBeforeSceneUnloadLocalEvent();
+            _sceneManagerEx.SetNormalBootMode(true); //만약 테스트모드에서 실행했다면 이후테스트는 노멀모드로 실행
+            DisconnectFromVivoxAndLobby().Forget(); //비복스 및 로비 연결해제
+        }
+
+
+        public void Register(ISpawnController targetManager)
+        {
+            _spawnController = targetManager;
+        }
+
+        public void Unregister(ISpawnController sceneContext)
+        {
+            if (_spawnController != null)
             {
-                _sceneManagerEx.InvokeOnBeforeSceneUnloadLocalEvent();
-
-                _ = DisconnectFromVivoxAndLobby(); //비복스 및 로비 연결해제
+                _spawnController = null;
             }
+        }
 
-
-            public void Register(ISpawnController spawnController)
+        public void SpawnControllerOption(NetworkObject ngo, Action spawnLogic)
+        {
+            if (_spawnController != null)
             {
-               _spawnController = spawnController;
+                _spawnController.SpawnControllerOption(ngo, spawnLogic);
             }
-
-            public void Unregister(ISpawnController sceneContext)
+            else
             {
-                if (_spawnController != null)
-                {
-                    _spawnController = null;
-                }
+                spawnLogic.Invoke();
             }
-
-            public void SpawnControllerOption(NetworkObject ngo, Action spawnLogic)
-            {
-                if (_spawnController != null)
-                {
-                    _spawnController.SpawnControllerOption(ngo, spawnLogic);
-                }
-                else
-                {
-                    spawnLogic.Invoke();
-                }
-            }
+        }
     }
-    }
+}

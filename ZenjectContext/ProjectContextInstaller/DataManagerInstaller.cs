@@ -1,4 +1,5 @@
 using GameManagers;
+using GameManagers.Data;
 using UnityEngine;
 using Zenject;
 

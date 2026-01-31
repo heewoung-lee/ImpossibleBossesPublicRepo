@@ -1,4 +1,6 @@
 using GameManagers;
+using GameManagers.RelayManager;
+using GameManagers.Scene;
 using NetWork.NGO;
 using NUnit.Framework;
 using Unity.Netcode;
@@ -49,8 +51,8 @@ namespace Scene.BattleScene
                             initializeNgo.SetForcePositionFromNetworkRpc(pos);
                         }
                     }
-
                 }
+                _sceneManagerEx.OnAllPlayerLoadedEvent -= SetPosition;
             }
         }
     }

@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 namespace Scene.CommonInstaller.Interfaces
 {
@@ -13,6 +14,6 @@ namespace Scene.CommonInstaller.Interfaces
     
     public interface ISceneConnectOnline
     { 
-        public Task SceneConnectOnlineStart();
+        public UniTask SceneConnectOnlineStart();
     }
 }

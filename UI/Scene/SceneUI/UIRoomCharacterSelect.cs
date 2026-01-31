@@ -1,9 +1,12 @@
 using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.UIManager;
+using GameManagers.RelayManager;
+using GameManagers.Scene;
 using Module.UI_Module;
 using NetWork.NGO;
 using NetWork.NGO.UI;
@@ -114,25 +117,32 @@ namespace UI.Scene.SceneUI
             Bind<Transform>(typeof(Transforms));
             Bind<Button>(typeof(Buttons));
             Bind<GameObject>(typeof(GameObjects));
-            _chooseCameraTr = _resourcesServices.InstantiateByKey("Prefabs/Map/LobbyScene/ChoosePlayer")
-                .GetComponent<ModuleChooseCharactorTr>().ChooseCameraTr;
+         
             _charactorSelect = Get<Transform>((int)Transforms.CharactorSelectTr);
             _backToLobbyButton = Get<Button>((int)Buttons.BackToLobbyButton);
             _buttonStart = Get<Button>((int)Buttons.ButtonStart);
             _buttonStart.onClick.AddListener(LoadScenePlayGames);
             _buttonStart.gameObject.SetActive(false);
-            _backToLobbyButton.onClick.AddListener(async () => { await BacktoLobby(); });
+            _backToLobbyButton.onClick.AddListener(()=>BacktoLobby().Forget());
             _loadingPanel = Get<GameObject>((int)GameObjects.LoadingPanel);
 
             _uiRoomPlayerFrames = new UIRoomPlayerFrame[MaxPlayerCount];
+            _buttonReady = Get<Button>((int)Buttons.ButtonReady);
+            _buttonText = _buttonReady.GetComponentInChildren<TMP_Text>();
+        }
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
+            _chooseCameraTr = _resourcesServices.InstantiateByKey("Prefabs/Map/LobbyScene/ChoosePlayer")
+                .GetComponent<ModuleChooseCharactorTr>().ChooseCameraTr;
+            
+            
             for (int index = 0; index < _uiRoomPlayerFrames.Length; index++)
             {
                 _uiRoomPlayerFrames[index] = _uiManagerServices.MakeSubItem<UIRoomPlayerFrame>(_charactorSelect);
             }
-
             _netWorkManager = _relayManager.NetworkManagerEx;
-            _buttonReady = Get<Button>((int)Buttons.ButtonReady);
-            _buttonText = _buttonReady.GetComponentInChildren<TMP_Text>();
             ReadyButtonInitialize();
         }
 
@@ -140,6 +150,11 @@ namespace UI.Scene.SceneUI
         {
             _ngoUIRootCharacterSelect = chracterRootTr;
             _spawnCharacterSelectEvent?.Invoke();
+        }
+
+        public void SetCharacterSelectorNgo(CharacterSelectorNgo characterSelectorNgo)
+        {
+            _characterSelectorNgo = characterSelectorNgo;
         }
 
         private void ReadyButtonInitialize()
@@ -159,9 +174,9 @@ namespace UI.Scene.SceneUI
             _readyButtonStateValue[(int)ReadyButtonStateEnum.CancelState].ReadyButtonTextColor = Color.white;
         }
 
-        protected override void OnEnableInit()
+        protected override void ZenjectEnable()
         {
-            base.OnEnableInit();
+            base.ZenjectEnable();
             _loadingPanel.SetActive(false);
         }
 
@@ -215,14 +230,14 @@ namespace UI.Scene.SceneUI
             SpawnCharacterSelectorAndSetPosition(playerIndex);
         }
 
-        public async Task BacktoLobby()
+        public async UniTask BacktoLobby()
         {
             try
             {
                 _loadingPanel.SetActive(true);
                 UnscribeRelayCallback();
                 Lobby currentLobby = await _lobbyManager.GetCurrentLobby();
-                _lobbyManager.HostChageEvent -= OnHostMigrationEvent;
+                _lobbyManager.HostChangeEvent -= OnHostMigrationEvent;
                 await _lobbyManager.TryJoinLobbyByNameOrCreateWaitLobby();
                 _sceneManagerEx.LoadScene(Define.Scene.LobbyScene);
             }
@@ -248,7 +263,7 @@ namespace UI.Scene.SceneUI
             base.StartInit();
             _uiLoadingPanel = _uiManagerServices.GetSceneUIFromResource<UILoadingPanel>();
             InitializeCharacterSelectionAsHost();
-            _lobbyManager.HostChageEvent += OnHostMigrationEvent;
+            _lobbyManager.HostChangeEvent += OnHostMigrationEvent;
         }
 
         private void OnHostMigrationEvent()
@@ -261,8 +276,6 @@ namespace UI.Scene.SceneUI
             if (_relayManager.NetworkManagerEx.IsHost == false)
                 return;
 
-
-            _relayManager.SpawnToRPC_Caller();
             //NgoUIRootCharacterSelect characterSelect = _ngoUIRootCharacterSelectFactory.Create(); 7.23일 팩토리 방식에서 일반 생성으로 변경
             //일반 생성으로 보이나 팩토리로 생성되며 생성 구별은 뒷단에 숨겨놓음
             NgoUIRootCharacterSelect characterSelect = _resourcesServices.InstantiateByKey("Prefabs/NGO/NGOUIRootChracterSelect").GetComponent<NgoUIRootCharacterSelect>();
@@ -275,10 +288,9 @@ namespace UI.Scene.SceneUI
         {
             if (_netWorkManager.IsHost)
             {
-                _characterSelectorNgo  = _resourcesServices.InstantiateByKey("Prefabs/NGO/NGOUICharacterSelectRect").GetComponent<CharacterSelectorNgo>();
-             
+                CharacterSelectorNgo selector  =  _resourcesServices.InstantiateByKey("Prefabs/NGO/NGOUICharacterSelectRect").GetComponent<CharacterSelectorNgo>();
                 //_characterSelectorNgo = _characterSelectorNgoFactory.Create(); 7.23일 
-                SetPositionCharacterSelector(_characterSelectorNgo.gameObject, playerIndex);
+                SetPositionCharacterSelector(selector.gameObject, playerIndex);
             }
         }
 
@@ -330,27 +342,14 @@ namespace UI.Scene.SceneUI
             _netWorkManager.NetworkConfig.EnableSceneManagement = true;
             _relayManager.RegisterSelectedCharacter(_relayManager.NetworkManagerEx.LocalClientId,
                 (Define.PlayerClass)_characterSelectorNgo.ModuleChooseCharacterMove.PlayerChooseIndex);
+            
             _sceneManagerEx.OnClientLoadedEvent += ClientLoadedEvent;
-            _sceneManagerEx.OnAllPlayerLoadedEvent += AllPlayerLoadedEvent;
             _sceneManagerEx.NetworkLoadScene(Define.Scene.GamePlayScene);
 
             void ClientLoadedEvent(ulong clientId)
             {
                 _relayManager.NgoRPCCaller.GetPlayerChoiceCharacterRpc(clientId);
                 Debug.Log(_sceneManagerEx.GetCurrentScene.CurrentScene + "씬네임" + "플레이어 ID" + clientId);
-            }
-
-            void AllPlayerLoadedEvent()
-            {
-                PlayScene playScene = null;
-                foreach (BaseScene scene in _sceneManagerEx.GetCurrentScenes)
-                {
-                    if (scene is PlayScene outPlayScene)
-                    {
-                        playScene = outPlayScene;
-                        break;
-                    }
-                }
             }
         }
 

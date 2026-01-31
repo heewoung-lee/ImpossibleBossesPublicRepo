@@ -10,16 +10,10 @@ namespace NetWork.BaseNGO
     [RequireComponent(typeof(NetworkObject))]
     public abstract class NgoParticleInitializeBase : NetworkBehaviour
     {
+        [Inject] protected IVFXManagerServices _vfxManager;
         public abstract NetworkObject ParticleNgo { get; }
         public abstract void SetInitialize(NetworkObject particleObj);
-        
-        [Inject] private IVFXManagerServices _vfxManager;
-        public abstract NetworkObject TargetNgo { get; }
-        public abstract void SetTargetInitialize(NetworkObject targetNgo);
-
-        public virtual void StartParticleOption(Action<GameObject> callback)
-        {
-            callback?.Invoke(gameObject);
-        }
+        public virtual void StartParticleOption(GameObject targetGo, float duration){}
+        public virtual void StartParticleOption(float duration,NetworkParams networkParams){}
     }
 }

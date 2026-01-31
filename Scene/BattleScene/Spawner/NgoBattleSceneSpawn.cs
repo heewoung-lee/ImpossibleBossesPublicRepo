@@ -1,6 +1,9 @@
 using Controller.BossState;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.Pool;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using NetWork.BaseNGO;
 using NetWork.NGO;
 using UnityEngine;
@@ -13,9 +16,9 @@ namespace Scene.BattleScene.Spawner
     {
         public class NgoBattleSceneSpawnFactory : NgoZenjectFactory<NgoBattleSceneSpawn>
         {
-            public NgoBattleSceneSpawnFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public NgoBattleSceneSpawnFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NgoBattleSceneSpawn");
             }
@@ -53,8 +56,6 @@ namespace Scene.BattleScene.Spawner
         {
             if (IsHost == false)
                 return;
-
-            _relayManager.SpawnToRPC_Caller();
 
             BossGolemController bossGolemController = _resourcesServices
                 .InstantiateByKey("Prefabs/Enemy/Boss/Character/StoneGolem").GetComponent<BossGolemController>();

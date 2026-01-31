@@ -1,13 +1,12 @@
 using System.Collections.Generic;
-using Data.DataType.ItemType;
-using Data.DataType.ItemType.Interface;
 using Data.Item;
+using DataType;
+using DataType.Item;
 using GameManagers;
-using GameManagers.Interface;
 using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ItemDataManager;
 using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.UIManager;
+using GameManagers.ItamDataManager.Interface;
+using GameManagers.ResourcesEx;
 using Stats;
 using TMPro;
 using UI.Popup.PopupUI;
@@ -25,8 +24,7 @@ namespace UI.SubItem
         [Inject] private IItemGradeBorder _itemGradeBorder;
         [Inject] private IPlayerSpawnManager _gameManagerEx;
         [Inject] private IUIManagerServices _uiManagerServices;
-        
-        
+
         enum ItemICons
         {
             ItemIconImage,
@@ -49,8 +47,6 @@ namespace UI.SubItem
         private int _itemCount;
         private UIPlayerInventory _uiPlayerInventory;
 
-        
-        
         private RectTransform _itemRectTr;
         private PlayerStats _playerStats;
         private Image _itemGradeBorderImage;
@@ -64,9 +60,18 @@ namespace UI.SubItem
             set
             {
                 _itemCount = value;
-                _itemCountText.text = _itemCount.ToString();
+
+                if (_itemCount <= 1)
+                {
+                    _itemCountText.text = "";
+                }
+                else
+                {
+                    _itemCountText.text = _itemCount.ToString();
+                }
             }
         }
+
         public override RectTransform ItemRectTr => _itemRectTr;
 
         public int ItemPrice
@@ -79,6 +84,7 @@ namespace UI.SubItem
             }
         }
 
+        public ItemType ItemType => _itemData != null ? _itemData.ItemType : ItemType.ETC;
 
         protected override void AwakeInit()
         {
@@ -95,67 +101,91 @@ namespace UI.SubItem
         protected override void StartInit()
         {
             base.StartInit();
-            _itemNameText.text = _itemName;
-            _playerStats = _gameManagerEx.GetPlayer().GetComponent<PlayerStats>();
+
+            if (_itemData != null)
+            {
+                _itemNameText.text = _itemData.dataName;
+                _itemGradeBorderImage.sprite = _itemGradeBorder.GetGradeBorder(_itemData.itemGrade);
+            }
+
+            var player = _gameManagerEx.GetPlayer();
+            if (player != null) _playerStats = player.GetComponent<PlayerStats>();
+
             _uiPlayerInventory = _uiManagerServices.GetImportant_Popup_UI<UIPlayerInventory>();
             _uiShop = _uiManagerServices.GetImportant_Popup_UI<UIShop>();
-            _itemGradeBorderImage.sprite = _itemGradeBorder.GetGradeBorder(ItemGradeType);
 
-
-            _uiRaycaster = _uiShop.UIShopRayCaster;
-            _eventSystem = _uiShop.EventSystem;
+            if (_uiShop != null)
+            {
+                _uiRaycaster = _uiShop.UIShopRayCaster;
+                _eventSystem = _uiShop.EventSystem;
+            }
         }
 
+        public void InitializeItem(ItemDataSO data, int count, int price)
+        {
+            base.InitializeItem(data);
+
+            ItemPrice = price;
+
+            // 장비는 1개, 소비는 여러 개
+            if (data.ItemType == ItemType.Equipment)
+            {
+                ItemCount = 1;
+            }
+            else
+            {
+                ItemCount = count;
+            }
+        }
 
         public override void ItemRightClick(PointerEventData eventdata)
         {
             base.ItemRightClick(eventdata);
-            //아이템창이 닫힌상태에서 받는게 불가능하니, 닫힌상태에서는 루트아이템으로 보내버리기
             BuyItem();
         }
 
         private void BuyItem()
         {
-            if (_playerStats.Gold < _itemPrice)
+            if (_playerStats == null)
                 return;
 
-            _playerStats.Gold -= _itemPrice;//플레이어의 현재 돈을 깎는다.
-            _iteminfo.MakeInventoryItemComponent(_uiManagerServices);
-
-            ItemCount--;
-            if (_itemCount <= 0)
-                _destroyer.DestroyObject(gameObject);
+            if (_playerStats.TrySpendMoney(_itemPrice) == true)
+            { //살 돈이 있다면  
+                if (_uiPlayerInventory != null)
+                {
+                    _uiPlayerInventory.AddItem(_itemData);
+                }
+                ItemCount--;
+                if (_itemCount <= 0)
+                    _destroyer.DestroyObject(gameObject);
+            }
+            else
+            {
+                //살돈이 없다면
+                //이 부분은 아직 뭘쓸지 몰라서 남겨둠
+                //나중에 UI로 "돈이 부족합니다 이런거 남겨도 좋을듯"
+            }
+     
+            
         }
 
         public override void GetDragEnd(PointerEventData eventData)
         {
-            //인벤토리에 넣으면 아이템 사기
-            _itemIconSourceImage.color = new Color(_itemIconSourceImage.color.r, _itemIconSourceImage.color.g, _itemIconSourceImage.color.b, 1f);
-            _isDragging = false;
+            // 드래그 종료 시 이미지 복구
+            RevertImage();
+
             List<RaycastResult> uiResults = new List<RaycastResult>();
             EventSystem.current.RaycastAll(eventData, uiResults);
+
             foreach (RaycastResult uiResult in uiResults)
             {
+                // 인벤토리 영역에 드랍하면 구매
                 if (uiResult.gameObject.TryGetComponentInChildren(out InventoryContentCoordinate contextTr))
                 {
                     BuyItem();
+                    break; // 한 번만 구매
                 }
             }
-            UIDragImageIcon.SetItemImageDisable();
-        }
-
-        public void InitializeItem(IItem iteminfo, int count, int price)
-        {
-            base.IntializeItem(iteminfo);
-            if (iteminfo is ItemEquipment)
-            {
-                _itemCount = 1;
-            }
-            else if (iteminfo is ItemConsumable)
-            {
-                ItemCount += count;
-            }
-            ItemPrice = price;
         }
     }
 }

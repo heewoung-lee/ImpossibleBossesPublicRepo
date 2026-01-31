@@ -3,20 +3,16 @@ using Zenject;
 
 namespace Module.PlayerModule.PlayerClassModule.Fighter
 {
+    public interface IFighterFactoryMarker{}
+    
     public class FighterNeedObjectInstaller : MonoInstaller
     {
         public override void InstallBindings()
         {
-            Container.BindInterfacesTo<NgoFighterSkillSlashInitialize.NgoFighterSkillSlashFactory>().AsSingle();
-
-            Container.BindInterfacesTo<NgoFighterSkillDeterminationInitialize.NgoFighterSkillDeterminationFactory>().AsSingle();
-
-            Container.BindInterfacesTo<NgoFighterSkillTauntInitialize.NgoFighterSkillTauntFactory>().AsSingle();
-            
-            Container.BindInterfacesTo<NgoFighterSkillRoarInitialize.NgoFighterSkillRoarFactory>().AsSingle();
-            
-            Container.BindInterfacesTo<NgoFighterSkillEnemyTauntInitialize.NgoFighterSkillEnemyTauntFactory>().AsSingle();
-
+           
+            Container.Bind(x => x.AllInterfaces())
+                .To(x => x.AllNonAbstractClasses().DerivingFrom<IFighterFactoryMarker>())
+                .AsSingle();
         }
       
     }

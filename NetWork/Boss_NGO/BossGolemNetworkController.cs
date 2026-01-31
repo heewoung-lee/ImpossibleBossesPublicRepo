@@ -3,8 +3,10 @@ using System.Collections;
 using BehaviorDesigner.Runtime;
 using Controller;
 using Controller.BossState;
-using GameManagers;
+using DataType.Skill.Factory.Effect.Def;
+using DataType.Skill.Factory.Effect.Strategy;
 using GameManagers.Interface.GameManagerEx;
+using GameManagers.RelayManager;
 using NetWork.BaseNGO;
 using Unity.Netcode;
 using UnityEngine;
@@ -44,7 +46,7 @@ namespace NetWork.Boss_NGO
     }
 
 
-    public class BossGolemNetworkController : NetworkBehaviourBase
+    public class BossGolemNetworkController : NetworkBehaviourBase,ICCReceiver
     {
         [Inject] IBossSpawnManager _bossSpawnManager;
         [Inject] private RelayManager _relayManager;
@@ -87,6 +89,37 @@ namespace NetWork.Boss_NGO
                 GetComponent<BossController>().enabled = false;
                 GetComponent<BehaviorTree>().enabled = false;
             }
+            
+        }
+
+
+        [Rpc(SendTo.Server,InvokePermission = RpcInvokePermission.Everyone)]
+        public void SetTargetServerRpc(NetworkObjectReference targetRef)
+        {
+            if (targetRef.TryGet(out NetworkObject targetNetObj))
+            {
+                _bossController.TargetObject = targetNetObj.gameObject;
+            }
+        }
+        
+        public void ApplyCC(CCType ccType, GameObject caster)
+        {
+            switch (ccType)
+            {
+                case CCType.Taunt:
+
+                    if (caster.TryGetComponent(out NetworkObject netObj))
+                    {
+                        SetTargetServerRpc(netObj);
+                    }
+                    
+                    
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(ccType), ccType, null);
+            }
+            
+            
         }
 
         [Rpc(SendTo.ClientsAndHost)]
@@ -180,5 +213,6 @@ namespace NetWork.Boss_NGO
             }
             _finishedIndicatorDuration = true;
         }
+
     }
 }

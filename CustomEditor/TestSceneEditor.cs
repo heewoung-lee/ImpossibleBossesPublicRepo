@@ -1,16 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using CustomEditor.Interfaces;
 using CustomEditor.Multiplay;
 using Scene;
 using Scene.CommonInstaller;
 using Scene.CommonInstaller.Interfaces;
-using Scene.GamePlayScene;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Util;
-using Unity.Multiplayer.PlayMode.Configurations.Editor;
 
 
 namespace CustomEditor
@@ -284,7 +281,7 @@ namespace CustomEditor
         [HorizontalGroup("Multi/Row")]
         [SerializeField, ToggleLeft, LabelText("UseSerializeVersion")]
         [OnValueChanged("OnUseSerializeVersion")]
-        private bool useSerializeVersion = true;
+        private bool useSerializeVersion = false;
 
         private void OnUseSerializeVersion()
         {

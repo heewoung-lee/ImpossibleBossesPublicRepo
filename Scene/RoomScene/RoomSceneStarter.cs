@@ -19,6 +19,7 @@ namespace Scene.RoomScene
             UIRoomCharacterSelect uICharacterSelect = _uiManagerServices.GetSceneUIFromResource<UIRoomCharacterSelect>();
             UIRoomChat uiChatting = _uiManagerServices.GetSceneUIFromResource<UIRoomChat>();
             
+            
             //TODO: 얘네 둘이 SceneContainer에 의해 생성되어함.
             
         }

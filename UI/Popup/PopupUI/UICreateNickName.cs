@@ -1,3 +1,5 @@
+using System;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface.LoginManager;
 using GameManagers.Interface.UIManager;
@@ -34,9 +36,9 @@ namespace UI.Popup.PopupUI
 
         public PlayerLoginInfo PlayerLoginInfo { get; set; }
 
-        protected override void OnDisableInit()
+        protected override void ZenjectEnable()
         {
-            base.OnDisableInit();
+            base.ZenjectEnable();
             _nickNameInputField.text = "";
         }
         protected override void StartInit()
@@ -63,21 +65,32 @@ namespace UI.Popup.PopupUI
         public void CreateNickname()
         {
             _confirmButton.interactable = false;
-            CreateUserNickName(PlayerLoginInfo, _nickNameInputField.text);
+            CreateUserNickName(PlayerLoginInfo, _nickNameInputField.text).Forget();
         }
 
-        public async void CreateUserNickName(PlayerLoginInfo playerinfo, string nickname)
+        public async UniTaskVoid CreateUserNickName(PlayerLoginInfo playerinfo, string nickname)
         {
             (bool isCheckResult, string message) = await _writeGoogleSheet.WriteNickNameToGoogleSheet(playerinfo, nickname);
-
-            if (isCheckResult == false)
+            try
             {
-                _messageError.SetActive(true);
-                _errorMessageText.text = message;
+                if (isCheckResult == false)
+                {
+                    _errorMessageText.text = message;
+                    _messageError.SetActive(true);
+                }
+                else
+                {
+                    _uiManager.ClosePopupUI(this);
+                }
             }
-            else
+            catch (Exception e)
             {
-                _uiManager.ClosePopupUI(this);
+                Debug.LogError($"[CreateNickName] Error: {e}");
+                //에러 발생 시 버튼이 잠긴 채로 남지 않게 해제
+                _confirmButton.interactable = true;
+                
+                _errorMessageText.text = "오류가 발생했습니다.";
+                _messageError.SetActive(true);
             }
         }
     }

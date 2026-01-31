@@ -28,9 +28,6 @@ namespace Enemy.Boss.Installer
 
             
             Container.BindInterfacesTo<DropItemBehaviour.DropItemBehaviourFactory>().AsSingle();
-            
-            Container.BindInterfacesTo<NgoMoveDownTownBehaviour.NgoMoveDownTownBehaviourFactory>().AsSingle();
-            
         }
     }
 }

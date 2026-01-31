@@ -1,6 +1,6 @@
 using GameManagers;
-using GameManagers.Interface.UIFactoryManager.UIController;
 using GameManagers.Interface.UIManager;
+using GameManagers.UIFactory.UIController;
 using UI.Scene.SceneUI;
 using UnityEngine;
 using Util;

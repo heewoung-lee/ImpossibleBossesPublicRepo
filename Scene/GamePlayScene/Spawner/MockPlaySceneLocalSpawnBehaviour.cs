@@ -1,5 +1,6 @@
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using NetWork.NGO.UI;
 using Scene.CommonInstaller;
 using Scene.GamePlayScene.Spawner;
@@ -29,7 +30,8 @@ namespace Scene.GamePlayScene.Spwaner
         public void Init()
         {
            //플레이어 스폰
-
+           //TODO: 로컬에 어떤 플레이어 스폰할껀지 추가해야함.
+           
            Define.PlayerClass playerClass = _sceneSelectCharacter.GetPlayerableCharacter();
            _resourceService.InstantiateByKey($"Prefabs/Player/SpawnCharacter/{playerClass}Base");
            

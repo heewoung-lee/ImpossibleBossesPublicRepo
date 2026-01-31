@@ -1,6 +1,6 @@
 using GameManagers;
 using GameManagers.Interface.NGOPoolManager;
-using GameManagers.Interface.NGOPoolManager.Implementation;
+using GameManagers.Pool;
 using Zenject;
 
 namespace ZenjectContext.ProjectContextInstaller

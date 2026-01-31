@@ -1,4 +1,5 @@
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using NetWork.NGO;
 using Unity.Netcode;
 using UnityEngine;
@@ -11,9 +12,9 @@ namespace Scene.CommonInstaller.Factories
     {
         public class NgoRootUIInitializerFactory : NgoZenjectFactory<NgoRootUIInitializer>
         {
-            public NgoRootUIInitializerFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public NgoRootUIInitializerFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NGO_ROOT_UI");
             }

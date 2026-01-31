@@ -1,6 +1,7 @@
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.UIManager;
+using GameManagers.ResourcesEx;
 using Module.UI_Module;
 using Scene.CommonInstaller;
 using Scene.GamePlayScene.Spawner;
@@ -35,7 +36,6 @@ namespace Scene.GamePlayScene
             _sceneSpawnBehaviour.SpawnObj();
             _uiLoadingScene = _uiManagerServices.GetOrCreateSceneUI<UILoading>();
             _gamePlaySceneLoadingProgress =_resourcesServices.GetOrAddComponent<GamePlaySceneLoadingProgress>(_uiLoadingScene.gameObject);
-
         }
     }
 }

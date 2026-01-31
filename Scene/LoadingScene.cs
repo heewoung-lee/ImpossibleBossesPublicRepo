@@ -1,10 +1,7 @@
 using System.Collections;
-using System.Threading.Tasks;
 using GameManagers;
-using GameManagers.Interface.UIManager;
-using Scene.GamePlayScene;
+using GameManagers.Scene;
 using UI.Scene.SceneUI;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Util;
@@ -16,8 +13,6 @@ namespace Scene
     {
         [Inject] private IUIManagerServices _uiManager; 
         [Inject] SceneManagerEx _sceneManagerEx;
-        
-        
         
         UILoading _uiLoading;
         public override Define.Scene CurrentScene => Define.Scene.LoadingScene;
@@ -31,9 +26,6 @@ namespace Scene
             StartCoroutine(LoadingSceneProcess());
         }
 
-        public override void Clear()
-        {
-        }
 
         protected override void AwakeInit()
         {

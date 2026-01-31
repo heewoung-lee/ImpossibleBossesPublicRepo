@@ -1,8 +1,7 @@
 using GameManagers;
 using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.SceneUIManager;
-using GameManagers.Interface.UIFactoryManager.SceneUI;
 using GameManagers.Interface.UIManager;
+using GameManagers.UIFactory.SceneUI;
 using Stats;
 using Stats.BaseStats;
 using TMPro;

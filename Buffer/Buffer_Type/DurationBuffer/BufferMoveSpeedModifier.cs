@@ -1,19 +1,20 @@
 using Data.DataType.ItemType.Interface;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using Stats.BaseStats;
 using UnityEngine;
 using Zenject;
 
 namespace Buffer.Buffer_Type.DurationBuffer
 {
-    public class BufferMoveSpeedModifier : DurationBuff
+    public class BufferMoveSpeedModifier
     {
         [Inject]private IResourcesServices _resourcesServices;
 
         private Sprite _iconImage;
 
-        public override Sprite BuffIconImage
+        public Sprite BuffIconImage
         {
             get
             {
@@ -25,22 +26,22 @@ namespace Buffer.Buffer_Type.DurationBuffer
             }
         }
 
-        public override string Buffname => "이동속도증가";
+        public string Buffname => "이동속도증가";
 
-        public override StatType StatType => StatType.MoveSpeed;
+        public StatType StatType => StatType.MoveSpeed;
 
-        public override void ApplyStats(BaseStats stats, float value)
+        public void ApplyStats(BaseStats stats, float value)
         {
             stats.Plus_MoveSpeed_Abillity((int)value);
 
         }
-        public override void RemoveStats(BaseStats stats, float value)
+        public void RemoveStats(BaseStats stats, float value)
         {
             stats.Plus_MoveSpeed_Abillity(-(int)value);
 
         }
 
-        public override void SetBuffIconImage(Sprite buffImageIcon)
+        public void SetBuffIconImage(Sprite buffImageIcon)
         {
             _iconImage = buffImageIcon;
         }

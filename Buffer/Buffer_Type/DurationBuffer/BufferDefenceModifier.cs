@@ -1,20 +1,21 @@
 using Data.DataType.ItemType.Interface;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using Stats.BaseStats;
 using UnityEngine;
 using Zenject;
 
 namespace Buffer.Buffer_Type.DurationBuffer
 {
-    public class BufferDefenceModifier : DurationBuff
+    public class BufferDefenceModifier 
     {
         
         [Inject]private IResourcesServices _resourcesServices;
 
         private Sprite _iconImage;
 
-        public override Sprite BuffIconImage
+        public Sprite BuffIconImage
         {
             get
             {
@@ -26,21 +27,21 @@ namespace Buffer.Buffer_Type.DurationBuffer
             }
         }
         
-        public override string Buffname => "방어력증가";
+        public string Buffname => "방어력증가";
 
-        public override StatType StatType => StatType.Defence;
+        public StatType StatType => StatType.Defence;
 
 
-        public override void ApplyStats(BaseStats stats, float value)
+        public void ApplyStats(BaseStats stats, float value)
         {
             stats.Plus_Defence_Abillity((int)value);
         }
-        public override void RemoveStats(BaseStats stats, float value)
+        public void RemoveStats(BaseStats stats, float value)
         {
             stats.Plus_Defence_Abillity(-(int)value);
         }
 
-        public override void SetBuffIconImage(Sprite buffImageIcon)
+        public void SetBuffIconImage(Sprite buffImageIcon)
         {
             _iconImage = buffImageIcon;
         }

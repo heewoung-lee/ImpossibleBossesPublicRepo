@@ -4,6 +4,8 @@ using GameManagers;
 using GameManagers.Interface.LoginManager;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.UIManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using Module.UI_Module;
 using NetWork.BaseNGO;
 using Scene.CommonInstaller.Interfaces;
@@ -24,9 +26,9 @@ namespace NetWork.NGO
     {
         public class CharacterSelectorNgoFactory : NgoZenjectFactory<CharacterSelectorNgo>
         {
-            public CharacterSelectorNgoFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public CharacterSelectorNgoFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NGOUICharacterSelectRect");
             }
@@ -186,6 +188,7 @@ namespace NetWork.NGO
                 _uiRoomCharacterSelect.ButtonState(false);
                 SetNicknameServerRpc(PlayerIngameLoginInfo.PlayerNickName);
                 _uiRoomCharacterSelect.SetButtonEvent(() => PlayerReadyServerRpc());
+                _uiRoomCharacterSelect.SetCharacterSelectorNgo(this);
                 SetPositionCharacterChooseCamera();
             }
 

@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface.UIManager;
 using Scene.CommonInstaller;
@@ -27,6 +28,7 @@ namespace Scene.BattleScene
             _sceneConnectOnline = sceneConnectOnline;
             _gameplaySceneStarter = gameplaySceneStarter;
             _sceneMover = sceneMover;
+                 
         }
         
         public ISceneMover SceneMover => _sceneMover;
@@ -38,31 +40,9 @@ namespace Scene.BattleScene
         protected override void StartInit()
         {
             base.StartInit();
-            // _uiLoadingScene = _uiManagerServices.GetOrCreateSceneUI<UILoading>();
-            // _gamePlaySceneLoadingProgress = _uiLoadingScene.AddComponent<GamePlaySceneLoadingProgress>();
-            // // if (isTest == true)
-            // // {
-            // //     _battleSceneController = new MoveSceneController(new MockUnitBattleScene(Define.PlayerClass.Fighter, _uiLoadingScene, isSoloTest));
-            // //     gameObject.AddComponent<MockUnitUIGamePlaySceneModule>();
-            // //     _battleSceneController.InitGamePlayScene();
-            // // }
-            // // else
-            // // {
-            // //     _battleSceneController = new MoveSceneController(new UnitBattleScene());
-            // //     gameObject.AddComponent<MockUnitUIGamePlaySceneModule>();
-            // //     _battleSceneController.InitGamePlayScene();
-            // //     _gamePlaySceneLoadingProgress.OnLoadingComplete += _battleSceneController.SpawnObj;
-            // // }
-            // //
-            //
-            // _sceneSpawnBehaviour.Init();
-            // _sceneSpawnBehaviour.SpawnObj();
-            //TODO: 0617 인르톨러가 없으니깐 반드시 인스톨러 넣을 것
-            
-            base.StartInit();
-            _ = StartInitAsync();
+            StartInitAsync().Forget();
         }
-        private async Task StartInitAsync()
+        private async UniTaskVoid StartInitAsync()
         {
             await _sceneConnectOnline.SceneConnectOnlineStart();
             try
@@ -75,9 +55,6 @@ namespace Scene.BattleScene
             }
         }
         
-        public override void Clear()
-        {
-        }
         protected override void AwakeInit()
         {
         }

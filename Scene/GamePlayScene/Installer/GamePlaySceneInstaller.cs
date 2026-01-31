@@ -54,18 +54,25 @@ namespace Scene.GamePlayScene.Installer
             }); //소비자용 바인드 즉 프로바이더가 현재 모드를 판단해서 소비자가 쓸 바인드객체를 골라서 바인드함.
 
 
-            
-            
-
             // ISceneSpawnBehaviour(모드별로 전부 바인드)
             Container.Bind<ISceneSpawnBehaviour>().WithId(SceneMode.NormalBoot).To<UnitNetGamePlayScene>().AsSingle();
             Container.Bind<ISceneSpawnBehaviour>().WithId(SceneMode.LocalTest).To<MockPlaySceneLocalSpawnBehaviour>()
                 .AsCached();
-            Container.Bind<ISceneSpawnBehaviour>().WithId(SceneMode.MultiTest_Solo)
-                .To<MockPlaySceneNetworkSpawnBehaviour>().AsCached();
-            Container.Bind<ISceneSpawnBehaviour>().WithId(SceneMode.MultiTest_Multi)
-                .To<MockPlaySceneNetworkSpawnBehaviour>().AsCached();
 
+
+            Container.Bind(
+                typeof(MockPlaySceneNetworkSpawnBehaviour), //본체를 바인드해야 FromResolve가능
+                typeof(IInitializable),
+                typeof(IDisposable)).To<MockPlaySceneNetworkSpawnBehaviour>().AsCached();
+
+            Container.Bind<ISceneSpawnBehaviour>().WithId(SceneMode.MultiTest_Solo)
+                .To<MockPlaySceneNetworkSpawnBehaviour>().FromResolve();
+            Container.Bind<ISceneSpawnBehaviour>().WithId(SceneMode.MultiTest_Multi)
+                .To<MockPlaySceneNetworkSpawnBehaviour>().FromResolve();
+
+            
+            
+            
             //ISceneProvider가 현재 모드에 맞는 ISceneSpawnBehaviour ID없이 소비자가 쓸 수 있게 자동으로 바인드
             Container.Bind<ISceneSpawnBehaviour>().FromMethod(contextlevel =>
             {

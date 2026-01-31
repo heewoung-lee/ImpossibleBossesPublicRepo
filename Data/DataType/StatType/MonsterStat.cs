@@ -1,9 +1,10 @@
 using System;
+using GameManagers.Data;
 
 namespace Data.DataType.StatType
 {
     [Serializable]
-    public struct MonsterStat : IKey<int>
+    public struct MonsterStat : IKey<int>,IGoogleSheetData
     {
         public int monsterID;
         public int hp;

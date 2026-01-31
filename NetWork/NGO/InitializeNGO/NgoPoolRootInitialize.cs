@@ -1,6 +1,8 @@
 using System.IO;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.Pool;
+using GameManagers.ResourcesEx;
 using NetWork.BaseNGO;
 using Unity.Collections;
 using Unity.Netcode;
@@ -14,9 +16,9 @@ namespace NetWork.NGO.InitializeNGO
     {
         public class NgoPoolRootInitializeFactory : NgoZenjectFactory<NgoPoolRootInitialize>
         {
-            public NgoPoolRootInitializeFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public NgoPoolRootInitializeFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NGO_Pooling_ROOT");
             }
@@ -81,21 +83,13 @@ namespace NetWork.NGO.InitializeNGO
 
         private void GeneratePoolObj(string path)
         {
-            GameObject ngo = _resourcesServices.Load<GameObject>(path);
-
-            //_poolingNgoPath가 안뜸
-            if (ngo.TryGetComponent(out NgoPoolingInitializeBase poolingObj))
-            {
-                _poolManager.SetPool_NGO_ROOT_Dict(poolingObj.PoolingNgoPath, transform);
-                _poolManager.NGO_Pool_RegisterPrefab(poolingObj.PoolingNgoPath, poolingObj.PoolingCapacity);
-                //딕셔너리에 각 풀마다 반납장소 등록
-            }
+            _poolManager.NGO_Pool_RegisterPrefab(path,this);
         }
 
         public void SetRootObjectName(string poolingNgoPath)
         {
             _poolingNgoPath.Value = poolingNgoPath;
-            string pathName = Path.GetFileNameWithoutExtension(poolingNgoPath);
+            string pathName = Path.GetFileNameWithoutExtension(poolingNgoPath);//순수파일이름 추출
             pathName += "_Root";
             _rootName.Value = pathName;
         }

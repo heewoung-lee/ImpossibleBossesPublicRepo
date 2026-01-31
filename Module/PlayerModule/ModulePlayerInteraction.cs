@@ -1,3 +1,4 @@
+using CoreScripts;
 using GameManagers;
 using GameManagers.Interface;
 using GameManagers.Interface.InputManager;
@@ -17,7 +18,7 @@ namespace Module.PlayerModule
     /// 데미지를 계산하는 콜라이어와 겹쳐서 2배로 들어가는 문제가 발생했고
     /// 오브젝트를 나눔
     /// </summary>
-    public class ModulePlayerInteraction : MonoBehaviour 
+    public class ModulePlayerInteraction : ZenjectMonoBehaviour 
     {
         
         [Inject] private IUIorganizer _uiManager;
@@ -49,17 +50,24 @@ namespace Module.PlayerModule
         private void Awake()
         {
             _playerController = GetComponentInParent<PlayerController>();
+        }
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
             _interactionInput = _inputManager.GetInputAction(Define.ControllerType.Player, "Interaction");
             _interactionInput.Enable();
         }
 
-        private void OnEnable()
+        protected override void ZenjectEnable()
         {
+            base.ZenjectEnable();
             _interactionInput.performed += Interaction;
         }
 
-        private void OnDisable()
+        protected override void ZenjectDisable()
         {
+            base.ZenjectDisable();
             _interactionInput.performed -= Interaction;
         }
 

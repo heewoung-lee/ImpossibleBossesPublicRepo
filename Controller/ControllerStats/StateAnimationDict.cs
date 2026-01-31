@@ -11,7 +11,7 @@ namespace Controller.ControllerStats
 
         public void RegisterState(IState iMoveableState ,Action stateStrategy)
         {
-            if (!_stateDict.ContainsKey(iMoveableState))
+            if (_stateDict.ContainsKey(iMoveableState) == false)
             {
                 _stateDict.Add(iMoveableState, stateStrategy);
             }

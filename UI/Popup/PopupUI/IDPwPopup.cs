@@ -15,14 +15,16 @@ namespace UI.Popup.PopupUI
         public abstract TMP_InputField IdInputField { get; }
         public abstract TMP_InputField PwInputField { get; }
 
-        protected override void AwakeInit()
+        protected override void InitAfterInject()
         {
-            base.AwakeInit();
+            base.InitAfterInject();
             _inputTabKey = _inputManager.GetInputAction(Define.ControllerType.UI, "ID_PW_Popup_TabKey");
             _inputTabKey.Enable();
 
             _inputTabKey.started += SwitchingField;
         }
+
+
 
         protected void SwitchingField(InputAction.CallbackContext context)
         {

@@ -4,6 +4,8 @@ using Controller.BossState;
 using Controller.ControllerStats;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using NetWork;
 using NetWork.Boss_NGO;
 using NetWork.NGO.Interface;
@@ -110,7 +112,7 @@ namespace BehaviourTreeNode.BossGolem.Task
                 {
                     if (_hasSpawnedParticles) return;
                     string dustPath = "Prefabs/Particle/AttackEffect/Dust_Particle";
-                    SpawnParamBase param = SpawnParamBase.Create(argFloat: 1f);
+                    NetworkParams param =  new NetworkParams(argFloat:1f){};
                     RelayManagerInstance.NgoRPCCaller.SpawnNonNetworkObject(_attackRangeParticlePos, dustPath,
                         param);
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using GameManagers;
 using GameManagers.Interface.GameManagerEx;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using Module.CameraModule;
 using Module.PlayerModule;
 using Module.PlayerModule.PlayerClassModule;
@@ -28,11 +30,11 @@ namespace NetWork.NGO
         private IPlayerSpawnManager _gameManagerEx;
         private RelayManager _relayManager;
         
-        public class CharacterSpawnFactory : NgoZenjectFactory<string,PlayerInitializeNgo>
+        public class CharacterSpawnFactory : NgoZenjectFactory<PlayerInitializeNgo>
         {
-            public CharacterSpawnFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public CharacterSpawnFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService,
-                string key) : base(container, registerableFactory, handlerFactory, loadService, key)
+                string key) : base(container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>(key);
             }
@@ -69,6 +71,8 @@ namespace NetWork.NGO
                 SetOwnerPlayerADD_Module();
             }
             _relayManager.NetworkManagerEx.SceneManager.OnLoadEventCompleted += SetParentPosition;
+            
+            
         }
         private void SetParentPosition(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
@@ -78,7 +82,7 @@ namespace NetWork.NGO
             if (loadSceneMode != LoadSceneMode.Single)
                 return;
 
-            transform.SetParent(_relayManager.NgoRoot.transform);
+            GetComponent<NetworkObject>().TrySetParent(_relayManager.NgoRoot.transform);
         }
 
         public override void OnNetworkDespawn()
@@ -99,40 +103,21 @@ namespace NetWork.NGO
             _resourcesServices.GetOrAddComponent<PlayerInput>(gameObject);
             PlayerController controller = _resourcesServices.GetOrAddComponent<PlayerController>(gameObject);
 
-            _resourcesServices.GetOrAddComponent<ModuleMainCameraCinemachineBrain>(gameObject);
             _resourcesServices.GetOrAddComponent<ModulePlayerAnimInfo>(gameObject);
             _resourcesServices.GetOrAddComponent<ModulePlayerTextureCamera>(gameObject);
-            _resourcesServices.GetOrAddComponent<ModuleMainCameraCinemachineBrain>(gameObject);
+            //플레이어 렌더 카메라는 붙이는걸로 진행따로 카메라 바인드 안할예정
 
-            _resourcesServices.GetOrAddComponent(GetPlayerModuleClass(_relayManager.ChoicePlayerCharacter),gameObject);
-            
             _resourcesServices.GetOrAddComponent<ModulePlayerInteraction>(_interactionTr.gameObject);
             SetPlayerLayerMask();
       
-            RuntimeAnimatorController ownerPlayerAnimController = _resourcesServices.Load<RuntimeAnimatorController>($"Art/Player/AnimData/Animation/{_relayManager.ChoicePlayerCharacter}Controller");
-            gameObject.GetComponent<Animator>().runtimeAnimatorController = ownerPlayerAnimController;
+            //RuntimeAnimatorController ownerPlayerAnimController = _resourcesServices.Load<RuntimeAnimatorController>($"Art/Player/AnimData/Animation/{_relayManager.ChoicePlayerCharacter}Controller");
+            //gameObject.GetComponent<Animator>().runtimeAnimatorController = ownerPlayerAnimController;
+            //1.6일 삭제 각 클래스별 필수적으로 가져야 할 자신의 애니메이션 컨트롤러를 고정적으로 넣어둠 
+            //앞으로는 로드해서 집어넣을 필요가 없음
+            
             _gameManagerEx.InvokePlayerSpawnWithController(controller);
         }
 
-
-        private Type GetPlayerModuleClass(Define.PlayerClass playerClass)
-        {
-            switch (playerClass)
-            {
-                case Define.PlayerClass.Archer:
-                    return typeof(ModuleAcherClass); 
-                case Define.PlayerClass.Fighter:
-                    return typeof(ModuleFighterClass);
-                case Define.PlayerClass.Mage:
-                    return typeof(ModuleMageClass);
-                case Define.PlayerClass.Monk:
-                    return typeof(ModuleMonkClass);
-                case Define.PlayerClass.Necromancer:
-                    return typeof(ModuleNecromancerClass);
-
-                default: return null;
-            }
-        }
         private void SetPlayerLayerMask()
         {
             LayerMask playerMask = LayerMask.NameToLayer("Player");

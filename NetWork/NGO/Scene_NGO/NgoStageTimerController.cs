@@ -1,6 +1,8 @@
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.UIManager;
+using GameManagers.ResourcesEx;
+using GameManagers.Scene;
 using NetWork.NGO.UI;
 using Unity.Netcode;
 using UnityEngine;
@@ -10,29 +12,50 @@ using ZenjectContext.GameObjectContext;
 
 namespace NetWork.NGO.Scene_NGO
 {
+    public readonly struct TimeValue
+    {
+        public float VillageStayTime { get; }
+        public float BossRoomStayTime { get; }
+        public float AllPlayerInPortalStayTime { get; }
+
+        public TimeValue(float villageStayTime, float bossRoomStayTime, float allPlayerInPortalCount)
+        {
+            VillageStayTime = villageStayTime;
+            BossRoomStayTime = bossRoomStayTime;
+            AllPlayerInPortalStayTime = allPlayerInPortalCount;
+        }
+    }
+
+
     public class NgoStageTimerController : NetworkBehaviour
     {
         public class NgoStageTimerControllerFactory : NgoZenjectFactory<NgoStageTimerController>
         {
-            public NgoStageTimerControllerFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public NgoStageTimerControllerFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/Scene_NGO/NgoStageTimerController");
             }
         }
-        
-        [Inject] private SceneManagerEx _sceneManagerEx;
-        [Inject] private IUIManagerServices _uiManagerServices;
-        
+
+
+        [Inject]
+        public void Construct(SceneManagerEx sceneManagerEx, IUIManagerServices uiManagerServices, TimeValue timeValue)
+        {
+            _sceneManagerEx = sceneManagerEx;
+            _uiManagerServices = uiManagerServices;
+            _timeValue = timeValue;
+        }
+
+        private SceneManagerEx _sceneManagerEx;
+        private IUIManagerServices _uiManagerServices;
+        private TimeValue _timeValue;
+
         private Color _normalClockColor = "FF9300".HexCodetoConvertColor();
         private Color _allPlayerInPortalColor = "0084FF".HexCodetoConvertColor();
 
 
-        private const float VillageStayTime = 300f;
-        //private const float BossRoomStayTime = 60f;
-        private const float BossRoomStayTime = 1f;
-        private const float AllPlayerinPortalCount = 7f;
         private float _totalTime = 0;
         private float _currentTime = 0;
 
@@ -46,6 +69,7 @@ namespace NetWork.NGO.Scene_NGO
                 {
                     _uiStageTimer = _uiManagerServices.GetOrCreateSceneUI<UIStageTimer>();
                 }
+
                 return _uiStageTimer;
             }
         }
@@ -57,9 +81,12 @@ namespace NetWork.NGO.Scene_NGO
                 if (Mathf.Approximately(_totalTime, default))
                 {
                     Define.Scene currentScene = _sceneManagerEx.CurrentScene;
-                    _totalTime = currentScene == Define.Scene.GamePlayScene ? VillageStayTime : BossRoomStayTime;
+                    _totalTime = currentScene == Define.Scene.GamePlayScene
+                        ? _timeValue.VillageStayTime
+                        : _timeValue.BossRoomStayTime;
                 }
-                return _totalTime;  
+
+                return _totalTime;
             }
         }
 
@@ -79,7 +106,7 @@ namespace NetWork.NGO.Scene_NGO
             if (IsHost == false)
                 return;
 
-            UIStageTimer.SetTimer(TotalTime);
+            UIStageTimer.SetTimer(TotalTime, _normalClockColor);
         }
 
 
@@ -104,7 +131,7 @@ namespace NetWork.NGO.Scene_NGO
         public void SetPortalInAllPlayersCountRpc()
         {
             _currentTime = UIStageTimer.CurrentTime;
-            UIStageTimer.SetTimer(AllPlayerinPortalCount, _allPlayerInPortalColor);
+            UIStageTimer.SetTimer(_timeValue.AllPlayerInPortalStayTime, _allPlayerInPortalColor);
         }
 
 

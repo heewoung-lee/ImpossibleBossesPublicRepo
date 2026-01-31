@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface.LoginManager;
+using GameManagers.RelayManager;
 using Scene.CommonInstaller.Interfaces;
 using Unity.Services.Lobbies.Models;
 using Util;
@@ -15,7 +17,7 @@ namespace Scene.CommonInstaller
 
 
         private PlayersTag _playerType;
-        public async Task SceneConnectOnlineStart()
+        public async UniTask SceneConnectOnlineStart()
         {
             PlayerIngameLoginInfo playerinfo = await TestMultiUtil.SetAuthenticationService(TestMultiUtil.GetPlayerTag());
             _lobbyManager.SetPlayerLoginInfo(playerinfo);
@@ -37,7 +39,6 @@ namespace Scene.CommonInstaller
                 await _relayManager.JoinGuestRelay(joinCode);
             }
             _lobbyManager.InitializeLobbyEvent();
-            _relayManager.SpawnToRPC_Caller();
         }
     }
 }

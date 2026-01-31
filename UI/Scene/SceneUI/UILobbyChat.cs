@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface.VivoxManager;
 using TMPro;
@@ -48,9 +49,9 @@ namespace UI.Scene.SceneUI
             _chattingScrollRect = Get<ScrollRect>((int)ScrollRects.ChatScrollRect);
             _sendButton.onClick.AddListener(() =>
             {
-                SendChatingMessage(_chattingInputField.text);
+                SendChatingMessage(_chattingInputField.text).Forget();
             });
-            _chattingInputField.onSubmit.AddListener(SendChatingMessage);
+            _chattingInputField.onSubmit.AddListener((text)=>SendChatingMessage(text).Forget());
             _sendButton.interactable = false;
         }
         public void SendText(string text)
@@ -78,8 +79,19 @@ namespace UI.Scene.SceneUI
                 ButtonInteractable();
             }
         }
+        private void OnDestroy()
+        {
+            if (VivoxService.Instance != null)
+            {
+                VivoxService.Instance.ChannelMessageReceived -= ChannelMessageReceived;
+            }
 
-        public async void SendChatingMessage(string message)
+            if (_vivoxSession != null)
+            {
+                _vivoxSession.VivoxDoneLoginEvent -= ButtonInteractable;
+            }
+        }
+        public async UniTaskVoid SendChatingMessage(string message)
         {
             if (string.IsNullOrEmpty(_chattingInputField.text) || _sendButton.interactable == false)
                 return;

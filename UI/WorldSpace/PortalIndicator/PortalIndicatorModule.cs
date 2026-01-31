@@ -1,5 +1,6 @@
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using Scene.CommonInstaller.Interfaces;
 using UnityEngine;
 using Zenject;
@@ -9,22 +10,20 @@ namespace UI.WorldSpace.PortalIndicator
     public class PortalIndicatorModule : MonoBehaviour
     {
         private IUIManagerServices _uiManagerServices;
-        private IFactoryCreator _creatorFactory;
-        private UIPortalIndicator.UIPortalIndicatorFactory _uiPortalIndicatorFactory;
 
         [Inject]
         public void Construct(
-            IUIManagerServices uiManagerServices,
-            IFactoryCreator creatorFactory,
-            UIPortalIndicator.UIPortalIndicatorFactory uiPortalIndicatorFactory)
+            IUIManagerServices uiManagerServices)
         {
             _uiManagerServices = uiManagerServices;
-            _creatorFactory = creatorFactory;
-            _uiPortalIndicatorFactory = uiPortalIndicatorFactory;
         }
         public void Start()
         {
             UIPortalIndicator uiPortalIndicator = _uiManagerServices.MakeUIWorldSpaceUI<UIPortalIndicator>();
+            if (uiPortalIndicator is IInitializable initializable)
+            {
+                initializable.Initialize();
+            }
             uiPortalIndicator.transform.SetParent(transform);
         }
     }

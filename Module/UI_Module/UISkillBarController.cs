@@ -1,33 +1,37 @@
 using GameManagers;
 using GameManagers.Interface;
 using GameManagers.Interface.SkillManager;
-using GameManagers.Interface.UIFactoryManager.UIController;
 using GameManagers.Interface.UIManager;
+using GameManagers.UIFactory.UIController;
 using UI.Scene.SceneUI;
 using UnityEngine;
 using Zenject;
+using ZenjectContext.ProjectContextInstaller;
 
 namespace Module.UI_Module
 {
     public class UISkillBarController : MonoBehaviour
     {
-        public class UISkillBaControllerFactory : SceneComponentFactory<UISkillBarController>{}
+        /// <summary>
+        /// 스킬을 쓸 수 있는 스킬UI
+        /// </summary>
+        public class UISkillBarControllerFactory : SceneComponentFactory<UISkillBarController>{}
         
         private IUIManagerServices _uiManager;
-        private ISkillManager _skillManager;
+        private SignalBus  _signalBus;
 
         [Inject]
-        public void Construct(IUIManagerServices uiManager, ISkillManager skillManager)
+        public void Construct(IUIManagerServices uiManager,SignalBus signalBus)
         {
             _uiManager = uiManager;
-            _skillManager = skillManager;
+            _signalBus = signalBus;
         }
         
         
         void Start()
         {
             UISkillBar skillBarUI = _uiManager.GetSceneUIFromResource<UISkillBar>();
-            _skillManager.Invoke_Done_UI_SKilBar_Init_Event();
+            _signalBus.Fire(new UISkillBarReadySignal());
         }
 
     }

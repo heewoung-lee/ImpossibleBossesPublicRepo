@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BehaviorDesigner.Runtime;
 using Controller.ControllerStats;
 using Controller.ControllerStats.BaseStates;
 using Data;
@@ -19,11 +20,25 @@ namespace Controller.BossState
         private const float Skill1PreFrame = 0.6f;
         private const float Skill2PreFrame = 0.3f;
         private const float Skill1Transition = 0.1f;
+        
+        
+        public override GameObject TargetObject
+        {
+            get => base.TargetObject; // 읽을 때는 부모의 값을 그대로 읽음
+            set
+            {
+                base.TargetObject = value;
 
+                if (_behaviorTree != null)
+                {
+                    _behaviorTree.SetVariableValue("Target", value);
+                }
+            }
+        }
 
         private Dictionary<IState, float> _attackStopTimingRatioDict = new Dictionary<IState, float>();
         public override Dictionary<IState, float> AttackStopTimingRatioDict => _attackStopTimingRatioDict;
-
+        private BehaviorTree _behaviorTree;
 
         private int[] _golemAttacks = new int[2]
         {
@@ -67,6 +82,8 @@ namespace Controller.BossState
             _attackStopTimingRatioDict.Add(_baseAttackState, AttackPreFrame);
             _attackStopTimingRatioDict.Add(_bossSkill1State, Skill1PreFrame);
             _attackStopTimingRatioDict.Add(_bossSkill2State, Skill2PreFrame);
+
+            _behaviorTree = GetComponent<BehaviorTree>();
         }
         public override void UpdateAttack()
         {

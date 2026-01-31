@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using GameManagers;
+using GameManagers.RelayManager;
 using Scene.CommonInstaller;
 using Scene.CommonInstaller.Interfaces;
 using UnityEngine;
@@ -10,18 +12,26 @@ namespace Scene.RoomScene
 {
     public class RoomPlayScene : BaseScene,ISceneTestMode,ISceneMultiMode
     {
-        [Inject]private IUIManagerServices _uiManagerServices;
-        [Inject]private ISceneConnectOnline _sceneConnectOnline;
-        [Inject]private ISceneStarter _roomSceneStarter;
-        [Inject]private RelayManager _relayManager;
+        private IUIManagerServices _uiManagerServices;
+        private ISceneConnectOnline _sceneConnectOnline;
+        private ISceneStarter _roomSceneStarter;
+        private RelayManager _relayManager;
+        
+        [Inject]
+        public void Construct(IUIManagerServices uiManagerServices, ISceneConnectOnline sceneConnectOnline,ISceneStarter roomSceneStarter,RelayManager relayManager)
+        {
+            _uiManagerServices = uiManagerServices;
+            _sceneConnectOnline = sceneConnectOnline;
+            _roomSceneStarter = roomSceneStarter;
+            _relayManager = relayManager;
+        }
+        
+
 
         [SerializeField] private TestMode testMode;
         [SerializeField] private MultiMode multiMode;
         public override Define.Scene CurrentScene => Define.Scene.RoomScene;
 
-        public override void Clear()
-        {
-        }
 
         protected override void AwakeInit()
         {
@@ -29,10 +39,10 @@ namespace Scene.RoomScene
         protected override void StartInit()
         {
             base.StartInit();
-            _ = StartInitAsync();
+            StartInitAsync().Forget();
         }
         
-        private async Task StartInitAsync()
+        private async UniTaskVoid StartInitAsync()
         {
             try
             {

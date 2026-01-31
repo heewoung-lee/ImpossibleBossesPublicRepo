@@ -1,5 +1,7 @@
 using GameManagers;
 using GameManagers.Interface.UIManager;
+using GameManagers.Pool;
+using GameManagers.RelayManager;
 using NetWork.NGO.UI;
 using Scene.BattleScene;
 using Scene.GamePlayScene.Spawner;
@@ -38,7 +40,6 @@ namespace Scene.GamePlayScene
         {
             _uiLoadingScene = _uiManagerServices.GetOrCreateSceneUI<UILoading>();
             _uiStageTimer = _uiManagerServices.GetOrCreateSceneUI<UIStageTimer>();
-            _uiStageTimer.OnTimerCompleted += _sceneMover.MoveScene;
         }
     
         public void SpawnObj()

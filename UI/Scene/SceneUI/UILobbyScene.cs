@@ -14,6 +14,12 @@ namespace UI.Scene.SceneUI
         protected override void AwakeInit()
         {
             base.AwakeInit();
+            
+        }
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
             _uiUserPanel = _uiManagerServices.GetSceneUIFromResource<UIUserInfoPanel>();
             _uiLobbyChat = _uiManagerServices.GetSceneUIFromResource<UILobbyChat>();
             _uiRoomInventory = _uiManagerServices.GetSceneUIFromResource<UIRoomInventory>();

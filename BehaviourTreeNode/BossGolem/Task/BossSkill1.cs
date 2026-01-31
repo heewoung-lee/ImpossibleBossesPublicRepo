@@ -3,6 +3,7 @@ using BehaviorDesigner.Runtime.Tasks;
 using Controller.BossState;
 using Controller.ControllerStats;
 using GameManagers;
+using GameManagers.RelayManager;
 using NetWork;
 using NetWork.Boss_NGO;
 using NetWork.NGO.Interface;
@@ -115,10 +116,13 @@ namespace BehaviourTreeNode.BossGolem.Task
                         }
                         Vector3 targetPos = targetPlayer.transform.position;
 
-                        SpawnParamBase skill1IndicatorParam = SpawnParamBase.Create(argPosVector3: targetPos, argInteger: _damage.Value, argFloat: _skill1DurationTime);
+                        NetworkParams skill1IndicatorParam = new NetworkParams(
+                            argPosVector3:targetPos,
+                            argInteger:_damage.Value,
+                            argFloat: _skill1DurationTime
+                            ){};
                         RelayManager.NgoRPCCaller.SpawnLocalObject(targetPos, _skill1IndicatorPath, skill1IndicatorParam);
-
-                        SpawnParamBase skill1StoneParam = SpawnParamBase.Create(argFloat: _skill1DurationTime);
+                        NetworkParams skill1StoneParam = new NetworkParams(argFloat:_skill1DurationTime){};
                         RelayManager.NgoRPCCaller.SpawnLocalObject(targetPos, _skill1StonePath, skill1StoneParam);
                         //5.6 수정 SpawnProjector(targetPlayer);
                     }

@@ -1,8 +1,4 @@
-using System;
-using System.ComponentModel;
 using System.Linq;
-using GameManagers.Interface.ResourcesManager;
-using NetWork.LootItem;
 using NetWork.NGO;
 using NetWork.NGO.InitializeNGO;
 using NetWork.NGO.InitializeNGO.EffectVFX;
@@ -14,62 +10,29 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Zenject;
 
-public class GamePlaySceneUseObjectsInstaller : MonoInstaller
+namespace Scene.GamePlayScene.Installer
 {
-     protected const string CharacterLoadPath = "Prefabs/Player/SpawnCharacter";
+    public class GamePlaySceneUseObjectsInstaller : MonoInstaller
+    {
+        protected const string CharacterLoadPath = "Prefabs/Player/SpawnCharacter";
         protected const string LootItemLoadPath = "Prefabs/NGO/LootingItem";
         public override void InstallBindings()
         {
-           Container.BindInterfacesTo<NgoGamePlaySceneSpawn.NgoGamePlaySceneSpawnFactory>().AsSingle();
+            Container.BindInterfacesTo<NgoGamePlaySceneSpawn.NgoGamePlaySceneSpawnFactory>().AsSingle();
 
-            Container.BindInterfacesTo<NgoVFXInitialize.VFXRootNgoFactory>().AsSingle();
-
+            Container.BindInterfacesTo<GamePlaySceneNormalSpawn>().AsSingle();
+            
+            
             Container.BindInterfacesTo<Dummy.DummyFactory>().AsSingle();
+            
+            Container.BindInterfacesTo<PlayerDummy.PlayerDummyFactory>().AsSingle();
 
             Container.BindInterfacesTo<NgoBossRoomEntrance.NgoBossRoomEntranceFactory>().AsSingle();
+            Container.Bind<BossRoomEntrancePosition>().FromInstance(new BossRoomEntrancePosition(new Vector3(15f,0.15f,32f))).AsCached();
 
             Container.BindInterfacesTo<NgoStageTimerController.NgoStageTimerControllerFactory>().AsSingle();
-
-            Container.BindInterfacesTo<NgoPoolRootInitialize.NgoPoolRootInitializeFactory>().AsSingle();
-
-            Container.BindInterfacesTo<NetworkObjectPool.NetworkObjectPoolFactory>().AsSingle();
-
-            Container.BindInterfacesTo<NgoRootInitializer.NgoRootFactory>().AsSingle();
+            Container.Bind<TimeValue>().FromInstance(new TimeValue(300f, 60f, 7f)).AsCached();
             
-            Container.BindInterfacesTo<ItemRootInitialize.ItemRootFactory>().AsSingle();
-
-            Container.BindInterfacesAndSelfTo<NgoLevelUpInitialize.NgoLevelUpFactory>().AsSingle();
-            
-            BindAllPlayableCharacterFactories();
-
-            BindDropItemFactories();
-            
-            
-            void BindAllPlayableCharacterFactories()
-            {
-                //Player Register
-                string[] allCharacter = Resources.LoadAll<GameObject>(CharacterLoadPath)
-                    .Select(characterPrefab => CharacterLoadPath + "/" + characterPrefab.name).ToArray();
-
-                
-                Assert.IsNotNull(allCharacter,"allCharacter is null");
-                foreach (string characterPrefabPath in allCharacter)
-                {
-                    Container.BindInterfacesTo<PlayerInitializeNgo.CharacterSpawnFactory>().AsCached().WithArguments(characterPrefabPath);
-                }
-            }
-
-
-            void BindDropItemFactories()
-            {
-                string[] lootItems = Resources.LoadAll<LootItem>(LootItemLoadPath)
-                    .Select(lootItemprefab => LootItemLoadPath + "/" + lootItemprefab.name).ToArray();
-
-                Assert.IsNotNull(lootItems,"lootItems is null");
-                foreach (string lootitem in lootItems)
-                {
-                    Container.BindInterfacesTo<LootItem.LootItemFactory>().AsCached().WithArguments(lootitem);
-                }
-            }
         }
+    }
 }

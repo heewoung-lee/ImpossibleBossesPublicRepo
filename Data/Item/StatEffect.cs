@@ -1,5 +1,6 @@
 using System;
 using Data.DataType.ItemType.Interface;
+using Stats.BaseStats;
 using Unity.Netcode;
 using UnityEngine;
 

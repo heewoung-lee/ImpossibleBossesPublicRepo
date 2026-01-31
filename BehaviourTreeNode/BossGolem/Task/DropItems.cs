@@ -2,9 +2,13 @@ using System.Collections.Generic;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
 using Data.DataType.ItemType.Interface;
+using DataType.Item;
 using GameManagers;
-using GameManagers.Interface.ItemDataManager;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ItamData.Interface;
+using GameManagers.ItamDataManager.Interface;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using UI.SubItem;
 using Unity.Netcode;
 using UnityEngine;
@@ -15,7 +19,7 @@ namespace BehaviourTreeNode.BossGolem.Task
     public class DropItems : Action
     {
         private IResourcesServices _resourcesServices;
-        private IItemGetter _itemGetter;
+        private IItemDataManager _itemDataManager;
         private RelayManager _relayManager;
 
 
@@ -31,15 +35,13 @@ namespace BehaviourTreeNode.BossGolem.Task
             }
         }
 
-        private IItemGetter ItemGetter
+        private IItemDataManager ItemDataManager
         {
             get
             {
-                if (_itemGetter == null)
-                {
-                    _itemGetter =  GetComponent<BossDependencyHub>().ItemGetter;
-                }
-                return _itemGetter;
+                if (_itemDataManager == null)
+                    _itemDataManager = GetComponent<BossDependencyHub>().ItemDataManager;
+                return _itemDataManager;
             }
         }
 
@@ -100,23 +102,24 @@ namespace BehaviourTreeNode.BossGolem.Task
                 _elapseTime = 0;
                 _index++;
                 SpawnItem();
-
-                void SpawnItem()
-                {
-                    if (RelayManager.NetworkManagerEx.IsHost == false)
-                        return;
-
-                    IItem spawnItem = ItemGetter.GetRandomItemFromAll();
-                    IteminfoStruct itemStruct = new IteminfoStruct(spawnItem);
-                    NetworkObjectReference dropItemBehaviour = RelayManager.GetNetworkObject(_ngoDropItemBehaviour);
-                    RelayManager.NgoRPCCaller.Spawn_Loot_ItemRpc(itemStruct, Owner.transform.position, addLootItemBehaviour:dropItemBehaviour);
-                }
             }
             _isCallIndex = false;
             _elapseTime += Time.deltaTime;
             return TaskStatus.Running;
         }
+        private void SpawnItem()
+        {
+            if (RelayManager.NetworkManagerEx.IsHost == false) return;
 
+            ItemDataSO spawnItem = ItemDataManager.GetRandomItemData();
+            
+            if (spawnItem != null)
+            {
+                IteminfoStruct itemStruct = new IteminfoStruct(spawnItem.itemNumber);
+                NetworkObjectReference dropItemBehaviour = RelayManager.GetNetworkObject(_ngoDropItemBehaviour);
+                RelayManager.NgoRPCCaller.Spawn_Loot_ItemRpc(itemStruct, Owner.transform.position, addLootItemBehaviour: dropItemBehaviour);
+            }
+        }
         public override void OnEnd()
         {
             base.OnEnd();
@@ -126,7 +129,7 @@ namespace BehaviourTreeNode.BossGolem.Task
                 _timeRandom.Clear();
                 _timeRandom = null;
             }
-            RelayManager.DeSpawn_NetWorkOBJ(_ngoDropItemBehaviour);
+            _resourcesServices.DestroyObject(_ngoDropItemBehaviour);
         }
     }
 }

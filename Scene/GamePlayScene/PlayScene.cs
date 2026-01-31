@@ -1,17 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using CustomEditor.Multiplay;
-using GameManagers;
-using NetWork;
-using NetWork.NGO;
+using Cysharp.Threading.Tasks;
 using Scene.CommonInstaller;
 using Scene.CommonInstaller.Interfaces;
-using Sirenix.OdinInspector;
 using UI.Scene.SceneUI;
-using Unity.Netcode;
 using UnityEngine;
 using Util;
 using Zenject;
@@ -34,6 +25,7 @@ namespace Scene.GamePlayScene
             _sceneConnectOnline = sceneConnectOnline;
             _gameplaySceneStarter = gameplaySceneStarter;
             _sceneMover = sceneMover;
+            
         }
 
         public ISceneMover SceneMover => _sceneMover;
@@ -46,10 +38,10 @@ namespace Scene.GamePlayScene
         protected override void StartInit()
         {
             base.StartInit();
-            _ = StartInitAsync();
+            StartInitAsync().Forget();
         }
 
-        private async Task StartInitAsync()
+        private async UniTaskVoid StartInitAsync()
         {
             await _sceneConnectOnline.SceneConnectOnlineStart();
             try

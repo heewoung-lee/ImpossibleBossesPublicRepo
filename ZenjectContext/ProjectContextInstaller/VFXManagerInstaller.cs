@@ -1,7 +1,4 @@
 using GameManagers;
-using GameManagers.Interface.VFXManager;
-using GameManagers.Interface.VFXManager.Implementation;
-using UnityEngine;
 using Zenject;
 
 namespace ZenjectContext.ProjectContextInstaller
@@ -11,8 +8,7 @@ namespace ZenjectContext.ProjectContextInstaller
 
         public override void InstallBindings()
         {
-            Container.Bind<IVFXManagerServices>().To<VFXManager>().AsSingle();
-            Container.BindInterfacesTo<ParticleGenerator>().AsSingle();
+            Container.BindInterfacesTo<VFXManager>().AsSingle();
         }
     }
     

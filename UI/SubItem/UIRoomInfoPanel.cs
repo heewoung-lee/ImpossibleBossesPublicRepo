@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.UIManager;
+using GameManagers.Scene;
 using TMPro;
 using UI.Popup.PopupUI;
 using Unity.Services.Lobbies;
@@ -15,9 +15,21 @@ namespace UI.SubItem
 {
     public class UIRoomInfoPanel : UIBase
     {
-        [Inject]public IUIManagerServices UIManagerServices { get; }
-        [Inject] private LobbyManager _lobbyManager;
-        [Inject] SceneManagerEx _sceneManagerEx;
+        private IUIManagerServices _uIManagerServices;
+        private LobbyManager _lobbyManager;
+        private SceneManagerEx _sceneManagerEx;
+        public IUIManagerServices UIManagerServices => _uIManagerServices;
+        
+        [Inject]
+        public void Construct(LobbyManager lobbyManager, SceneManagerEx sceneManagerEx, IUIManagerServices uIManagerServices)
+        {
+            _lobbyManager = lobbyManager;
+            _sceneManagerEx = sceneManagerEx;
+            _uIManagerServices = uIManagerServices;
+        }
+        
+        
+        
         enum Texts
         {
             RoomNameText,
@@ -32,6 +44,9 @@ namespace UI.SubItem
         private Button _joinButton;
 
         private Lobby _lobbyRegisteredPanel;
+
+
+
         public Lobby LobbyRegisteredPanel => _lobbyRegisteredPanel;
         protected override void AwakeInit()
         {
@@ -40,10 +55,10 @@ namespace UI.SubItem
             _roomNameText = Get<TMP_Text>((int)Texts.RoomNameText);
             _currentPlayerCount = Get<TMP_Text>((int)Texts.CurrentCount);
             _joinButton = Get<Button>((int)Buttons.JoinButton);
-            _joinButton.onClick.AddListener(async ()=>await AddJoinEvent());
             _joinButton.onClick.AddListener(() =>
             {
                 _joinButton.interactable = false;
+                AddJoinEvent().Forget();
             });
         }
 
@@ -63,7 +78,7 @@ namespace UI.SubItem
         }
 
 
-        public async Task AddJoinEvent()
+        public async UniTaskVoid AddJoinEvent()
         {
             if (_lobbyRegisteredPanel.HasPassword)
             {
@@ -98,7 +113,6 @@ namespace UI.SubItem
                     }
                     _joinButton.interactable = true;
                     _lobbyManager.TriggerLobbyLoadingEvent(false);
-                    return;
                 }
             }
         }

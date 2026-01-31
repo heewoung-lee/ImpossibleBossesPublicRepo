@@ -1,23 +1,12 @@
 using System.Collections;
-using GameManagers;
-using GameManagers.Interface.ResourcesManager;
 using TMPro;
 using UnityEngine;
-using Zenject;
 
 namespace UI.WorldSpace
 {
     public class UIDamageText : UIBase
     {
-
-
         TMP_Text _damageText;
-
-        public TMP_Text DamageText
-        {
-            get => _damageText;
-            set => _damageText = value;
-        }
 
         Color _originalColor;
         Vector3 _originalTransform;
@@ -27,20 +16,29 @@ namespace UI.WorldSpace
             DamageText
         }
 
-        public void OnEnable()
+        protected override void StartInit()
         {
-            if (_damageText == null)
-            {
-                Bind<TMP_Text>(typeof(DamegeText));
-                _damageText = GetText((int)DamegeText.DamageText);
-                _originalColor = _damageText.color;
-                _originalTransform = transform.position;
-            }
+        }
 
+        protected override void AwakeInit()
+        {
+            Bind<TMP_Text>(typeof(DamegeText));
+            _damageText = GetText((int)DamegeText.DamageText);
+            _originalColor = _damageText.color;
+            _originalTransform = transform.position;
+        }
+
+        protected override void ZenjectEnable()
+        {
+            base.ZenjectEnable();
+        }
+
+        private void OnEnable()
+        {
             StartCoroutine(DisplayDamage());
         }
 
-        public void OnDisable()
+        private void OnDisable()
         {
             _damageText.color = _originalColor;
             transform.position = _originalTransform;
@@ -84,14 +82,6 @@ namespace UI.WorldSpace
         public void LateUpdate()
         {
             transform.rotation = Camera.main.transform.rotation;
-        }
-
-        protected override void StartInit()
-        {
-        }
-
-        protected override void AwakeInit()
-        {
         }
     }
 }

@@ -1,11 +1,8 @@
+using CoreScripts;
 using GameManagers;
-using GameManagers.Interface;
 using GameManagers.Interface.GameManagerEx;
 using GameManagers.Interface.InputManager;
-using GameManagers.Interface.SceneUIManager;
-using GameManagers.Interface.UIFactoryManager.SceneUI;
-using GameManagers.Interface.UIFactoryManager.UIController;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIFactory.UIController;
 using UI.Popup.PopupUI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,7 +11,7 @@ using Zenject;
 
 namespace Module.UI_Module
 {
-    public class UIPlayerInventoryController : MonoBehaviour
+    public class UIPlayerInventoryController : ZenjectMonoBehaviour
     {
         public class UIPlayerInventoryControllerFactory : SceneComponentFactory<UIPlayerInventoryController> { }
         
@@ -23,7 +20,15 @@ namespace Module.UI_Module
         [Inject] private IUIManagerServices _uiManager;
         [Inject] private IInputAsset _inputManager;
         [Inject] private IPlayerSpawnManager _gameManagerEx;
-        private void Awake()
+        protected override void ZenjectEnable()
+        {
+            _switchInventoryUI.performed += SwitchInventory;
+        }
+        protected override void ZenjectDisable()
+        {
+            _switchInventoryUI.performed -= SwitchInventory;
+        }
+        protected override void InitAfterInject()
         {
             _switchInventoryUI = _inputManager.GetInputAction(Define.ControllerType.UI, "Show_UI_Inventory");
             _switchInventoryUI.Enable();
@@ -41,19 +46,10 @@ namespace Module.UI_Module
             }
         }
 
-        private void OnEnable()
-        {
-            _switchInventoryUI.performed += SwitchInventory;
-        }
-
-        private void OnDisable()
-        {
-            _switchInventoryUI.performed -= SwitchInventory;
-        }
-
         public void SwitchInventory(InputAction.CallbackContext context)
         {
             _uiManager.SwitchPopUpUI(_inventoryUI);
         }
+
     }
 }

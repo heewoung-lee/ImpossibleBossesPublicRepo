@@ -4,29 +4,29 @@ using UnityEngine;
 
 namespace Buffer.Buffer_Type.DurationBuffer
 {
-    public class BufferMaxHpModifier : DurationBuff
+    public class BufferMaxHpModifier 
     {
 
         private Sprite _iconImage = null;
 
-        public override Sprite BuffIconImage => _iconImage;
+        public Sprite BuffIconImage => _iconImage;
 
-        public override string Buffname => "최대체력증가";
+        public string Buffname => "최대체력증가";
 
-        public override StatType StatType => StatType.MaxHP;
+        public StatType StatType => StatType.MaxHP;
 
 
-        public override void RemoveStats(BaseStats stats, float value)
+        public void RemoveStats(BaseStats stats, float value)
         {
             stats.Plus_MaxHp_Abillity(-(int)value);
         }
 
-        public override void ApplyStats(BaseStats stats, float value)
+        public void ApplyStats(BaseStats stats, float value)
         {
             stats.Plus_MaxHp_Abillity((int)value);
         }
 
-        public override void SetBuffIconImage(Sprite buffImageIcon)
+        public void SetBuffIconImage(Sprite buffImageIcon)
         {
             _iconImage = buffImageIcon;
         }

@@ -1,4 +1,5 @@
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using NetWork.NGO;
 using Unity.Netcode;
 using UnityEngine;
@@ -11,12 +12,13 @@ namespace NPC.Dummy
     {
         public class DummyFactory : NgoZenjectFactory<Dummy>
         {
-            public DummyFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public DummyFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NPC/DamageTestDummy");
             }
         }
+
     }
 }

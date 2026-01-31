@@ -3,6 +3,8 @@ using BehaviourTreeNode.BossGolem.Task;
 using Data.DataType.ItemType.Interface;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using NetWork.NGO;
 using Unity.Netcode;
 using UnityEngine;
@@ -15,9 +17,9 @@ namespace NetWork.Boss_NGO
     {
         public class DropItemBehaviourFactory : NgoZenjectFactory<DropItemBehaviour>
         {
-            public DropItemBehaviourFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public DropItemBehaviourFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NGO_BossDropItemBehaviour");
             }
@@ -29,7 +31,6 @@ namespace NetWork.Boss_NGO
         }
         
         private RelayManager _relayManager;
-        
         
         private readonly float _maxHeight = 3f;
         private readonly float _circleRange = 30f;

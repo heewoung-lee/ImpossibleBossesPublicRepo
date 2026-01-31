@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using NUnit.Framework;
 using Scene.CommonInstaller;
 using UI.Scene.Interface;
@@ -32,7 +34,7 @@ namespace NetWork.NGO
 
         public class NgoRPCSpawnerFactory : NgoZenjectFactory<NgoRPCSpawnController>
         {
-            public NgoRPCSpawnerFactory(DiContainer container, IFactoryRegister registerableFactory, NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(container, registerableFactory, handlerFactory, loadService)
+            public NgoRPCSpawnerFactory(DiContainer container, IFactoryManager factoryManager, NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(container, factoryManager, handlerFactory, loadService)
             {
             _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NgoRPCSpawnController");
             }
@@ -52,7 +54,6 @@ namespace NetWork.NGO
 
             if (IsServer)
             {
-                Debug.Log("열림");
                 _relayManager.NetworkManagerEx.CustomMessagingManager.RegisterNamedMessageHandler("ClientReady",
                     SendClientReady);
             }

@@ -1,6 +1,7 @@
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.VFXManager;
+using GameManagers.ResourcesEx;
 using NetWork.BaseNGO;
 using Unity.Netcode;
 using UnityEngine;
@@ -22,9 +23,9 @@ namespace NetWork.NGO.InitializeNGO
         
         public class VFXRootNgoFactory : NgoZenjectFactory<NgoVFXInitialize>
         {
-            public VFXRootNgoFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public VFXRootNgoFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/VFXRootNGO");
             }

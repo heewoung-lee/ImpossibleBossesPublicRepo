@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Data.DataType.ItemType.Interface;
 using Data.Item;
 using Data.Item.EquipSlot;
+using DataType.Item;
 using GameManagers;
-using GameManagers.Interface;
 using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ItemDataManager;
-using GameManagers.Interface.UIManager;
+using GameManagers.ItamDataManager.Interface;
+using GameManagers.RelayManager;
 using UI.Popup.PopupUI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,44 +18,40 @@ namespace UI.SubItem
 {
     public abstract class UIItemComponentInventory : UIItemComponent
     {
-        [Inject] private IUIManagerServices _uiManagerServices;
-        [Inject] private IItemGradeBorder _itemGradeBorderManager;
-        [Inject] IPlayerSpawnManager _gameManagerEx;
-        [Inject] private RelayManager _relayManager;
-        
+        [Inject] protected IUIManagerServices _uiManagerServices;
+        [Inject] protected IItemGradeBorder _itemGradeBorderManager;
+        [Inject] protected IPlayerSpawnManager _gameManagerEx;
+        [Inject] protected RelayManager _relayManager;
+
         public enum Images
         {
             BackGroundImage,
-            ItemIconSourceImage,
+            ItemIconSourceImage, // 프리팹의 이미지 이름과 정확히 같아야 함
             ItemGradeBorder
         }
-        private bool _isEquipped = false;
-        private Action _onAfterStart;
 
+        protected Image _backGroundImage;
+        protected Image _itemGradeBorder;
         protected RectTransform _itemRectTr;
+
         protected Transform _contentofInventoryTr;
         protected UIPlayerInventory _inventoryUI;
         protected EquipSlotTrInfo _equipSlot;
-        protected Image _backGroundImage;
-        protected Image _itemGradeBorder;
+
         protected GraphicRaycaster _uiRaycaster;
         protected EventSystem _eventSystem;
-        
+
+        private bool _isEquipped = false;
+        private Action _onAfterStart;
 
         public event Action OnAfterStart
         {
-            add
-            {
-                UniqueEventRegister.AddSingleEvent(ref _onAfterStart, value);
-            }
-            remove
-            {
-                UniqueEventRegister.RemovedEvent(ref _onAfterStart, value);
-            }
+            add { UniqueEventRegister.AddSingleEvent(ref _onAfterStart, value); }
+            remove { UniqueEventRegister.RemovedEvent(ref _onAfterStart, value); }
         }
+
         public bool IsEquipped => _isEquipped;
         public override RectTransform ItemRectTr => _itemRectTr;
-        public abstract GameObject GetLootingItemObejct(IItem iteminfo);
 
         protected override void AwakeInit()
         {
@@ -73,47 +68,61 @@ namespace UI.SubItem
 
             _inventoryUI = _uiManagerServices.GetImportant_Popup_UI<UIPlayerInventory>();
 
-            _equipSlot = _inventoryUI.gameObject.FindChild<EquipSlotTrInfo>("Left_Panel", true);
-            _contentofInventoryTr = _inventoryUI.GetComponentInChildren<InventoryContentCoordinate>().transform;
+            if (_inventoryUI != null)
+            {
+                var contentCoord = _inventoryUI.GetComponentInChildren<InventoryContentCoordinate>(true);
+                if (contentCoord != null)
+                    _contentofInventoryTr = contentCoord.transform;
 
-            _uiRaycaster = _inventoryUI.UIInventoryRayCaster;
-            _eventSystem = _inventoryUI.EventSystem;
+                _equipSlot = _inventoryUI.GetComponentInChildren<EquipSlotTrInfo>(true);
 
-            _itemGradeBorder.sprite = _itemGradeBorderManager.GetGradeBorder(_itemGrade);
-
+                _uiRaycaster = _inventoryUI.UIInventoryRayCaster;
+                _eventSystem = _inventoryUI.EventSystem;
+            }
 
             _onAfterStart?.Invoke();
             _onAfterStart = null;
-
         }
 
-        public void SetItemEquipedState(bool isEquiped)
+        public override void InitializeItem(ItemDataSO data)
         {
-            _isEquipped = isEquiped;
+            // 1. 부모 호출 -> UIItemComponent.InitializeItem 실행
+            // 부모 쪽에서 _itemIconSourceImage.sprite = data.icon 을 수행함 (이제 변수가 연결돼서 보임!)
+            base.InitializeItem(data);
+
+            if (data == null) return;
+
+            // 2. 인벤토리 전용 로직 (등급 테두리)
+            if (_itemGradeBorder != null && _itemGradeBorderManager != null)
+            {
+                _itemGradeBorder.sprite = _itemGradeBorderManager.GetGradeBorder(data.itemGrade);
+                _itemGradeBorder.enabled = true;
+            }
+            SetItemEquipedState(false);
         }
-        public sealed override void GetDragEnd(PointerEventData eventData)//다른 자식클래스들이 GetDragEnd를 직접적으로 상속받지못하게 막고 대신 DropItemOnUI 메서드를 상속받아 구현하도록
-        {//아이템 드랍 구현
+
+        public sealed override void GetDragEnd(PointerEventData eventData)
+        {
             if (_isDragging)
             {
                 DropItem(eventData);
                 RevertImage();
+                _isDragging = false;
             }
         }
 
-
         private void DropItem(PointerEventData eventData)
         {
-            if (IsPointerOverUI(eventData, out List<RaycastResult> uiraycastResult))//UI쪽에 닿으면 자식클래스에서 구현해 놓은 메서드를 호출하고 종료.
+            if (IsPointerOverUI(eventData, out List<RaycastResult> uiraycastResult))
             {
-                DropItemOnUI(eventData, uiraycastResult); // 자식 클래스의 구현 호출
+                DropItemOnUI(eventData, uiraycastResult);
                 return;
             }
+
             DropItemOnGround();
         }
 
         protected abstract void DropItemOnUI(PointerEventData eventData, List<RaycastResult> uiraycastResult);
-
-
         protected abstract void RemoveItemFromInventory();
 
         private bool IsPointerOverUI(PointerEventData eventData, out List<RaycastResult> uiraycastResult)
@@ -127,26 +136,30 @@ namespace UI.SubItem
         protected virtual void DropItemOnGround()
         {
             RemoveItemFromInventory();
-            IteminfoStruct itemStruct = new IteminfoStruct(_iteminfo);
-            _relayManager.NgoRPCCaller.Spawn_Loot_ItemRpc(itemStruct,_gameManagerEx.GetPlayer().transform.position);
+            if (_relayManager != null && _itemData != null)
+            {
+                IteminfoStruct itemStruct = new IteminfoStruct(_itemData.itemNumber);
+                Vector3 dropPos = _gameManagerEx.GetPlayer().transform.position;
+                _relayManager.NgoRPCCaller.Spawn_Loot_ItemRpc(itemStruct, dropPos);
+            }
         }
+
+        public void SetItemEquipedState(bool isEquiped) => _isEquipped = isEquiped;
 
         protected void AttachItemToSlot(GameObject go, Transform slot)
         {
             go.transform.SetParent(slot);
-            go.GetComponent<RectTransform>().anchorMin = Vector2.zero; // 좌측 하단 (0, 0)
-            go.GetComponent<RectTransform>().anchorMax = Vector2.one;  // 우측 상단 (1, 1)
-            go.GetComponent<RectTransform>().offsetMin = Vector2.zero; // 오프셋 제거
-            go.GetComponent<RectTransform>().offsetMax = Vector2.zero; // 오프셋 제거
+
+            var rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
 
             if (slot.GetComponent<InventoryContentCoordinate>() != null)
-            {
-                _isEquipped = false;
-            }
+                SetItemEquipedState(false);
             else
-            {
-                _isEquipped = true;
-            }
+                SetItemEquipedState(true);
         }
     }
 }

@@ -1,14 +1,21 @@
+using System;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.Pool;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using NetWork.NGO.UI;
 using Scene.BattleScene.Spawner;
 using Scene.CommonInstaller;
 using Scene.GamePlayScene;
 using Scene.GamePlayScene.Spawner;
 using UI.Scene.SceneUI;
+using Unity.Netcode;
 using UnityEngine;
 using Util;
 using Zenject;
+using ZenjectContext.ProjectContextInstaller;
+using Object = UnityEngine.Object;
 
 namespace Scene.BattleScene
 {
@@ -19,14 +26,15 @@ namespace Scene.BattleScene
         private readonly IResourcesServices _resourceService;
         private readonly NgoPoolManager _poolManager;
         private readonly ISceneSelectCharacter _sceneSelectedCharacter;
-     
+        private readonly SignalBus _signalBus;
         
         [Inject]
         public MockUnitNetworkBattleScene(
             RelayManager relayManager,
             IUIManagerServices uiManagerServices,
             IResourcesServices resourceService,
-            NgoPoolManager poolManager)
+            NgoPoolManager poolManager,
+            SignalBus signalBus)
         {
             _relayManager = relayManager;
             _uiManagerServices = uiManagerServices;
@@ -34,6 +42,7 @@ namespace Scene.BattleScene
             _poolManager = poolManager;
             _sceneSelectedCharacter =  Object.FindAnyObjectByType<BaseScene>()
                 .GetComponent<ISceneSelectCharacter>();
+            _signalBus = signalBus;
         }
         private NgoBattleSceneSpawn _ngoGamePlaySceneSpawn;
         public Define.PlayerClass GetPlayableCharacter => _sceneSelectedCharacter.GetPlayerableCharacter();
@@ -41,49 +50,48 @@ namespace Scene.BattleScene
         public void Init()
         {
             Debug.Assert(_sceneSelectedCharacter != null, "sceneSelectedCharacter is null");
-            _relayManager.NetworkManagerEx.OnClientConnectedCallback -= ConnectClient;
-            _relayManager.NetworkManagerEx.OnClientConnectedCallback += ConnectClient;
-    
-            if (_relayManager.NetworkManagerEx is not null)
+            RegisterMyCharacter();
+            LoadGamePlayScene();
+            
+            void RegisterMyCharacter()
             {
-                ulong networkID = _relayManager.NetworkManagerEx.LocalClientId;
-                _relayManager.RegisterSelectedCharacter(networkID, GetPlayableCharacter);
-
-                //TODO: 테스트 도중에 RPCCALL가 없는 경우가 있었음. 이부분. 나중에 제거할지 말지 결정할것
-                if (_relayManager.NgoRPCCaller == null)
+                if (_relayManager.NetworkManagerEx.IsConnectedClient == true) //네트워크를 확인했을때 내가 네트워크에 할당되었는지 확인.
                 {
-                    _relayManager.SpawnRpcCallerEvent += () =>
-                    {
-                        _relayManager.NgoRPCCaller.GetPlayerChoiceCharacterRpc(networkID);
-                    };
+                    ulong networkID = _relayManager.NetworkManagerEx.LocalClientId;
+                    RegisterAndSpawnPlayer(networkID);
                 }
                 else
                 {
-                    _relayManager.NgoRPCCaller.GetPlayerChoiceCharacterRpc(networkID);
+                    _relayManager.NetworkManagerEx.OnClientConnectedCallback -= ConnectClient;
+                    _relayManager.NetworkManagerEx.OnClientConnectedCallback += ConnectClient;
                 }
-                LoadScene();
             }
         }
         private void ConnectClient(ulong clientID)
         {
             if (_relayManager.NgoRPCCaller == null)
             {
-                _relayManager.SpawnRpcCallerEvent += SpawnPlayer;
+                Action<RpcCallerReadySignal> onSignal = null;
+
+                onSignal = (signal) =>
+                {
+                    _signalBus.Unsubscribe<RpcCallerReadySignal>(onSignal);
+                    RegisterAndSpawnPlayer(clientID);
+                };
+                _signalBus.Subscribe<RpcCallerReadySignal>(onSignal);
             }
             else
             {
-                SpawnPlayer();
-            }
-            void SpawnPlayer()
-            {
-                if (_relayManager.NetworkManagerEx.LocalClientId != clientID)
-                    return;
-                _relayManager.RegisterSelectedCharacter(clientID, GetPlayableCharacter);
-                _relayManager.NgoRPCCaller.GetPlayerChoiceCharacterRpc(clientID);
-                LoadScene();
+                RegisterAndSpawnPlayer(clientID);
             }
         }
-        private void LoadScene()
+
+        private void RegisterAndSpawnPlayer(ulong clientID)
+        {
+            _relayManager.RegisterSelectedCharacter(clientID, GetPlayableCharacter); 
+            _relayManager.NgoRPCCaller.GetPlayerChoiceCharacterRpc(clientID);
+        }
+        private void LoadGamePlayScene()
         {
             _uiManagerServices.GetOrCreateSceneUI<UILoading>().gameObject.SetActive(false);
         }

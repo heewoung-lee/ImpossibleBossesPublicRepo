@@ -6,6 +6,6 @@ namespace NetWork.NGO.Interface
 {
     public interface ISpawnBehavior
     {
-        public void SpawnObjectToLocal(in SpawnParamBase param,string runtimePath = null);
+        public void SpawnObjectToLocal(in NetworkParams param,string runtimePath = null);
     }
 }

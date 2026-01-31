@@ -2,10 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Controller;
+using CoreScripts;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.SceneUIManager;
 using GameManagers.Interface.UIManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
+using GameManagers.Scene;
+using GameManagers.UIFactory.SceneUI;
 using NetWork;
 using Scene.CommonInstaller;
 using Scene.CommonInstaller.Interfaces;
@@ -37,7 +42,7 @@ namespace Scene
     }
 
     
-    public abstract class BaseScene : MonoBehaviour,IInitializable,IDisposable
+    public abstract class BaseScene : ZenjectMonoBehaviour,IDisposable
     {
         private IResourcesServices _resourcesServices;
         private IEnumerable<ISceneUI> _sceneUIs;
@@ -46,9 +51,10 @@ namespace Scene
         private RelayManager _relayManager;
         private Action _onZenjectInitializeAfterEvent;
 
-        private bool _checkDoneZenjectInitilaize = false;
-        public bool CheckDoneZenjectInitialize => _checkDoneZenjectInitilaize;
-        public event Action OnZenjctInitializeAfterEvent
+        private bool _checkDoneZenjectInitialize = false;
+        private bool _isExitProcessDone = false;
+        public bool CheckDoneZenjectInitialize => _checkDoneZenjectInitialize;
+        public event Action OnZenjectInitializeAfterEvent
         {
             add=> UniqueEventRegister.AddSingleEvent(ref _onZenjectInitializeAfterEvent,value);
             remove => UniqueEventRegister.AddSingleEvent(ref _onZenjectInitializeAfterEvent,value);
@@ -85,7 +91,6 @@ namespace Scene
         {
             StartInit();
             CallSceneUIs();
-            _sceneManagerEx.SetBootMode(true);
         }
 
         private void Awake()
@@ -106,33 +111,67 @@ namespace Scene
             {
                 _resourcesServices.InstantiateByKey("Prefabs/UI/EventSystem").name = "@EventSystem";
             }
-            _checkDoneZenjectInitilaize = true;
+            _checkDoneZenjectInitialize = true;
             _onZenjectInitializeAfterEvent?.Invoke();
             _onZenjectInitializeAfterEvent = null;
+            Application.wantsToQuit += OnWantsToQuit;
         }
 
         protected virtual void AwakeInit()  {}
-        public virtual void Clear() {}
         
-        public async void OnApplicationQuit()
+        
+        
+        
+        private bool OnWantsToQuit()
         {
-            Assert.IsNotNull(_socketEventManager,"socketEventManager is null");
-            if (_socketEventManager == null) return;
-            try
+            // 1. 이미 정리가 끝났다면 종료 허용 (true 반환)
+            if (_isExitProcessDone)
             {
-                await _socketEventManager.InvokeDisconnectRelayEvent();
-                await _socketEventManager.InvokeLogoutVivoxEvent();
-                await _socketEventManager.InvokeLogoutAllLeaveLobbyEvent();
+                return true;
             }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-            //순서대로 끊어야 함
-            
+
+            // 2. 정리가 안 됐다면 종료를 막고(false 반환), 비동기 정리 시작
+            ExitSequence().Forget();
+            return false;
         }
-        public void Initialize()
+        
+        private async UniTaskVoid ExitSequence()
         {
+            Assert.IsNotNull(_socketEventManager, "socketEventManager is null");
+            
+            if (_socketEventManager != null)
+            {
+                try
+                {
+                    var cleanupTask = UniTask.Create(async () =>
+                    {
+                        await _socketEventManager.InvokeDisconnectRelayEvent();
+                        await _socketEventManager.InvokeLogoutVivoxEvent();
+                        await _socketEventManager.InvokeLogoutAllLeaveLobbyEvent();
+                    });
+                    await cleanupTask.TimeoutWithoutException(TimeSpan.FromSeconds(3f));
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+
+            _isExitProcessDone = true;
+            Debug.Log("Safe Exit Completed. Quitting application.");
+            
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
+            Debug.Log($"Initializing scene + {SceneManagerEx.IsCurrentBootNormal}");
+            
             Debug.Log($"{gameObject.name}씬초기화 완료");
             if (_relayManager.NetworkManagerEx.IsConnectedClient == false)
             {
@@ -143,11 +182,11 @@ namespace Scene
                 ReadySender.SendClientReady(_relayManager.NetworkManagerEx.LocalClientId);
             }
         }
-
         public void Dispose()
         {
             if (_relayManager.NetworkManagerEx.IsConnectedClient == true)
             {
+                Application.wantsToQuit -= OnWantsToQuit;
                 _relayManager.NetworkManagerEx.OnClientConnectedCallback -= ReadySender.SendClientReady;
             }
         }

@@ -20,7 +20,7 @@ namespace Controller
         private InputAction _mouseDelta;
         private InputAction _mouseScroll;
         [Inject] private IInputAsset _inputManager;
-        [Inject] IPlayerSpawnManager _gameManagerEx;
+        [Inject] private IPlayerSpawnManager _gameManagerEx;
 
         private bool _mouseMiddleButtonPressed = false;
         private void Awake()

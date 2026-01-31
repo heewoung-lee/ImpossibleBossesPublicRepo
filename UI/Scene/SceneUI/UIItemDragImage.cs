@@ -1,5 +1,4 @@
-using GameManagers.Interface.SceneUIManager;
-using GameManagers.Interface.UIFactoryManager.SceneUI;
+using GameManagers.UIFactory.SceneUI;
 using UnityEngine;
 using UnityEngine.UI;
 using Util;
@@ -24,8 +23,10 @@ namespace UI.Scene.SceneUI
                 return _itemDragImage.IsActive();
             }
         }
-        void Awake()
+
+        protected override void AwakeInit()
         {
+            base.AwakeInit();
             Bind<Image>(typeof(Images));
 
             _itemDragImage = Get<Image>((int)Images.ItemDragImage);

@@ -1,13 +1,15 @@
-using GameManagers;
+using GameManagers.Scene;
 using Zenject;
 
-namespace ProjectContextInstaller
+namespace ZenjectContext.ProjectContextInstaller
 {
     public class SceneDataSaveAndLoaderInstaller : MonoInstaller
     {
         public override void InstallBindings()
         {
             Container.BindInterfacesAndSelfTo<SceneDataSaveAndLoader>().AsSingle();
+            
+            
         }
     }
 }

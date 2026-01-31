@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using GameManagers;
 using GameManagers.Interface.NGOPoolManager;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.Pool;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using NetWork.BaseNGO;
-using NetWork.NGO.InitializeNGO;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -17,16 +19,15 @@ namespace NetWork.NGO
     {
         public class NetworkObjectPoolFactory : NgoZenjectFactory<NetworkObjectPool>
         {
-            public NetworkObjectPoolFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public NetworkObjectPoolFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NGO_Pooling");
             }
         }
 
         private IResourcesServices _resourcesServices;
-        private INgoPoolRegister _ngoPoolRegister;
         private INetworkObjectGetter _networkObjectGetter;
         private RelayManager _relayManager;
         private NgoPoolManager _poolManager;
@@ -34,7 +35,6 @@ namespace NetWork.NGO
         [Inject]
         public void Construct(
             IResourcesServices resourcesServices, 
-            INgoPoolRegister ngoPoolRegister,
             INetworkObjectGetter networkObjectGetter,
             RelayManager relayManager, 
             NgoPoolManager poolManager)
@@ -42,7 +42,6 @@ namespace NetWork.NGO
             _resourcesServices = resourcesServices;
             _relayManager = relayManager;
             _poolManager = poolManager;
-            _ngoPoolRegister = ngoPoolRegister;
             _networkObjectGetter = networkObjectGetter;
             
             m_PooledObjects = new Dictionary<string, ObjectPool<NetworkObject>>();
@@ -74,7 +73,6 @@ namespace NetWork.NGO
             if (_relayManager.NetworkManagerEx.IsHost == false)
                 return;
 
-            _ngoPoolRegister.ResisterPoolObj();
             gameObject.RemoveCloneText();
         }
 
@@ -82,6 +80,11 @@ namespace NetWork.NGO
         {
           return _networkObjectGetter.GetNetworkObject(prefabPath, position, rotation);
         }
+        public NetworkObject GetNetworkObject(string prefabPath)
+        {
+            return _networkObjectGetter.GetNetworkObject(prefabPath);
+        }
+        
 
         public void ReturnNetworkObject(NetworkObject networkObject)
         {
@@ -107,6 +110,11 @@ namespace NetWork.NGO
                 return;
             }
             m_PooledObjects[prefabPath] = new ObjectPool<NetworkObject>(CreateFunc, ActionOnGet, ActionOnRelease, ActionOnDestroy, defaultCapacity: prewarmCount);
+            
+            
+            _relayManager.NetworkManagerEx.PrefabHandler.RemoveHandler(prefab);
+            PooledPrefabInstanceHandler handler = new PooledPrefabInstanceHandler(this, prefabPath);
+            _relayManager.NetworkManagerEx.PrefabHandler.AddHandler(prefab, handler);
 
             var prewarmNetworkObjects = new List<NetworkObject>();
             for (var i = 0; i < prewarmCount; i++)
@@ -117,16 +125,11 @@ namespace NetWork.NGO
             {
                 m_PooledObjects[prefabPath].Release(networkObject);
             }
-
-            PooledPrefabInstanceHandler handler = new PooledPrefabInstanceHandler(this, prefabPath);
-
-            _relayManager.NetworkManagerEx.PrefabHandler.AddHandler(prefab, handler);
-
             NetworkObject CreateFunc()
             {
                 NetworkObject ngo = _resourcesServices.InstantiatePrefab(prefab, _poolManager.PoolNgoRootDict[prefabPath]).RemoveCloneText().GetComponent<NetworkObject>();
                 
-                 _relayManager.NetworkManagerEx.PrefabHandler.RemoveHandler(ngo);
+                 //_relayManager.NetworkManagerEx.PrefabHandler.RemoveHandler(ngo);
                 //등록했던, NGO프리펩들이 가지고 있던 핸들러가 있기에 가지고 있는 핸들러를 없애고 풀용 핸들러를 장착해줘야함
                 //문제없는 이후는 처음에 핸들러로 인해 컨테이너를 주입해 줬기때문에 문제없음
                 return ngo;
@@ -147,7 +150,10 @@ namespace NetWork.NGO
                 Destroy(networkObject.gameObject);
             }
         }
+        
     }
+    
+    
     public class PooledPrefabInstanceHandler : INetworkPrefabInstanceHandler
     {
         private readonly NetworkObjectPool m_NetworkObjectPool;

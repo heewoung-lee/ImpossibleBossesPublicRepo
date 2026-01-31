@@ -1,159 +1,165 @@
 using System;
-using System.Collections.Generic;
-using Data.DataType.ItemType;
-using Data.DataType.ItemType.Interface;
+using Controller;
 using Data.Item;
-using GameManagers;
-using GameManagers.Interface;
+using DataType.Item; // ItemDataSO
+using DataType.Item.Equipment;
+using DataType.Skill.Factory;
+using DataType.Skill.Factory.Effect;
+using DataType.Strategies; // EquipmentSlotType
+using GameManagers; // SceneDataSaveAndLoader
 using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ItemDataManager;
-using GameManagers.Interface.UIManager;
+using GameManagers.Interface.ResourcesManager;
+using GameManagers.ItamData.Interface;
+using GameManagers.Scene;
+using GameManagers.UIFactory.SubItemUI;
+using Skill;
 using Stats.BaseStats;
 using UI.Popup.PopupUI;
 using UnityEngine;
-using Util;
 using Zenject;
 
 namespace UI.SubItem
 {
-    public class EquipMentSlot : MonoBehaviour, IItemUnEquip
+    public class EquipMentSlot : MonoBehaviour
     {
         public EquipmentSlotType slotType;
+
+        private IUIManagerServices _uiManagerServices;
+        private IItemDataManager _itemDataManager;
+        private IPlayerSpawnManager _gameManagerEx;
+        private SceneDataSaveAndLoader _sceneDataSaveAndLoader;
+        private IUIItemFactory _uiItemFactory;
+        private IStrategyFactory _strategyFactory;
         
-        [Inject] private IUIManagerServices _uiManagerServices;
-        [Inject] private IItemGetter _itemGetter;
-        [Inject] private IPlayerSpawnManager _gameManagerEx;
-        [Inject] private SceneDataSaveAndLoader _sceneDataSaveAndLoader;
+        [Inject]
+        public void Construct(IUIManagerServices uiManagerServices, IItemDataManager itemDataManager,  
+            IPlayerSpawnManager gameManagerEx, SceneDataSaveAndLoader sceneDataSaveAndLoader, 
+            IUIItemFactory uiItemFactory,IStrategyFactory effectFactory)
+        {
+            _uiManagerServices = uiManagerServices;
+            _itemDataManager = itemDataManager;
+            _gameManagerEx = gameManagerEx;
+            _sceneDataSaveAndLoader = sceneDataSaveAndLoader;
+            _uiItemFactory = uiItemFactory;
+            _strategyFactory = effectFactory;
+        }
         
         private UIPlayerInventory _uiPlayerInventory;
         private Transform _contentofInventoryTr;
         private BaseStats _playerStats;
         private UIItemComponentInventory _equipedItem;
+
+        // 장비 UI 프리팹 경로 (UIPlayerInventory와 동일하게 맞춤)
+
         public BaseStats PlayerStats
         {
             get
             {
-                if(_playerStats == null)
+                if (_playerStats == null)
                 {
-                    if(_gameManagerEx.GetPlayer() != null && _gameManagerEx.GetPlayer().TryGetComponent(out BaseStats stats) == true)
+                    var player = _gameManagerEx.GetPlayer();
+                    if (player != null && player.TryGetComponent(out BaseStats stats))
                     {
                         _playerStats = stats;
                     }
                 }
+
                 return _playerStats;
             }
         }
-
-
-        private bool _isEquipped = false;
-        public bool IsEquipped
-        {
-            get => _isEquipped;
-            private set
-            {
-                _isEquipped = value;
-
-                if (_equipedItem == null)
-                    return;
-
-                ApplyItemEffects();
-            }
-        }
-
-
+        public bool IsEquipped { get; private set; } = false;
 
         private void OnDestroy()
         {
-            //TODO: 왜 디스트로이에 했냐, OnDisable로 하면 화면이 닫힐때 호출이 안되므로 디스트로이에 저장 로직 만듬
-
+            // 씬 이동 등으로 파괴될 때 데이터 저장
             SaveDataFromEquipment();
         }
+
         private void SaveDataFromEquipment()
         {
-            if (IsEquipped == true)
+            if (IsEquipped && _equipedItem != null)
             {
-                _sceneDataSaveAndLoader.SaveEquipMentData(new KeyValuePair<EquipmentSlotType, UIItemComponentInventory>(slotType, _equipedItem));
-                IsEquipped = false;//이전 아이템으로 능력치 빼기
+                _sceneDataSaveAndLoader.SaveEquipMentData(slotType, _equipedItem);
 
-                UIItemComponentInventory currentEquipItem = _equipedItem;
-                currentEquipItem.transform.SetParent(null);
-                currentEquipItem.SetItemEquipedState(false);//능력치 제거
-            } 
-        }
+                ProcessStrategy(_equipedItem.ItemNumber, false);
 
-        private void ApplyItemEffects()
-        {
-            List<StatEffect> itemEffects = _equipedItem.ItemEffects;
-
-            foreach (StatEffect effect in itemEffects)
-            {
-                StatType statType = effect.statType;
-                float statValue = effect.value;
-                UpdateStatsFromEquippedItem(statType, statValue, PlayerStats, IsEquipped);
+                IsEquipped = false;
+                _equipedItem.transform.SetParent(null);
+                _equipedItem.SetItemEquipedState(false);
             }
         }
-
-        private void UpdateStatsFromEquippedItem(StatType statType, float statValue, BaseStats stats, bool isEquipped)
-        {
-            int coefficient = isEquipped ? 1 : -1; //장비를 장착했으면 true, 빼면 false
-
-            switch (statType)
-            {
-                case StatType.MaxHP:
-                    stats.Plus_MaxHp_Abillity((int)statValue * coefficient);
-                    break;
-                case StatType.CurrentHp:
-                    stats.Plus_Current_Hp_Abillity((int)statValue * coefficient);
-                    break;
-                case StatType.Attack:
-                    stats.Plus_Attack_Ability((int)statValue * coefficient);
-                    break;
-                case StatType.Defence:
-                    stats.Plus_Defence_Abillity((int)statValue * coefficient);
-                    break;
-                case StatType.MoveSpeed:
-                    stats.Plus_MoveSpeed_Abillity(statValue * coefficient);
-                    break;
-            }
-        }
-
 
         void Start()
         {
             string slotTypeName = transform.gameObject.name.Replace("_Item_Slot", "");
             slotType = (EquipmentSlotType)Enum.Parse(typeof(EquipmentSlotType), slotTypeName);
-            _uiPlayerInventory = _uiManagerServices.GetImportant_Popup_UI<UIPlayerInventory>();
-            _contentofInventoryTr = _uiPlayerInventory.GetComponentInChildren<InventoryContentCoordinate>().transform;
 
-            if(_sceneDataSaveAndLoader.TryGetLoadEquipMentData(slotType,out IteminfoStruct iteminfo) == true)
+            _uiPlayerInventory = _uiManagerServices.GetImportant_Popup_UI<UIPlayerInventory>();
+            if (_uiPlayerInventory != null)
             {
-                IItem item = _itemGetter.GetItemByItemNumber(iteminfo.ItemNumber);
-                UIItemComponentEquipment equipItem = item.MakeInventoryItemComponent(_uiManagerServices) as UIItemComponentEquipment;
-                equipItem.SetINewteminfo(iteminfo);
-                equipItem.OnAfterStart += () => { equipItem.EquipItem(); };
-            
+                var contentCoord = _uiPlayerInventory.GetComponentInChildren<InventoryContentCoordinate>();
+                if (contentCoord != null) _contentofInventoryTr = contentCoord.transform;
             }
+
+            LoadSavedEquipment();
         }
 
+        private void LoadSavedEquipment()
+        {
+            if (_sceneDataSaveAndLoader.TryGetLoadEquipMentData(slotType, out IteminfoStruct iteminfo))
+            {
+                if (_itemDataManager.TryGetItemData(iteminfo.ItemNumber, out ItemDataSO data))
+                {
+                    UIItemComponentInventory equipItem = _uiItemFactory.CreateItemUI(data, null);
+                
+                    // 슬롯에 등록
+                    ItemEquip(equipItem);
+                    equipItem.SetItemEquipedState(true); 
+                    equipItem.transform.SetParent(transform,false);
+                    //false로 해놓은 이유는 현재 장비슬롯이 해당 장비의 부모가 될때,
+                    //프리펩 로컬 크기와 위치를 유지하며 슬롯에 맞게 들어가기 위함.
+                    //true로 해놓으면 아이템이 갖는 본래 월드좌표와 크기가 되니 오류가 생김.
+                }
+            }
+        }
 
         public void ItemEquip(UIItemComponentInventory itemComponent)
         {
-            if (IsEquipped)//이미 슬롯에 아이템이 있다면
+            if (IsEquipped && _equipedItem != null)
             {
-                IsEquipped = false;//이전 아이템으로 능력치 빼기
-
-                UIItemComponentInventory currentEquipItem = _equipedItem;
-                currentEquipItem.transform.SetParent(_contentofInventoryTr);
-                currentEquipItem.SetItemEquipedState(false);
+                ProcessStrategy(_equipedItem.ItemNumber, false); 
+                UIItemComponentInventory oldItem = _equipedItem;
+                oldItem.transform.SetParent(_contentofInventoryTr, false); 
+                oldItem.SetItemEquipedState(false);
             }
+
             _equipedItem = itemComponent;
             IsEquipped = true;
-        }
 
+            ProcessStrategy(_equipedItem.ItemNumber, true); 
+        }
         public void ItemUnEquip()
         {
+            if (IsEquipped && _equipedItem != null)
+            {
+                ProcessStrategy(_equipedItem.ItemNumber, false); // false = 해제
+            }
             IsEquipped = false;
+            _equipedItem = null;
         }
-
+        private void ProcessStrategy(int itemNumber, bool isEquip)
+        {
+            if (_itemDataManager.TryGetItemData(itemNumber, out ItemDataSO data))
+            {
+                var strategy = _strategyFactory.GetStrategy(data);
+                if (strategy is IEquippable equipStrategy && data is EquipmentItemSO equipData)
+                {
+                    if (isEquip)
+                        equipStrategy.Equip(PlayerStats, equipData);
+                    else 
+                        equipStrategy.UnEquip(PlayerStats, equipData);
+                }
+            }
+        }
     }
 }

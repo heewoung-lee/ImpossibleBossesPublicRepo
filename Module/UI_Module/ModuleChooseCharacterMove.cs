@@ -1,4 +1,7 @@
+using System;
+using System.Linq;
 using NetWork.NGO;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,7 +37,6 @@ namespace Module.UI_Module
                 {
                     _characterSelectorNgo = GetComponent<CharacterSelectorNgo>();
                 }
-
                 return _characterSelectorNgo;
             }
         }
@@ -63,12 +65,22 @@ namespace Module.UI_Module
                 return _nextButton;
             }
         }
+
         private void Start()
         {
-            NextButton.onClick.AddListener(() => MoveSelectCamera(SelectDirection.RightClick));
-            PreviousButton.onClick.AddListener(() => MoveSelectCamera(SelectDirection.LeftClick));
+            NextButton.onClick.AddListener(MoveRightCamera);
+            PreviousButton.onClick.AddListener(MoveLeftCamera);
         }
 
+        private void OnDisable()
+        {
+            NextButton.onClick.RemoveListener(MoveRightCamera);
+            PreviousButton.onClick.RemoveListener(MoveLeftCamera);
+        }
+
+
+        private void MoveRightCamera()=> MoveSelectCamera(SelectDirection.RightClick);
+        private void MoveLeftCamera()=> MoveSelectCamera(SelectDirection.LeftClick);
         public void MoveSelectCamera(SelectDirection direction)
         {
             int index = _currentSelectCharactorIndex;

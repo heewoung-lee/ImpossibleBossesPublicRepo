@@ -1,5 +1,7 @@
+using GameManagers;
 using Player;
 using UnityEngine;
+using Zenject;
 
 namespace Module.CameraModule
 {
@@ -7,9 +9,9 @@ namespace Module.CameraModule
     {
         private Transform _player; // 플레이어 Transform
 
-
         void Start()
         {
+          
             _player = GetComponentInParent<PlayerController>().transform;
         }
 

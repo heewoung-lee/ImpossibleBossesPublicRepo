@@ -3,6 +3,8 @@ using Controller.BossState;
 using Controller.ControllerStats;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using NetWork.Boss_NGO;
 using Unity.Netcode;
 using UnityEngine;
@@ -65,7 +67,7 @@ namespace BehaviourTreeNode.BossGolem.Task
             _networkController = Owner.GetComponent<BossGolemNetworkController>();
             _anim = Owner.GetComponent<Animator>();
             _bossGolemAnimationNetworkController = Owner.GetComponent <BossGolemAnimationNetworkController>();
-            _animLength = Utill.GetAnimationLength("Anim_Dead", _controller.Anim);
+            _animLength = Utill.GetAnimationLength("Anim_Death", _controller.Anim);
         }
 
         public override void OnStart()

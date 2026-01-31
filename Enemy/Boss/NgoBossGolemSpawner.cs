@@ -1,4 +1,5 @@
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using NetWork.NGO;
 using Unity.Netcode;
 using UnityEngine;
@@ -11,9 +12,9 @@ namespace Enemy.Boss
     {
         public class BossGolemFactory : NgoZenjectFactory<NgoBossGolemSpawner>
         {
-            public BossGolemFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public BossGolemFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/Enemy/Boss/Character/StoneGolem");
             }

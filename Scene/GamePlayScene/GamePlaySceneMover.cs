@@ -1,4 +1,6 @@
 using GameManagers;
+using GameManagers.RelayManager;
+using GameManagers.Scene;
 using NetWork.NGO;
 using Unity.Netcode;
 using UnityEngine;
@@ -10,17 +12,17 @@ namespace Scene.GamePlayScene
 {
     public class GamePlaySceneMover : ISceneMover
     {
-       private readonly SceneManagerEx _sceneManagerEx;
-       private readonly RelayManager _relayManager;
+        private readonly SceneManagerEx _sceneManagerEx;
+        private readonly RelayManager _relayManager;
 
         [Inject]
-        public GamePlaySceneMover(SceneManagerEx sceneManagerEx,RelayManager relayManager)
+        public GamePlaySceneMover(SceneManagerEx sceneManagerEx, RelayManager relayManager)
         {
             _sceneManagerEx = sceneManagerEx;
             _relayManager = relayManager;
         }
-        
-        
+
+
         public void MoveScene()
         {
             if (_relayManager.NetworkManagerEx.IsHost == false)
@@ -42,8 +44,8 @@ namespace Scene.GamePlayScene
                         agent.Warp(pos);
                         player.GetComponent<PlayerInitializeNgo>().SetForcePositionFromNetworkRpc(pos);
                     }
-
                 }
+                _sceneManagerEx.OnAllPlayerLoadedEvent -= SetPlayerPosition;
             }
         }
     }

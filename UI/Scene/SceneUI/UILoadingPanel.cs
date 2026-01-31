@@ -21,9 +21,13 @@ namespace UI.Scene.SceneUI
             Bind<GameObject>(typeof(LoadingPanel));
             _loadingPanel = Get<GameObject>(((int)LoadingPanel.LoadingPanel));
             _loadingPanelImage = _loadingPanel.GetComponentInChildren<Image>();
-            _lobbyManager.LobbyLoadingEvent += LobbyLoading;
         }
 
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
+            _lobbyManager.LobbyLoadingEvent += LobbyLoading;
+        }
 
         protected override void StartInit()
         {

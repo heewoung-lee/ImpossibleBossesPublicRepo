@@ -22,7 +22,7 @@ namespace BehaviourTreeNode.BossGolem.Task
         [SerializeField]private SharedBool _hasArrived;
         private BossGolemController _controller;
         private BossGolemAnimationNetworkController _bossGolemAnimationNetworkController;
-        private GameObject _targetObject;
+        [SerializeField]private SharedGameObject _targetObject;
         private Collider[] _targetObjects;
 
         public override void OnAwake()
@@ -38,7 +38,7 @@ namespace BehaviourTreeNode.BossGolem.Task
             _bossGolemAnimationNetworkController.SyncBossStateToClients(_controller.BaseMoveState);
             _hasArrived.Value = false;
 
-            if (_targetObject == null)
+            if (_targetObject.Value == null)
             {
                 Physics.OverlapSphereNonAlloc(transform.position, float.MaxValue, _targetObjects, 
                     LayerMask.GetMask(Utill.GetLayerID(Define.ControllerLayer.Player), Utill.GetLayerID(Define.ControllerLayer.AnotherPlayer)
@@ -54,12 +54,17 @@ namespace BehaviourTreeNode.BossGolem.Task
                         if (baseStats.IsDead == true)
                             continue;
                     }
+                    if (collider.TryGetComponent(out ITargetable targetable))
+                    {
+                        if (targetable.IsTargetable == false)
+                            continue; // 은신 중이면 무시하고 다음 타겟 찾기
+                    }
 
                     float distance = (transform.position - collider.transform.position).sqrMagnitude;
                     findClosePlayer = findClosePlayer > distance ? distance : findClosePlayer;
                     if (Mathf.Approximately(findClosePlayer, distance))
                     {
-                        _targetObject = collider.transform.gameObject;
+                        _targetObject.Value = collider.transform.gameObject;
                     }
                 }
             }
@@ -70,14 +75,30 @@ namespace BehaviourTreeNode.BossGolem.Task
         // Return running if the agent hasn't reached the destination yet
         public override TaskStatus OnUpdate()
         {
-            if (_targetObject == null) // 타겟이 없는 경우 ex) 타겟이 다 죽은 경우
+            // 타겟이 없는 경우 ex) 타겟이 다 죽은 경우
+            if (_targetObject.Value == null) 
             {
                 _controller.UpdateIdle();
                 return TaskStatus.Failure;
             }
 
+            //타겟이 타겟이 불가능한 상태일땐 실패를 반환해 다른 타겟을 찾도록
+            if (_targetObject.Value.TryGetComponent(out ITargetable target) == true)
+            {
+                if (target.IsTargetable == false)
+                {
+                    _controller.UpdateIdle();
+                    return TaskStatus.Failure;
+                }
+            }
+            
+
             _controller.UpdateMove();
-            _hasArrived.Value = HasArrived() && TargetInSight.IsTargetInSight(_controller.GetComponent<IAttackRange>(), _targetObject.transform, 0.2f);
+            
+            //타겟과 가까워졌는지와, 타겟이 시야에 들어왔는지.
+            _hasArrived.Value = HasArrived() && 
+                                TargetInSight.IsTargetInSight
+                                    (_controller.GetComponent<IAttackRange>(), _targetObject.Value.transform, 0.2f);
 
             if (_hasArrived.Value)
             {
@@ -91,9 +112,9 @@ namespace BehaviourTreeNode.BossGolem.Task
         // Return targetPosition if target is null
         private Vector3 Target()
         {
-            if (_targetObject != null)
+            if (_targetObject.Value != null)
             {
-                return _targetObject.transform.position;
+                return _targetObject.Value.transform.position;
             }
             return Vector3.zero;
         }
@@ -101,14 +122,14 @@ namespace BehaviourTreeNode.BossGolem.Task
         public override void OnReset()
         {
             base.OnReset();
-            _targetObject = null;
+            _targetObject.Value = null;
         }
 
 
         public override void OnEnd()
         {
             base.OnEnd();
-            _targetObject = null;
+            _targetObject.Value = null;
         }
 
     }

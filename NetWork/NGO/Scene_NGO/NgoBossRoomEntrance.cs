@@ -1,5 +1,7 @@
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using NetWork.BaseNGO;
 using Stats;
 using UI.WorldSpace;
@@ -12,23 +14,38 @@ using ZenjectContext.GameObjectContext;
 
 namespace NetWork.NGO.Scene_NGO
 {
+    public readonly struct BossRoomEntrancePosition
+    {
+        public BossRoomEntrancePosition(Vector3 position)
+        {
+            TownPortalPosition = position;
+        }
+        public Vector3 TownPortalPosition { get; }
+    }
+    
+    
     public class NgoBossRoomEntrance : NetworkBehaviourBase
     {
         public class NgoBossRoomEntranceFactory : NgoZenjectFactory<NgoBossRoomEntrance>
         {
-            public NgoBossRoomEntranceFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public NgoBossRoomEntranceFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/NGO/Scene_NGO/NGOBossRoomEntrance");
             }
         }
+        [Inject] 
+        public void Construct(RelayManager relayManager,BossRoomEntrancePosition entrancePosition)
+        {
+            _relayManager = relayManager;
+            _entrancePosition = entrancePosition;
+        }
         
+        private RelayManager _relayManager;
+        private BossRoomEntrancePosition _entrancePosition; 
+        // 이 값은 단순 위치 벡터값만 있음. 나중에 테스트할때 포탈위치를 옮기고 싶다면 테스트 인스톨러에 ReBind해서 위치를 바꾸고 사용할 것;
         
-        [Inject] private RelayManager _relayManager;
-
-        
-        private Vector3 _townPortalPosition = new Vector3(15f, 0.15f, 32);
         private NgoStageTimerController _timerController;
         public NgoStageTimerController TimerController
         {
@@ -63,7 +80,7 @@ namespace NetWork.NGO.Scene_NGO
             if (IsHost == false)
                 return;
 
-            gameObject.transform.position = _townPortalPosition;
+            gameObject.transform.position = _entrancePosition.TownPortalPosition;
 
 
             _playerCountInPortal.OnValueChanged -= OnChangedCountPlayer;

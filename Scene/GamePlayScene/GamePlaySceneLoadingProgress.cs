@@ -1,19 +1,28 @@
 using System;
 using System.Collections;
 using GameManagers;
+using GameManagers.RelayManager;
 using UI;
 using UI.Scene.SceneUI;
 using UnityEngine;
 using UnityEngine.UI;
 using Util;
 using Zenject;
+using ZenjectContext.ProjectContextInstaller;
 
 namespace Scene.GamePlayScene
 {
     public class GamePlaySceneLoadingProgress : UIBase
     {
-        [Inject] private RelayManager _relayManager;
+        private RelayManager _relayManager;
+        private SignalBus _signalBus;
 
+        [Inject]
+        private void Construct(RelayManager relayManager,SignalBus signalBus)
+        {
+            _relayManager = relayManager;
+            _signalBus = signalBus;
+        }
         
         private UILoading _uiLoading;
         private int _loadedPlayerCount = 0;
@@ -77,18 +86,25 @@ namespace Scene.GamePlayScene
 
             if(_relayManager.NgoRPCCaller == null)
             {
-                _relayManager.SpawnRpcCallerEvent += LoadPlayerInit;
+                Action<RpcCallerReadySignal> onSignal = null;
+
+                onSignal = (signal) =>
+                {
+                    _signalBus.Unsubscribe<RpcCallerReadySignal>(onSignal);
+                    LoadPlayerInit();
+                };
+                _signalBus.Subscribe<RpcCallerReadySignal>(onSignal);
             }
             else
             {
                 LoadPlayerInit();
             }
-            void LoadPlayerInit()
-            {
-                LoadedPlayerCount = _relayManager.NgoRPCCaller.LoadedPlayerCount;
-                SetisAllPlayerLoaded(_relayManager.NgoRPCCaller.IsAllPlayerLoaded);
-            }
+        }
 
+        private void LoadPlayerInit()
+        {
+            LoadedPlayerCount = _relayManager.NgoRPCCaller.LoadedPlayerCount;
+            SetisAllPlayerLoaded(_relayManager.NgoRPCCaller.IsAllPlayerLoaded);
         }
 
         private IEnumerator LoadingSceneProcess(int playerCount)

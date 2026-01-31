@@ -1,24 +1,19 @@
 using System;
 using GameManagers;
+using GameManagers.ResourcesEx;
+using GameManagers.UI;
 using ProjectContextInstaller;
 using UnityEngine;
 using Zenject;
+using ZenjectContext.ProjectContextInstaller;
 
 namespace Scene.CommonInstaller
 {
-    [RequireComponent(typeof(DefaultObjectCreatorInstaller))]
-    [DisallowMultipleComponent]
-    public class CachingObjectInstaller : MonoInstaller
+    public class CachingObjectInstaller : Installer<CachingObjectInstaller>
     {
-        [Inject(Id=ResourcesLoaderInstaller.ResourceBindCode)] private IResourceKeyTypeProvider _resourcesLoadType;
         public override void InstallBindings()
         {
-            Type dictImplementation = typeof(CachingObjectDictManager<>).MakeGenericType(_resourcesLoadType.ResourceKeyType);
-
-            Container.BindInterfacesTo(dictImplementation)
-                .AsSingle().NonLazy();
-            
-            
+            Container.BindInterfacesAndSelfTo<CachingObjectDictManager>().AsSingle().NonLazy();
             Container.BindInterfacesAndSelfTo<UICachingService>().AsSingle().NonLazy();
         }
     }

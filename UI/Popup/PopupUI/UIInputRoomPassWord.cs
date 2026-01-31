@@ -1,7 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using GameManagers;
-using GameManagers.Interface.UIManager;
+using GameManagers.Scene;
 using Module.UI_Module;
 using TMPro;
 using UI.SubItem;
@@ -53,14 +54,13 @@ namespace UI.Popup.PopupUI
         private GameObject _messageError;
         private TMP_Text _errorMessageText;
         private ModuleUIFadeOut _errorMessageTextFadeOutMoudule;
-        [Inject] private UIManager _uiManager;
 
         public PlayerLoginInfo PlayerLoginInfo { get; set; }
 
 
-        protected override void OnDisableInit()
+        protected override void ZenjectEnable()
         {
-            base.OnDisableInit();
+            base.ZenjectEnable();
             _roomPwInputField.text = "";
             if (_roomInfoPanel != null)
             {
@@ -85,7 +85,7 @@ namespace UI.Popup.PopupUI
             _errorMessageText = _messageError.GetComponentInChildren<TMP_Text>();
             _errorMessageTextFadeOutMoudule = _messageError.GetComponent<ModuleUIFadeOut>();
             _errorMessageTextFadeOutMoudule.DoneFadeoutEvent += () => _confirmButton.interactable = true;
-            _confirmButton.onClick.AddListener(async () => await CheckJoinRoom());
+            _confirmButton.onClick.AddListener(()=>CheckJoinRoom().Forget());
             _messageError.SetActive(false);
         }
 
@@ -94,7 +94,7 @@ namespace UI.Popup.PopupUI
             _roomInfoPanel = infoPanel;
         }
 
-        private async Task CheckJoinRoom()
+        private async UniTaskVoid CheckJoinRoom()
         {
             _confirmButton.interactable = false;
             Lobby lobby = _roomInfoPanel.LobbyRegisteredPanel;
@@ -111,7 +111,6 @@ namespace UI.Popup.PopupUI
             {
                 _errorMessageText.text = "비밀번호가 틀렸습니다";
                 _messageError.SetActive(true);
-                _errorMessageTextFadeOutMoudule.DoneFadeoutEvent += () => { _confirmButton.interactable = true; };
                 return;
             }
             catch (LobbyServiceException notfound) when (notfound.Reason == LobbyExceptionReason.LobbyNotFound)
@@ -133,6 +132,7 @@ namespace UI.Popup.PopupUI
             catch (Exception error)
             {
                 Debug.Log($"에러가 발생했습니다{error}");
+                _confirmButton.interactable = true;
                 return;
             }
             finally

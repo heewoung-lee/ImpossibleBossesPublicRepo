@@ -1,6 +1,8 @@
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.UIManager;
+using GameManagers.RelayManager;
+using GameManagers.ResourcesEx;
 using UI.Scene.SceneUI;
 using Unity.Netcode;
 using UnityEngine;
@@ -25,9 +27,9 @@ namespace NetWork.NGO.UI
 
         public class NgoUIRootCharacterSelectFactory : NgoZenjectFactory<NgoUIRootCharacterSelect>
         {
-            public NgoUIRootCharacterSelectFactory(DiContainer container, IFactoryRegister registerableFactory,
+            public NgoUIRootCharacterSelectFactory(DiContainer container, IFactoryManager factoryManager,
                 NgoZenjectHandler.NgoZenjectHandlerFactory handlerFactory, IResourcesServices loadService) : base(
-                container, registerableFactory, handlerFactory, loadService)
+                container, factoryManager, handlerFactory, loadService)
             {
             _requestGO = loadService.Load<GameObject>("Prefabs/NGO/NGOUIRootChracterSelect");
             }

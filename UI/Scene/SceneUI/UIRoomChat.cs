@@ -50,6 +50,12 @@ namespace UI.Scene.SceneUI
             _buttonImages = _extensionButton.gameObject.GetComponentsInChildren<Image>();
             _extensionImage = _extensionButton.gameObject.GetComponentsInChildren<Image>().Select(image => image.sprite).ToArray();
             _contractionImage = new Sprite[_extensionImage.Length];
+        }
+
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
             _contractionImage[(int)ButtonImages.BackGroundSprite] = _resourcesServices.Load<Sprite>("Art/UI/ButtonImage/Button_Rectangle_Red");
             _contractionImage[(int)ButtonImages.InnerSprite] = _resourcesServices.Load<Sprite>("Art/UI/ButtonImage/Icon_Minus");
         }

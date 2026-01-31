@@ -1,5 +1,7 @@
 using Data.DataType.StatType;
 using GameManagers;
+using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using Stats.BaseStats;
 using Unity.Netcode;
 using Util;
@@ -7,9 +9,10 @@ using Zenject;
 
 namespace Stats.MonsterStats.SlimeStats
 {
-    public class SlimeStats : global::Stats.MonsterStats.MonsterStats
+    public class SlimeStats : MonsterStats
     {
-        [Inject] private RelayManager _relayManager;
+        [Inject] private IResourcesServices _resources;
+        
 
         private Define.MonsterID _slimeID;
         private int _exp;
@@ -37,8 +40,7 @@ namespace Stats.MonsterStats.SlimeStats
 
             if (gameObject.TryGetComponent(out NetworkObject ngo))
             {
-                ulong networkObjectID = ngo.NetworkObjectId;
-                _relayManager.DeSpawn_NetWorkOBJ(networkObjectID);
+                _resources.DestroyObject(ngo.gameObject);
             }
         }
 

@@ -1,6 +1,7 @@
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.VFXManager;
+using GameManagers.ResourcesEx;
 using NetWork;
 using NetWork.NGO.Interface;
 using Scene.CommonInstaller.Interfaces;
@@ -16,7 +17,7 @@ namespace VFX
         public class DustParticleFactory : GameObjectContextFactory<DustParticleInitialize>
         {
             public DustParticleFactory(DiContainer container, IResourcesServices loadService,
-                IFactoryController registerableFactory) : base(container, loadService, registerableFactory)
+                IFactoryManager factoryManager) : base(container,factoryManager)
             {
                 _requestGO = loadService.Load<GameObject>($"Prefabs/Particle/AttackEffect/Dust_Particle");
             }
@@ -25,7 +26,7 @@ namespace VFX
         public class BiGDustParticleFactory : GameObjectContextFactory<DustParticleInitialize>
         {
             public BiGDustParticleFactory(DiContainer container, IResourcesServices loadService,
-                IFactoryController registerableFactory) : base(container, loadService, registerableFactory)
+                IFactoryManager factoryManager) : base(container, factoryManager)
             {
                 _requestGO = loadService.Load<GameObject>($"Prefabs/Particle/AttackEffect/Dust_Particle_Big");
             }
@@ -38,7 +39,7 @@ namespace VFX
         {
             _vfxManager = vfxManager;
         }
-        public void SpawnObjectToLocal(in SpawnParamBase param,string path = null)
+        public void SpawnObjectToLocal(in NetworkParams param,string path = null)
         {
             _vfxManager.InstanceObjConvertToParticle(gameObject,path, param.ArgPosVector3, param.ArgFloat);
         }

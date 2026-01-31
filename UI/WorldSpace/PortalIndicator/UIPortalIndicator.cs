@@ -1,9 +1,11 @@
 using System;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.VFXManager;
+using GameManagers.ResourcesEx;
 using Scene.CommonInstaller.Interfaces;
 using Stats;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Zenject;
 using ZenjectContext.GameObjectContext;
@@ -16,20 +18,11 @@ namespace UI.WorldSpace.PortalIndicator
         {
             [Inject]
             public UIPortalIndicatorFactory(DiContainer container, IResourcesServices loadService,
-                IFactoryController registerableFactory) : base(container, loadService, registerableFactory)
+                IFactoryManager factoryManager) : base(container, factoryManager)
             {
                 _requestGO = loadService.Load<GameObject>($"Prefabs/UI/WorldSpace/UIPortalIndicator");
             }
         }
-
-        private IPortalIndicator _portalIndicator;
-
-        [Inject]
-        public void Construct(IPortalIndicator portalIndicator)
-        {
-            _portalIndicator = portalIndicator;
-        }
-
 
         enum Images
         {
@@ -52,15 +45,23 @@ namespace UI.WorldSpace.PortalIndicator
         {
             Bind<Image>(typeof(Images));
             _indicatorImg = Get<Image>((int)Images.PortalIndicatorImg);
-            _portalIndicator.IndicatorOffEvent += SetIndicatorOff;
-            _portalIndicator.Initialize();
+        }
+        
+        protected override void ZenjectDisable()
+        {
+            base.ZenjectDisable();
+            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
-
-        public void OnDisable()
+        protected override void ZenjectEnable()
         {
-            _portalIndicator.IndicatorOffEvent -= SetIndicatorOff;
-            _portalIndicator.OnDisableIndicator();
+            base.ZenjectEnable();
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+        
+        private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, LoadSceneMode mode)
+        {
+            SetIndicatorOff();
         }
 
         private Vector3 SetPosition()
@@ -77,6 +78,8 @@ namespace UI.WorldSpace.PortalIndicator
 
         void LateUpdate()
         {
+            if (Camera.main == null) return;
+            
             transform.rotation = Camera.main.transform.rotation;
         }
     }

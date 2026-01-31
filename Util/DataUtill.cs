@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using GameManagers;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using Newtonsoft.Json;
 using UnityEngine;
 using Zenject;
@@ -46,14 +47,6 @@ namespace Util
             string value = JsonConvert.SerializeObject(data);
             File.WriteAllText(Application.dataPath + "/Resources/Data/" + key + ".json", value);
         }
-        
-        public static void AddSerializableAttributeType(Type monoScriptType,List<Type> typeList)
-        {
-            if (Attribute.IsDefined(monoScriptType, typeof(SerializableAttribute)))
-            {
-                typeList.Add(monoScriptType);
-                //Debug.Log($"Find RequestType: {type.FullName}");
-            }
-        }
+      
     }
 }

@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using GameManagers;
-using GameManagers.Interface;
 using GameManagers.Interface.LoginManager;
-using GameManagers.Interface.UIManager;
+using GameManagers.Scene;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,7 +17,8 @@ namespace UI.Popup.PopupUI
         [Inject] private IPlayerLogininfo _playerLogininfo;
         [Inject] private IUIManagerServices _uiManagerServices;
         [Inject] private LobbyManager _lobbyManager;
-        [Inject] SceneManagerEx _sceneManagerEx;
+        [Inject] private SceneManagerEx _sceneManagerEx;
+
         enum Buttons
         {
             CloseButton,
@@ -70,8 +71,8 @@ namespace UI.Popup.PopupUI
             _pwInputField = Get<TMP_InputField>((int)InputFields.PwInputField);
             _closeButton.onClick.AddListener(OnClickCloseButton);
             _signupButton.onClick.AddListener(ShowSignUpUI);
-            _confirmButton.onClick.AddListener(async () => await AuthenticateUser(_idInputField.text, _pwInputField.text));
-            _uiManagerServices.AddImportant_Popup_UI(this);
+            _confirmButton.onClick.AddListener(async () =>
+                await AuthenticateUser(_idInputField.text, _pwInputField.text));
         }
 
         protected override void StartInit()
@@ -85,13 +86,20 @@ namespace UI.Popup.PopupUI
             }
         }
 
-        private void OnDisable()
+        protected override void InitAfterInject()
         {
+            base.InitAfterInject();
+            _uiManagerServices.AddImportant_Popup_UI(this);
+        }
+
+        protected override void ZenjectDisable()
+        {
+            base.ZenjectDisable();
             _idInputField.text = "";
             _pwInputField.text = "";
         }
 
-        public async Task AuthenticateUser(string userID, string userPw)
+        public async UniTask AuthenticateUser(string userID, string userPw)
         {
             if (string.IsNullOrEmpty(userID) || string.IsNullOrEmpty(userPw))
                 return;
@@ -144,7 +152,7 @@ namespace UI.Popup.PopupUI
                 return;
             }
 
-            _sceneManagerEx.LoadSceneWithLoadingScreen(Define.Scene.LobbyScene);
+             _sceneManagerEx.LoadSceneWithLoadingScreen(Define.Scene.LobbyScene);
             try
             {
                 bool checkPlayerNickNameAlreadyConnected = await _lobbyManager.InitLobbyScene(); //로그인을 시도;
@@ -152,12 +160,14 @@ namespace UI.Popup.PopupUI
                 {
                     if (_uiManagerServices.TryGetPopupDictAndShowPopup(out UIAlertDialog dialog) == true)
                     {
-                        dialog.AfterAlertEvent(() => { _confirmButton.interactable = true; })
-                            .AlertSetText("오류", "아이디가 이미 접속되어 있습니다.")
-                            .AfterAlertEvent(() => _sceneManagerEx.LoadScene(Define.Scene.LoginScene));
+                        dialog.GetComponent<Canvas>().sortingOrder = 100;
+                        dialog.AfterAlertEvent(CloseButton).AlertSetText("오류", "아이디가 이미 접속되어 있습니다.");
+                            
+                        void CloseButton()
+                        {
+                            _sceneManagerEx.LoadScene(Define.Scene.LoginScene);
+                        }
                     }
-
-                    return;
                 }
             }
             catch (Exception ex)
@@ -172,7 +182,6 @@ namespace UI.Popup.PopupUI
 
                 return;
             }
-            
         }
 
         public void OnClickCloseButton()

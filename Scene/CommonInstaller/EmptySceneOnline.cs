@@ -1,13 +1,14 @@
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Scene.CommonInstaller.Interfaces;
 
 namespace Scene.CommonInstaller
 {
     public class EmptySceneOnline : ISceneConnectOnline
     {
-        public Task SceneConnectOnlineStart()
+        public UniTask SceneConnectOnlineStart()
         {
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
     }
 }

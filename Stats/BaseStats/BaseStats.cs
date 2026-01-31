@@ -1,4 +1,6 @@
 using System;
+using Module.CommonModule;
+using Scene.CommonInstaller.InGameInstaller;
 using Sirenix.OdinInspector;
 using Unity.Netcode;
 using UnityEngine;
@@ -6,6 +8,29 @@ using Util;
 
 namespace Stats.BaseStats
 {
+    public enum StatType
+    {
+        MaxHP,
+        CurrentHp,
+        Attack,
+        Defence,
+        MoveSpeed,
+        Special
+    }
+
+    //1.31일 추가된 인터페이스 버퍼에서 특수한 효과를 쓰고 싶을때
+    //스크립트에서 해당 인터페이스를 상속받고 구현하면 된다.
+    public interface ISpecialModifier
+    {
+        public void ApplyModified(float value);
+    }
+
+    public interface ITargetable
+    {
+        public bool IsTargetable { get; }
+    }
+
+
     public struct CharacterBaseStat : INetworkSerializable
     {
         public int MaxHp;
@@ -13,15 +38,15 @@ namespace Stats.BaseStats
         public int Attack;
         public int Defence;
         public float Speed;
-        public static CharacterBaseStat operator -(CharacterBaseStat firstValue, CharacterBaseStat SecondValue)
+        public static CharacterBaseStat operator -(CharacterBaseStat firstValue, CharacterBaseStat secondValue)
         {
             return new CharacterBaseStat
             {
-                MaxHp = firstValue.MaxHp - SecondValue.MaxHp,
-                Hp = firstValue.Hp - SecondValue.Hp,
-                Attack = firstValue.Attack - SecondValue.Attack,
-                Defence = firstValue.Defence - SecondValue.Defence,
-                Speed = firstValue.Speed - SecondValue.Speed
+                MaxHp = firstValue.MaxHp - secondValue.MaxHp,
+                Hp = firstValue.Hp - secondValue.Hp,
+                Attack = firstValue.Attack - secondValue.Attack,
+                Defence = firstValue.Defence - secondValue.Defence,
+                Speed = firstValue.Speed - secondValue.Speed
             };
         }
         public CharacterBaseStat(int hp, int maxHp, int attack, int defence, float speed)
@@ -43,6 +68,7 @@ namespace Stats.BaseStats
         }
     }
     [DisallowMultipleComponent]
+    [RequireComponent(typeof(TargetableUnit))]
     public abstract class BaseStats : NetworkBehaviour, IDamageable
     {
         private Action<int, int> _eventAttacked; //현재 HP가 바로 안넘어와서 두번 매개변수에 현재 HP값 전달
@@ -53,7 +79,7 @@ namespace Stats.BaseStats
         private Action<int, int> _attackValueChangedEvent;
         private Action<int, int> _defenceValueChangedEvent;
         private Action<float, float> _moveSpeedValueChangedEvent;
-        private Action<bool, bool> _isDeadValueChagneEvent;
+        private Action<bool, bool> _isDeadValueChangeEvent;
 
 
 
@@ -140,11 +166,11 @@ namespace Stats.BaseStats
         {
             add
             {
-                UniqueEventRegister.AddSingleEvent(ref _isDeadValueChagneEvent, value);
+                UniqueEventRegister.AddSingleEvent(ref _isDeadValueChangeEvent, value);
             }
             remove
             {
-                UniqueEventRegister.RemovedEvent(ref _isDeadValueChagneEvent, value);
+                UniqueEventRegister.RemovedEvent(ref _isDeadValueChangeEvent, value);
             }
         }
 
@@ -220,7 +246,10 @@ namespace Stats.BaseStats
         [Rpc(SendTo.Server)]
         public void PlayerAttackValueChangedRpc(int value)
         {
+            
             _characterAttackValue.Value = Mathf.Clamp(value, 0, int.MaxValue);
+            
+            
         }
 
 
@@ -236,7 +265,10 @@ namespace Stats.BaseStats
         [Rpc(SendTo.Server)]
         public void PlayerDefenceValueChangedRpc(int value)
         {
-            _characterDefenceValue.Value = Mathf.Clamp(value, 0, int.MaxValue);
+            _characterDefenceValue.Value = value;
+            
+            //1.3일 수정 다른 스탯들은 Clamp로 음수를 뚫고 가지 못하게 막았지만 디버프 효과가 있는
+            //것들때문에 -를 허용하게 만듦
         }
 
 
@@ -266,6 +298,7 @@ namespace Stats.BaseStats
         [Rpc(SendTo.Server)]
         public void IsDeadValueChangedRpc(bool value)
         {
+            //여기에서 콜라이더 로직을 변경해야함.
             _isDeadValue.Value = value;
         }
 
@@ -370,32 +403,42 @@ namespace Stats.BaseStats
         }
         private void IsDeadValueChange(bool previousValue, bool newValue)
         {
-            _isDeadValueChagneEvent?.Invoke(previousValue,newValue);
+            _isDeadValueChangeEvent?.Invoke(previousValue,newValue);
         }
 
+
+        //1.24일 추가 마지막으로 맞은 시간을 추가해 채널링 및 다른 구현에서
+        //플레이어가 마지막으로 피격받은 시간이 체크조건을 시작한 시간보다 더 크면 종료하는 식으로 
+        public float LastDamagedTime { get; private set; } = float.MinValue;
 
         public void OnAttacked(IAttackRange attacker, int spacialDamage = -1)
         {
             if (_isDeadValue.Value == true) return;
 
+            LastDamagedTime= Time.time;
             NetworkObjectReference netWorkRef = TryGetOnAttackedOwner(attacker);
             OnAttackedRpc(netWorkRef, spacialDamage);
         }
 
 
-        [Rpc(SendTo.Server, RequireOwnership = false)]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         public void OnAttackedRpc(NetworkObjectReference attackerRef, int spacialDamage = -1)
         {
             ulong ownetClientId = OwnerClientId;
 
             int damage = 0;
-            attackerRef.TryGet(out NetworkObject attackerNgo);
-            attackerNgo.TryGetComponent(out BaseStats attackerStats);
-
-            if (spacialDamage < 0)
-                damage = attackerStats.Attack;
-            else
+            if (spacialDamage > 0)
+            {
                 damage = spacialDamage;
+            }
+            else
+            {
+                attackerRef.TryGet(out NetworkObject attackerNgo);
+                attackerNgo.TryGetComponent(out BaseStats attackerStats);
+
+                damage = attackerStats.Attack;
+            }
+            
             damage = Mathf.Max(0, damage - Defence);
             Hp -= damage;
             if (Hp <= 0)
@@ -437,6 +480,49 @@ namespace Stats.BaseStats
             Debug.Log("Attacker hasn't a BaseStats");
             return default;
         }
+
+
+        public void ModifyStat(StatType statType, float value)
+        {
+            int intValue = (int)value;
+            
+            switch (statType)
+            {
+                case StatType.Attack:
+                    Plus_Attack_Ability(intValue);
+                    break;
+                case StatType.Defence:
+                    Plus_Defence_Abillity(intValue);
+                    break;
+                case StatType.CurrentHp:
+                    Plus_Current_Hp_Abillity(intValue);
+                    break;
+                case StatType.MaxHP:
+                    Plus_MaxHp_Abillity(intValue);
+                    break;
+                case StatType.MoveSpeed:
+                    Plus_MoveSpeed_Abillity(intValue);
+                    break;
+                case StatType.Special:
+                    //여기에 각 클래스마다 스페셜하게 제작된 스크립트를 오버라이드해서 넣으면 됨.
+                    //확장성은 떨어지지만, 우선 개발을 빨리해야하니 최소한으로 확장하고 나중에 확장이 필요하면 그때 고칠 것
+                    if (TryGetComponent(out ISpecialModifier specialModifier) == true)
+                    {
+                        
+                        specialModifier.ApplyModified(value);
+                    }
+                    else
+                    {
+                        Debug.Assert(false,$"{gameObject.name} hasn't implemented ISpecialModifier");
+                    }
+                    break;
+                // 새로운 스탯이 생기면 여기에 case만 추가
+                default:
+                    Debug.LogWarning($"[BufferManager] 정의되지 않은 StatType: {statType}");
+                    break;
+            }
+        }
+        
 
 
 

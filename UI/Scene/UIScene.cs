@@ -1,6 +1,5 @@
 using GameManagers;
 using GameManagers.Interface;
-using GameManagers.Interface.SceneUIManager;
 using GameManagers.Interface.UIManager;
 using UI.Popup.PopupUI;
 using UnityEngine;
@@ -17,10 +16,14 @@ namespace UI.Scene
         {
             _uiManager = uiManager;
         }
-        protected override void AwakeInit()
+        protected override void AwakeInit() { } //Don't use injected Object
+
+        protected override void InitAfterInject()
         {
+            base.InitAfterInject();
             _uiManager.SetCanvas(gameObject.GetComponent<Canvas>(), true);
         }
+        
         protected override void StartInit()
         {
         }

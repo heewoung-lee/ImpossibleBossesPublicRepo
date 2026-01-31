@@ -1,6 +1,7 @@
 using System;
+using Cysharp.Threading.Tasks;
 using GameManagers;
-using GameManagers.Interface.UIManager;
+using GameManagers.Scene;
 using TMPro;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -15,7 +16,7 @@ namespace UI.Popup.PopupUI
     public class UICreateRoom : IDPwPopup, IUIHasCloseButton
     {
         [Inject] private LobbyManager _lobbyManager;
-        [Inject] SceneManagerEx _sceneManagerEx;
+        [Inject] private SceneManagerEx _sceneManagerEx;
         [Inject] private IUIManagerServices _uiManagerServices;
         
         enum InputFields
@@ -63,7 +64,7 @@ namespace UI.Popup.PopupUI
             _buttonClose = Get<Button>((int)Buttons.ButtonClose);
             _userCountSlider = Get<Slider>((int)Sliders.UserCountSlider);
             _currentCount = Get<TMP_Text>((int)Texts.CurrentCount);
-            _buttonConnect.onClick.AddListener(ConnectRoom);
+            _buttonConnect.onClick.AddListener(() =>ConnectRoom().Forget());
             _buttonClose.onClick.AddListener(OnClickCloseButton);
             _userCountSlider.onValueChanged.AddListener((value) =>
             {
@@ -81,7 +82,7 @@ namespace UI.Popup.PopupUI
             });
         }
 
-        public async void ConnectRoom()
+        public async UniTaskVoid ConnectRoom()
         {
             _buttonConnect.interactable = false;
             try

@@ -1,11 +1,10 @@
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CoreScripts;
 using GameManagers.Interface.ResourcesManager;
+using GameManagers.ResourcesEx;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -15,9 +14,26 @@ using Object = UnityEngine.Object;
 
 namespace UI
 {
-    public abstract class UIBase : MonoBehaviour
+    public abstract class UIBase : ZenjectMonoBehaviour
     {
         protected IResourcesServices _resourcesServices;
+        private Canvas _canvas;
+
+        public Canvas Canvas
+        {
+            get
+            {
+                if (_canvas == null)
+                {
+                    _canvas = GetComponent<Canvas>();
+                    if (_canvas == null)
+                    {
+                        _canvas = GetComponentInParent<Canvas>();
+                    }
+                }
+                return _canvas;
+            }
+        }
         
         [Inject]
         public void Construct(IResourcesServices resourcesServices)
@@ -25,28 +41,15 @@ namespace UI
             _resourcesServices = resourcesServices;
         }
         Dictionary<Type, Object[]> _bindDictionary = new Dictionary<Type,Object[]>();
+        
         protected abstract void StartInit();
         protected abstract void AwakeInit();
 
-        protected virtual void OnEnableInit(){}
-        protected virtual void OnDisableInit(){}
-
-
-        private void OnEnable()
-        {
-            OnEnableInit();
-        }
-
-        private void OnDisable()
-        {
-            OnDisableInit();
-        }
 
         private void Awake()
         {
             AwakeInit();
         }
-
         private void Start()
         {
             StartInit();
@@ -64,9 +67,9 @@ namespace UI
             _bindDictionary.Add(typeof(T), objects);
         }
 
-        protected void SetSortingOrder(int soringOrder)
+        public void SetSortingOrder(int soringOrder)
         {
-            gameObject.GetComponent<Canvas>().sortingOrder = soringOrder;
+            Canvas.sortingOrder = soringOrder;
         }
 
         protected void AddBind<T>(Type type,out string[] indexString) where T: Object

@@ -3,6 +3,7 @@ using GameManagers;
 using GameManagers.Interface.GameManagerEx;
 using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.VFXManager;
+using GameManagers.ResourcesEx;
 using UnityEngine;
 using Zenject;
 

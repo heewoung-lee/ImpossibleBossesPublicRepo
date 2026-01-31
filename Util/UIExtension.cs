@@ -16,19 +16,6 @@ namespace Util
 {
     public static class UIExtension
     {
-        public static bool TryGetTask<T>(this BehaviorTree tree, out T task) where T : BehaviorDesigner.Runtime.Tasks.Task
-        {
-            task = tree.FindTask<T>();
-
-            return task != null;
-        }
-
-        public static bool TryGetObject<T>(this System.Object originObject, out T originValue) where T : UnityEngine.Object
-        {
-            originValue = originObject as T;
-
-            return originValue != null;
-        }
         public static Color SetGradeColor(this MaskableGraphic graphic, Color setColor)
         {
             if (graphic != null)
@@ -79,53 +66,6 @@ namespace Util
             }
             return default(T);
         }
-        public static bool TryGetFindParentObject<T>(this Transform currentTr, out T findObject) where T : class
-        {
-            Transform parent = currentTr.parent;
-            while (parent != null)
-            {
-                foreach (Component obj in parent.GetComponents<Component>())
-                {
-                    if (obj is T)
-                    {
-                        findObject = obj as T;
-                        return true;
-                    }
-                }
-                parent = parent.parent;
-            }
-            findObject = null;
-            return false;
-        }
-
-
-        public static UIItemComponentInventory MakeInventoryItemComponent(this IItem iteminfo,IUIManagerServices uimanager, Transform parentTr = null, int itemCount = 1, string name = null, string path = null)
-        {
-            //iteminfo의 정보는 ItemConsumable 혹은 ItemEquipment이기에 UI_ItemComponent 형변환이 안된다.
-            //ItemCOnsumable을 찾으면 UI_ItemComponent_Consumable로 연결해주고
-            //ItemEquipment을 찾으면 UI_ItemComponent_Equipment로 연결해야한다.
-
-            UIPlayerInventory inventory = uimanager.GetImportant_Popup_UI<UIPlayerInventory>();
-
-            if (parentTr == null)
-            {
-                parentTr = inventory.ItemInventoryTr;
-            }
-
-            IInventoryItemMaker itemUIType = iteminfo as IInventoryItemMaker;
-            return itemUIType.MakeItemComponentInventory(uimanager,parentTr, itemCount, name, path);
-        }
-
-        public static UIShopItemComponent MakeShopItemComponent(this IItem iteminfo,IUIManagerServices uimanager,int price,Transform parentTr = null, int itemCount = 1, string name = null, string path = null)
-        {
-            UIShop shop = uimanager.GetImportant_Popup_UI<UIShop>();
-            if (parentTr == null)
-                parentTr = shop.ItemCoordinate;
-
-            IShopItemMaker itemUIType = iteminfo as IShopItemMaker;
-            return itemUIType.MakeShopItemComponent(uimanager,price,parentTr, itemCount, name, path);
-        }
-
         public static Color HexCodetoConvertColor(this string hexCode)
         {
             if(hexCode.Contains("#")== false)

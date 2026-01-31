@@ -2,29 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
-using Data.DataType.ItemType.Interface;
-using UI;
+using Cysharp.Threading.Tasks;
+using DataType;
+using DataType.Skill;
+using DataType.Skill.Factory.Decorator.Def;
+using DataType.Skill.Factory.Effect.Def;
+using Stats;
+using Stats.BaseStats;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using Zenject;
-using Object = UnityEngine.Object;
 
 namespace Util
 {
     public class Utill
     {
-
-        // public static T GetOrAddComponent<T>(GameObject go) where T : Component
-        // {
-        //     var component = go.GetComponent<T>();
-        //     if (component == null)
-        //     {
-        //         component = GetSceneContainer().InstantiateComponent<T>(go);
-        //     }
-        //     return component;
-        // }
-
         public static Color GetItemGradeColor(ItemGradeType grade)
         {
             switch (grade)
@@ -101,7 +91,7 @@ namespace Util
                 }
             }
 
-            if (list.Count > 0)
+            if (list.Count < 0)
                 return null;
             else
                 return list.ToArray();
@@ -121,17 +111,26 @@ namespace Util
 
         public static float GetAnimationLength(string animationName, Animator anim)
         {
-            float time = 0;
             RuntimeAnimatorController ac = anim.runtimeAnimatorController;
+            
+            Debug.Assert(ac != null, $"anim is null");
+            
             for (int i = 0; i < ac.animationClips.Length; i++)
             {
-                if (ac.animationClips[i].name == animationName)
+                AnimationClip clip = ac.animationClips[i];
+                
+                if (clip.name == animationName) // 완전 일치하게 적을 경우 리턴
                 {
-                    time = ac.animationClips[i].length;
+                    return clip.length;
+                }
+                
+                if (clip.name.EndsWith("@" + animationName)) // 보통은 Fighter@Jump 이
+                {
+                    return clip.length;
                 }
             }
-
-            return time;
+            Debug.LogWarning($"[AttackSkillStrategy] Could not find AnimationClip named '{animationName}'. Defaulting to 1.0f.");
+            return 1.0f;
         }
 
         public static string ItemGradeConvertToKorean(ItemGradeType itemGrade)
@@ -194,7 +193,7 @@ namespace Util
         private static CancellationTokenSource _retryCts;
         private static CancellationTokenSource _retryCtsVoid;
 
-        public static async Task<T> RateLimited<T>(Func<Task<T>> action, int delayMs = 1_000)
+        public static async UniTask<T> RateLimited<T>(Func<UniTask<T>> action, int delayMs = 1_000)
         {
             // 1) 먼저 새 CTS를 만든다.
             var newCts = new CancellationTokenSource();
@@ -206,25 +205,23 @@ namespace Util
 
             try
             {
-                Debug.LogWarning($"Rate limit exceeded. Retrying in {delayMs / 1000} seconds…");
-                await Task.Delay(delayMs, newCts.Token);
-
+                Debug.LogWarning($"Rate limit exceeded. Retrying in {delayMs / 1000f} seconds…");
+                await UniTask.Delay(delayMs, ignoreTimeScale: true, cancellationToken: newCts.Token); 
                 return await action();
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) // [수정] UniTask 취소 표준 예외
             {
                 Debug.Log("RateLimited<T>: 이전 예약이 취소되어 실행하지 않습니다.");
                 return default;
             }
             finally
             {
-                // 내가 마지막으로 등록한 CTS라면 null 로 초기화
                 Interlocked.CompareExchange(ref _retryCts, null, newCts);
                 newCts.Dispose();
             }
         }
 
-        public static async Task RateLimited(Func<Task> action, int delayMs = 1_000)
+        public static async UniTask RateLimited(Func<UniTask> action, int delayMs = 1_000)
         {
             // 1) 먼저 새 CTS를 만든다.
             var newCts = new CancellationTokenSource();
@@ -236,17 +233,16 @@ namespace Util
 
             try
             {
-                Debug.LogWarning($"Rate limit exceeded. Retrying in {delayMs / 1000} seconds…");
-                await Task.Delay(delayMs, newCts.Token);
+                Debug.LogWarning($"Rate limit exceeded. Retrying in {delayMs / 1000f} seconds…");
+                await UniTask.Delay(delayMs, ignoreTimeScale: true, cancellationToken: newCts.Token); 
                 await action();
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException) // [수정] UniTask 취소 표준 예외
             {
                 Debug.Log("RateLimited<T>: 이전 예약이 취소되어 실행하지 않습니다.");
             }
             finally
             {
-                // 내가 마지막으로 등록한 CTS라면 null 로 초기화
                 Interlocked.CompareExchange(ref _retryCtsVoid, null, newCts);
                 newCts.Dispose();
             }
@@ -256,5 +252,40 @@ namespace Util
         {
             return enumvalue.ToString();
         }
+        
+        
+        
+        public static string GetFinalDescription(BaseDataSO data, PlayerStats stats)
+        {
+            if (data == null || string.IsNullOrEmpty(data.description)) return "";
+        
+            string rawText = data.description;
+        
+            // 정규식으로 {Keyword} 찾기
+            return Regex.Replace(rawText, @"\{(.*?)\}", match =>
+            {
+                string keyword = match.Groups[1].Value;
+                return ResolveKeyword(keyword, data, stats);
+            });
+        }
+
+        private static string ResolveKeyword(string keyword, BaseDataSO data, PlayerStats stats)
+        {
+            if (data is SkillDataSO skilldata)
+            {
+                // {AttackDamage} 키워드를 발견했을 때
+                if (keyword == "AttackDamage")
+                {
+                    if (skilldata.effect is AttackEffectDef attackEffect)
+                    {
+                        float finalDamage = stats.Attack * attackEffect.multiplier + attackEffect.additional;
+                        return $"<color=red>{finalDamage:F0}</color>"; 
+                    }
+                }
+            }
+            return keyword;
+        }
+        
+
     }
 }

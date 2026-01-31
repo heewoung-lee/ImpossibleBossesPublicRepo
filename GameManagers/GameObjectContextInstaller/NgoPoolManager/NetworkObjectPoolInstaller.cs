@@ -1,5 +1,5 @@
 using GameManagers.Interface.NGOPoolManager;
-using GameManagers.Interface.NGOPoolManager.Implementation;
+using GameManagers.NGOPool.Implementation;
 using Zenject;
 
 namespace GameManagers.GameObjectContextInstaller.NgoPoolManager
@@ -9,8 +9,6 @@ namespace GameManagers.GameObjectContextInstaller.NgoPoolManager
         
         public override void InstallBindings()
         {
-            Container.Bind<INgoPoolRegister>().To<MockRegister>().AsSingle();
-
             Container.Bind<INetworkObjectGetter>().To<DynamicNetworkObjectGetter>().AsSingle();
         }
     }

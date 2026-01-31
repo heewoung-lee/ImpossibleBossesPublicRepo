@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
-using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.UIManager;
+using DataType.Item;
+using GameManagers.ItamData.Interface;
+using GameManagers.ItamDataManager.Interface;
+using GameManagers.Scene;
+using UI.Popup.PopupUI;
 using UI.SubItem;
 using UnityEngine;
 using Zenject;
@@ -10,27 +13,60 @@ namespace Data.Item
 {
     public class InventoryItemSaveAndLoader : MonoBehaviour
     {
-        //아이템 정보 가져오기
-        List<IteminfoStruct> _inventoryItemList = new List<IteminfoStruct>();
-        [Inject] private IUIManagerServices _uiManagerServices;
-        [Inject] private SceneDataSaveAndLoader _sceneDataSaveAndLoader;
+         private SceneDataSaveAndLoader _sceneDataSaveAndLoader;
+         private IItemDataManager _itemDataManager;
+        
+        private UIPlayerInventory _uiPlayerInventory;
+        [Inject]
+        private void Construct(SceneDataSaveAndLoader sceneDataSaveAndLoader, IItemDataManager itemDataManager)
+        {
+            _sceneDataSaveAndLoader = sceneDataSaveAndLoader;
+            _itemDataManager = itemDataManager;
+        }
+
+
+        private void Awake()
+        {
+            _uiPlayerInventory = GetComponent<UIPlayerInventory>();
+            
+            if (_uiPlayerInventory == null)
+            {
+                _uiPlayerInventory = GetComponentInParent<UIPlayerInventory>();
+            }
+        }
 
         private void OnDestroy()
         {
+            List<IteminfoStruct> saveList = new List<IteminfoStruct>();
+            
             foreach (UIItemComponentInventory item in GetComponentsInChildren<UIItemComponentInventory>())
             {
-                _inventoryItemList.Add(new IteminfoStruct(item));
+                saveList.Add(new IteminfoStruct(item.ItemNumber));
             }
-            _sceneDataSaveAndLoader.SaveInventoryItem(_inventoryItemList);
+            
+            _sceneDataSaveAndLoader.SaveInventoryItem(saveList);
         }
-
+        // 새 씬이 시작될 때 로드
         private void Start()
         {
-            if(_sceneDataSaveAndLoader.TryGetLoadInventoryItem(_uiManagerServices,out List<UIItemComponentInventory> loaditemList))
+            //장착된 데이터(ID 리스트) 가져오기
+            if (_sceneDataSaveAndLoader.TryGetLoadInventoryItem(out List<IteminfoStruct> savedList))
             {
-                //씬 전환후 가져온 아이템들에 대한 후처리는 여기에 할것 
+                //각 ID를 순회하며 복구
+                foreach (var info in savedList)
+                {
+                    // ID로 원본 데이터(SO) 찾기
+                    if (_itemDataManager.TryGetItemData(info.ItemNumber, out ItemDataSO data))
+                    {
+                        // UIPlayerInventory에게 생성 요청
+                        _uiPlayerInventory.AddItem(data);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[SaveLoader] 저장된 아이템 ID {info.ItemNumber}에 해당하는 데이터를 찾을 수 없습니다.");
+                    }
+                }
             }
         }
-
     }
 }

@@ -1,8 +1,9 @@
+using System;
 using Buffer;
 using GameManagers;
 using GameManagers.Interface.BufferManager;
-using GameManagers.Interface.SceneUIManager;
-using GameManagers.Interface.UIFactoryManager.SceneUI;
+using GameManagers.Scene;
+using GameManagers.UIFactory.SceneUI;
 using UI.Scene.Interface;
 using UnityEngine;
 using Zenject;
@@ -13,8 +14,8 @@ namespace UI.Scene.SceneUI
     {
         public class UIBufferBarFactory : SceneUIFactory<UIBufferBar>{}
 
-        [Inject]private IBufferManager _bufferManager;
-        [Inject] SceneManagerEx _sceneManagerEx;
+        [Inject] private IBufferManager _bufferManager;
+        [Inject] private SceneManagerEx _sceneManagerEx;
         enum BufferContextTr
         {
             BufferContext
@@ -26,17 +27,16 @@ namespace UI.Scene.SceneUI
         public Transform BufferContext { get => _bufferContext; }//여기에 다른애들이 추가를 한다면, 
 
 
-        protected override void OnEnableInit()
+        protected override void ZenjectEnable()
         {
-            base.OnEnableInit();
+            base.ZenjectEnable();
             _sceneManagerEx.OnBeforeSceneUnloadLocalEvent += OnBeforeSceneUnload;
         }
 
-        protected override void OnDisableInit()
+        protected override void ZenjectDisable()
         {
-            base.OnDisableInit();
+            base.ZenjectDisable();
             _sceneManagerEx.OnBeforeSceneUnloadLocalEvent -= OnBeforeSceneUnload;
-
         }
         protected override void StartInit()
         {

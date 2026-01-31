@@ -1,12 +1,19 @@
+using System;
+using Data.DataType.ItemType.Interface;
 using Data.Item;
+using DataType;
+using DataType.Item;
 using GameManagers;
 using GameManagers.Interface;
 using GameManagers.Interface.GameManagerEx;
+using GameManagers.Interface.ResourcesManager;
 using GameManagers.Interface.UIManager;
+using GameManagers.UIFactory.SubItemUI;
 using Stats;
 using Stats.BaseStats;
 using TMPro;
 using UI.Scene.SceneUI;
+using UI.SubItem;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -18,6 +25,10 @@ namespace UI.Popup.PopupUI
 {
     public class UIPlayerInventory : UIPopup, IPopupHandler
     {
+        private IUIManagerServices _uiManagerServices;
+        private IPlayerSpawnManager _gameManagerEx;
+        private IUIItemFactory _itemFactory;
+        
         private PlayerStats _ownerPlayerStats;
         private TMP_Text _playerName;
         private TMP_Text _playerLevel;
@@ -37,9 +48,7 @@ namespace UI.Popup.PopupUI
 
         private GraphicRaycaster _uiInventoryRaycaster;
         private EventSystem _eventSystem;
-        [Inject] private IUIManagerServices _uiManagerServices;
-        [Inject] IPlayerSpawnManager _gameManagerEx;
-
+        
         public Transform ItemInventoryTr => _itemInventoryTr;
         public GraphicRaycaster UIInventoryRayCaster=> _uiInventoryRaycaster;
         public EventSystem EventSystem => _eventSystem;
@@ -59,7 +68,12 @@ namespace UI.Popup.PopupUI
         }
 
         public bool IsVisible => _inventoryCanvas.enabled;
-
+        public enum Images
+        {
+            BackGroundImage,
+            ItemIconSourceImage, // 아이콘
+            ItemGradeBorder      // 테두리
+        }
         enum EquipmentGo
         {
             Equipment
@@ -79,10 +93,20 @@ namespace UI.Popup.PopupUI
             WindowPanel
         }
 
+        [Inject]
+        public void Construct(IUIManagerServices uiManagerServices,
+            IPlayerSpawnManager gameManagerEx,
+            IUIItemFactory uiItemFactory)
+        {
+            _uiManagerServices = uiManagerServices;
+            _gameManagerEx = gameManagerEx;
+            _itemFactory = uiItemFactory;
+        }
+        
+    
         protected override void AwakeInit()
         {
             base.AwakeInit();
-            _uiManagerServices.AddImportant_Popup_UI(this);
             Bind<Transform>(typeof(PanelTr));
             Bind<GameObject>(typeof(EquipmentGo));
             Bind<UIBase>(typeof(UIBases));
@@ -115,6 +139,15 @@ namespace UI.Popup.PopupUI
             _parentRectTransform = transform as RectTransform;
 
         }
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
+            _uiManagerServices.AddImportant_Popup_UI(this);
+            //로드할 수 있는 스크립트 삽입
+            _resourcesServices.GetOrAddComponent<InventoryItemSaveAndLoader>(_itemInventoryTr.gameObject);
+        }
+
         protected override void StartInit()
         {
             UpdateStats();
@@ -124,7 +157,16 @@ namespace UI.Popup.PopupUI
             //아이템을 로드하기 위해 게임오브젝트는 켜두는데 캔버스만 꺼둠.
 
         }
-
+        public void AddItem(ItemDataSO data, int count = 1)
+        {
+            if (data == null) return;
+            UIItemComponentInventory item = _itemFactory.CreateItemUI(data, _itemInventoryTr, count);
+            if (item == null)
+            {
+                Debug.LogError($"[UIInventory] 생성 실패 Key: {data.name}");
+                return;
+            }
+        }
         private void UpdatePlayerLevelAndNickName(CharacterBaseStat stat)
         {
             _playerName.text = OwnerPlayerStats.Name;
@@ -168,9 +210,9 @@ namespace UI.Popup.PopupUI
             _equipMent.transform.localPosition = _initialEquipPosition + (Vector3)offset;
         }
         
-        protected override void OnEnableInit()
+        protected override void ZenjectEnable()
         {
-            base.OnEnableInit();
+            base.ZenjectEnable();
             _closePopupUI.performed += CloseDecriptionWindow;
             if(OwnerPlayerStats != null)
             {
@@ -183,9 +225,10 @@ namespace UI.Popup.PopupUI
             _windowPanel.BindEvent(_windowPanel.gameObject,DragingPositionUpdate, Define.UIEvent.Drag);
             _equipMent.transform.localPosition = _initialWindowPosition;
         }
-        protected override void OnDisableInit()
+
+        protected override void ZenjectDisable()
         {
-            base.OnDisableInit();
+            base.ZenjectDisable();
             _closePopupUI.performed -= CloseDecriptionWindow;
             if (OwnerPlayerStats != null)
             {

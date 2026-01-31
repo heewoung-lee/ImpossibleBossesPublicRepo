@@ -1,99 +1,48 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Controller.PlayerState.FighterState;
+using Data.DataType.StatType;
 using GameManagers;
+using GameManagers.Data;
+using GameManagers.Interface.DataManager;
 using GameManagers.Interface.GameManagerEx;
 using Player;
 using Stats;
+using Stats.BaseStats;
 using UnityEngine;
 using Util;
 using Zenject;
 
 namespace Module.PlayerModule.PlayerClassModule
 {
+
+
     public class ModuleFighterClass : ModulePlayerClass
     {
-        [Inject] IPlayerSpawnManager _gameManagerEx;
-        
-        private const float DefalutTransitionRoar = 0.1f;
-        private const float DefalutTransitionTaunt = 0.1f;
-        private const float DefalutTransitionSlash = 0.3f;
-
+        private IAllData _allData;
+        private Dictionary<int, FighterStat> _originData;
+        [Inject]
+        public void Construct(IAllData allData)
+        {
+            _allData = allData;
+            _originData = _allData.GetData(typeof(FighterStat)) as Dictionary<int, FighterStat>;
+            //이 모듈이 파이터 클래스에 대한 스탯을 가져오도록 정의
+            //각기 모듈들이 클래스의 다름을 정의 하기에 이 부군에서 정의 할 수 밖에 없음.
+            InitializeStatTable(_originData);
+        }
         public override Define.PlayerClass PlayerClass => Define.PlayerClass.Fighter;
 
-        private PlayerController _controller;
-        private RoarState _roarState;
-        private DeterminationState _determinationState;
-        private SlashState _slashState;
-        private TauntState _tauntState;
 
+        #region AnimationClipMethod
 
-        private int _hashRoar = Animator.StringToHash("Roar");
-        private int _hashSlash = Animator.StringToHash("Slash");
-        public int HashSlash => _hashSlash;
-        private int _hashTaunt = Animator.StringToHash("Taunt");
-
-
-        public RoarState RoarState { get => _roarState; }
-        public SlashState SlashState { get => _slashState; }
-        public TauntState TauntState { get => _tauntState; }
-        public DeterminationState DeterminationState { get => _determinationState; }
-
-        public override void InitializeOnAwake()
+        public void AttackEvent()
         {
-            base.InitializeOnAwake();
-            _roarState = new RoarState(UpdateRoar);
-            _determinationState = new DeterminationState(UpdateDetermination);
-            _slashState = new SlashState(UpdateSlash);
-            _tauntState = new TauntState(UpdateTaunt);
+            if (IsOwner == false) return;
+            
+            TargetInSight.AttackTargetInSector(Stats);
         }
 
-
-        public override void InitializeOnStart()
-        {
-            base.InitializeOnStart();
-
-            if(TryGetComponent(out PlayerController controller))
-            {
-                _controller = controller;
-                InitializeState();
-            }
-            else
-            {
-                _gameManagerEx.OnPlayerSpawnEvent += Initialize_Player_DoneEvent;
-            }
-
-        }
-        private void Initialize_Player_DoneEvent(PlayerStats playerStats)
-        {
-            _controller = playerStats.GetComponent<PlayerController>();
-            InitializeState();
-        }
-
-        private void InitializeState()
-        {
-            _controller.StateAnimDict.RegisterState(_roarState, () => _controller.RunAnimation(_hashRoar, DefalutTransitionRoar));
-            _controller.StateAnimDict.RegisterState(_determinationState, () => _controller.RunAnimation(_hashRoar, DefalutTransitionRoar));
-            _controller.StateAnimDict.RegisterState(_slashState, () => _controller.RunAnimation(_hashSlash, DefalutTransitionSlash));
-            _controller.StateAnimDict.RegisterState(_tauntState, () => _controller.RunAnimation(_hashTaunt, DefalutTransitionTaunt));
-        }
-
-        public void UpdateRoar()
-        {
-            _controller.ChangeAnimIfCurrentIsDone(_hashRoar, _controller.BaseIDleState);
-        }
-
-        public void UpdateSlash()
-        {
-            _controller.ChangeAnimIfCurrentIsDone(_hashSlash, _controller.BaseIDleState);
-        }
-
-        private void UpdateTaunt()
-        {
-            _controller.ChangeAnimIfCurrentIsDone(_hashTaunt, _controller.BaseIDleState);
-        }
-
-        private void UpdateDetermination()
-        {
-            _controller.ChangeAnimIfCurrentIsDone(_hashRoar, _controller.BaseIDleState);
-        }
+        #endregion
     }
 }

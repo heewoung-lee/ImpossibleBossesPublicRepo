@@ -17,10 +17,6 @@ namespace Scene
             base.StartInit();
         }
 
-        public override void Clear()
-        {
-
-        }
 
         protected override void AwakeInit()
         {

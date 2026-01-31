@@ -50,13 +50,6 @@ namespace Util
             LoadingScene,
             NetworkLoadingScene
         }
-        public enum CurrentMouseType
-        {
-            None,
-            Base,
-            Attack,
-            Talk
-        }
         public enum Layer
         {
             Block = 8,

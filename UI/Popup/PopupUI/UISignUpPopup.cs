@@ -1,8 +1,11 @@
+using System;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface;
 using GameManagers.Interface.LoginManager;
 using GameManagers.Interface.UIManager;
 using TMPro;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using Zenject;
@@ -51,23 +54,38 @@ namespace UI.Popup.PopupUI
             _buttonClose = Get<Button>((int)Buttons.ButtonClose);
             _buttonSignup = Get<Button>((int)Buttons.ButtonSignup);
             _buttonClose.onClick.AddListener(OnClickCloseButton);
-            _buttonSignup.onClick.AddListener(CreateID);
+            _buttonSignup.onClick.AddListener(()=>CreateID().Forget());
         }
-        public async void CreateID()
+        public async UniTaskVoid CreateID()
         {
             if (string.IsNullOrEmpty(_idInputField.text) || string.IsNullOrEmpty(_pwInputField.text))
                 return;
 
+            _buttonSignup.interactable = false;
 
-            (bool isCheckResult, string message) =  await _writeGoogleSheet.WriteToGoogleSheet(_idInputField.text,_pwInputField.text);
-
-            if(isCheckResult == false)            {
-                _alertPopup = ShowAlertDialogUI<UIAlertDialog>(_alertPopup, "오류", message);
-            }
-            else
+            try
             {
-                _confirmPopup = ShowAlertDialogUI<UIConfirmDialog>(_confirmPopup, "성공", message, ShowLoginAfterSignUp);
-                ClearIDAndPw();
+                (bool isCheckResult, string message) = await _writeGoogleSheet.WriteToGoogleSheet(_idInputField.text, _pwInputField.text);
+
+                if (isCheckResult == false)
+                {
+                    _alertPopup = ShowAlertDialogUI<UIAlertDialog>(_alertPopup, "오류", message);
+                }
+                else
+                {
+                    _confirmPopup = ShowAlertDialogUI<UIConfirmDialog>(_confirmPopup, "성공", message, ShowLoginAfterSignUp);
+                    ClearIDAndPw();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[SignUp Error]: {ex}");
+                _alertPopup = ShowAlertDialogUI<UIAlertDialog>(_alertPopup, "오류", "알 수 없는 오류가 발생했습니다.");
+            }
+            finally
+            {
+                if (_buttonSignup != null) 
+                    _buttonSignup.interactable = true;
             }
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using GameManagers.Interface.LoginManager;
 using Scene.CommonInstaller;
 using Scene.CommonInstaller.Interfaces;
@@ -15,7 +16,7 @@ namespace Util
         public const string LobbyName = "TestLobby";
         
         
-        public static async Task<PlayerIngameLoginInfo> SetAuthenticationService(PlayersTag playerTag)
+        public static async UniTask<PlayerIngameLoginInfo> SetAuthenticationService(PlayersTag playerTag)
         {
             await UnityServices.InitializeAsync();
             if (!AuthenticationService.Instance.IsSignedIn)

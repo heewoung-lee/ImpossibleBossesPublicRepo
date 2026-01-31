@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using GameManagers;
 using GameManagers.Interface;
 using GameManagers.Interface.UIManager;
@@ -47,10 +48,10 @@ namespace Test.TestUI
             {
                 _testButton.gameObject.SetActive(ison);
             });
-            _testButton.onClick.AddListener(ClickLogin);
+            _testButton.onClick.AddListener(()=>ClickLogin().Forget());
         }
 
-        private async void ClickLogin()
+        private async UniTaskVoid ClickLogin()
         {
 
             if (_uiManager.TryGetPopupDictAndShowPopup(out UILoginPopup loginPopup) == true)
@@ -82,11 +83,5 @@ namespace Test.TestUI
                 }
             }
         }
-
-        protected override void StartInit()
-        {
-            base.AwakeInit();
-        }
-
     }
 }

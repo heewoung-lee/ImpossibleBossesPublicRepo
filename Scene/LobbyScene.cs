@@ -14,9 +14,6 @@ namespace Scene
         
         [Inject]private IUIManagerServices _uiManagerServices; 
         UILobbyScene _uiLobbyScene;
-        public override void Clear()
-        {
-        }
 
         protected override void AwakeInit()
         {
