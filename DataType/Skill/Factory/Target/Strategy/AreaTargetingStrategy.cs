@@ -45,12 +45,12 @@
                  _tmProvider = tmProvider;
              }
 
-             public void BeginSelection(SkillExecutionContext ctx, Action onReady, Action onCancel)
+             public void BeginSelection(SkillExecutionContext ctx, Action onComplete, Action onCancel)
              {
                 
                  
                  _released = false; 
-                 _onReady = onReady;
+                 _onReady = onComplete;
                  _onCancel = onCancel;
 
                  if (ctx == null)
@@ -72,19 +72,21 @@
                      radius: radius,
                      targetLayer: selectLayer,
                      indicatorMat: _def.indicatorMat,
-                     onSelected: pos =>
-                     {
-                         if (_released) return;
-                         ctx.SelectedPoint = pos;
-                         _onReady?.Invoke();
-                     },
-                     onCanceled: () =>
-                     {
-                         if (_released) return;
-                         _onCancel?.Invoke();
-                     }
+                     OnSelected,
+                     OnCanceled
                  );
-                 
+                 void OnSelected(Vector3 pos)
+                 {
+                     if (_released) return;
+                     ctx.SelectedPoint = pos;
+                     _onReady?.Invoke();
+                 }
+
+                 void OnCanceled()
+                 {
+                     if (_released) return;
+                     _onCancel?.Invoke();
+                 }
              }
 
              public void FillHitTargets(SkillExecutionContext ctx)
@@ -121,7 +123,6 @@
                  }
 
                  ctx.HitTargets = filteredTargets.ToArray();
-                 ctx.HitTargets = cols;
              }
 
              public void Release()

@@ -40,10 +40,10 @@ namespace DataType.Skill.Factory.Target.Strategy
             }
 
            
-            public void BeginSelection(SkillExecutionContext ctx, Action onReady, Action onCancel)
+            public void BeginSelection(SkillExecutionContext ctx, Action onComplete, Action onCancel)
             {
                 _released = false;
-                _onReady = onReady;
+                _onReady = onComplete;
                 _onCancel = onCancel;
 
                 if (ctx == null)

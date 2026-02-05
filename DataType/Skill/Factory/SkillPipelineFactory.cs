@@ -5,6 +5,7 @@ using DataType.Skill.Factory.Sequence;
 using DataType.Skill.Factory.Target;
 using Skill;
 using UnityEngine;
+using Zenject;
 
 namespace DataType.Skill.Factory
 {
@@ -20,6 +21,7 @@ namespace DataType.Skill.Factory
         private readonly IDecoratorFactory _decoratorFactory;
         private readonly IEffectFactory _effectFactory;
 
+        [Inject]
         public SkillPipelineFactory(
             ITargetingFactory targetingFactory,
             ISequenceFactory sequenceFactory,

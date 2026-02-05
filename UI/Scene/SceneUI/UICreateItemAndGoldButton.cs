@@ -86,11 +86,18 @@ namespace UI.Scene.SceneUI
         protected override void StartInit()
         {
             InitalizeUI_Button();
+            //HideButton();
         }
 
         public void IninitalizePlayerStats(GameObject player)
         {
             _playerStats = player.GetComponent<PlayerStats>();
+        }
+
+        private void HideButton()
+        {
+            _scoreButton.gameObject.SetActive(false);
+            _moveSceneButton.gameObject.SetActive(false);
         }
         
         public void InitalizeUI_Button()

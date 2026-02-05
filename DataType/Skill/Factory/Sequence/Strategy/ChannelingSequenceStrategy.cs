@@ -128,6 +128,11 @@ namespace DataType.Skill.Factory.Sequence.Strategy
 
                 try
                 {
+                    ctx.SkillData.isAnimationLocked = false; 
+                    // 2.2일 수정 채널링에서 쓰는 애니메이션들은 루프 애니메이션들임
+                    // 만약 실수로 루프 애니메이션 + Lock을 걸어버리면 플레이어가 멈출 수 있기에
+                    // 채널링 애니메이션은 락을 푸는 걸 강제함 구조가 좋진 않지만, 제일 싸게 고칠 수 있는방법 
+                    
                     decorator.Run(DecoratorPhase.Start, ctx, NoCompleteOption, FinishCancel);
                     //시퀀스가 나눠야할 시간의 총길이를 가져옴
                     //총 길이는 선택한 _def를 resolver가 구해주는 방식으로 계산

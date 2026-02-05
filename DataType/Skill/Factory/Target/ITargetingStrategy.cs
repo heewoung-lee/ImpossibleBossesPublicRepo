@@ -12,7 +12,7 @@ namespace DataType.Skill.Factory.Target
 
     public interface ITargetingModule
     {
-        void BeginSelection(SkillExecutionContext ctx, Action onReady, Action onCancel);
+        void BeginSelection(SkillExecutionContext ctx, Action onComplete, Action onCancel);
 
         void FillHitTargets(SkillExecutionContext ctx);
 

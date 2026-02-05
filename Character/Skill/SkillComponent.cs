@@ -32,7 +32,6 @@ namespace Skill
         private Image _iconimage;
         private Image _coolTimeImg;
         
-        private bool _isSkillReady;
         private UIDescription _decriptionObject;
         private RectTransform _skillComponentRectTr;
         public void SetSkillComponent(RuntimeSkill skill)
@@ -53,19 +52,15 @@ namespace Skill
                 }
             }
             _coolTimeImg.fillAmount = 0; 
-            _isSkillReady = true;
         }
-
         protected override void AwakeInit()
         {
             Bind<Image>(typeof(SkillImage));
             _iconimage = Get<Image>((int)SkillImage.SkillIconImage);
             _coolTimeImg = Get<Image>((int)SkillImage.CoolTimeImg);
-            _isSkillReady = true;
             _skillComponentRectTr = transform as RectTransform;
            
         }
-
         protected override void ZenjectEnable()
         {
             base.ZenjectEnable();
@@ -73,7 +68,6 @@ namespace Skill
             BindEvent(gameObject, ShowDescription, Define.UIEvent.PointerEnter);
             BindEvent(gameObject, CloseDescription, Define.UIEvent.PointerExit);
         }
-
         protected override void ZenjectDisable()
         {
             base.ZenjectDisable();
@@ -87,7 +81,6 @@ namespace Skill
             }
             
         }
-
         private void ShowDescription(PointerEventData data)
         {
             if (_connectSkill == null || _connectSkill.Data == null) return;
@@ -104,18 +97,15 @@ namespace Skill
             _decriptionObject.UI_DescriptionDisable();
             _decriptionObject.SetdecriptionOriginPos();
         }
-
         public void ClicktoSkill(PointerEventData eventdata)
         {
             SkillStart();
         }
-    
         public void SkillStart()
         {
             if (_connectSkill == null) return;
             
-            
-            if (_isSkillReady && _connectSkill.IsReady)
+            if (_connectSkill.IsReady)
             {
                 _connectSkill.Use();//사용하기만 하고 쿨타임이라든지 사용에 대한 결정은 오직 스킬의 전략에서만 
             }
@@ -133,7 +123,6 @@ namespace Skill
             float duration = _connectSkill.Data.cooldown;
             
             _coolTimeImg.fillAmount = 1;
-            _isSkillReady = false;
             
             while (_coolTimeImg.fillAmount > 0)
             {
@@ -141,7 +130,6 @@ namespace Skill
                 yield return null;  
             }
             _coolTimeImg.fillAmount = 0;
-            _isSkillReady = true;
         }
 
         public void AttachItemToSlot(GameObject go, Transform slot)

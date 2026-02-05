@@ -29,6 +29,6 @@ namespace DataType.Skill.Factory.Target.Def
         //1.22일 수정 아예 쿼리 자체를 강타입으로 묶어버림.
         //제각기 다른 쿼리방식을 타겟이 유연하게 쓸 수 있는 방식이 아무리
         //생각해도 안떠오름 그래서 강타입으로 묶음
-        [SerializeReference] public CircleQueryDef circleQueryDef = new CircleQueryDef();
+        public CircleQueryDef circleQueryDef = new CircleQueryDef();
     }
 }

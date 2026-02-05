@@ -273,7 +273,6 @@ namespace Module.PlayerModule.PlayerClassModule
             {
                 //공장을 통해 스킬 생성 (데이터 + 주인 주입)
                 RuntimeSkill newSkill = _runtimeSkillFactory.CreateSkill(data, controller);
-
                 if (newSkill != null)
                 {
                     _playerSkill.Add(data.dataName, newSkill);

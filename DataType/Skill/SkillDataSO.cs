@@ -55,7 +55,7 @@ namespace DataType.Skill
         [SerializeReference] public ITriggerDef trigger;
         [SerializeReference] public ITargetingDef targeting;
         [SerializeReference] public ISequenceDef sequence;
-        [SerializeReference] public IDecoratorDef decorator;
+        public DecoratorStackDef decorator = new DecoratorStackDef();
         [SerializeReference] public IEffectDef effect;
 
 #if UNITY_EDITOR
@@ -67,18 +67,7 @@ namespace DataType.Skill
             if (decorator == null) Debug.LogError($"[{name}] Decorator is null");
             if (effect == null) Debug.LogError($"[{name}] Effect is null");
 
-            FixEnsureDecoratorStack();
             SetPrimeShareValue();
-        }
-
-        private void FixEnsureDecoratorStack()
-        {
-            DecoratorStackDef stackDef = decorator as DecoratorStackDef;
-            if (stackDef == null)
-            {
-                stackDef = new DecoratorStackDef();
-                decorator = stackDef;
-            }
         }
 
 

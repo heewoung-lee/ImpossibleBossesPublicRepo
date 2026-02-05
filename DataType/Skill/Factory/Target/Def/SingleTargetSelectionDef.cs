@@ -9,8 +9,6 @@ namespace DataType.Skill.Factory.Target.Def
         public LayerMask targetLayer;
         public Material highlightMat;
         
-        
-        [SerializeReference]
         public ExtraTargetCondition extraTargetCondition;
     }
 }

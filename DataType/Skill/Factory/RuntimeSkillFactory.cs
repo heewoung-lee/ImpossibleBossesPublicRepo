@@ -54,8 +54,8 @@ namespace DataType.Skill.Factory
                 return null;
             }
 
-            var trigger = _triggerFactory.GetTrigger(data.trigger);
-            var pipeline = _pipelineFactory.Create(data, owner);
+            ISkillTriggerStrategy trigger = _triggerFactory.GetTrigger(data.trigger);
+            ISkillPipeline pipeline = _pipelineFactory.Create(data, owner);
 
             if (trigger == null || pipeline == null)
             {

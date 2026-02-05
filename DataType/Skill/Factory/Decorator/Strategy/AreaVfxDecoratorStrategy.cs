@@ -48,7 +48,9 @@ namespace DataType.Skill.Factory.Decorator.Strategy
 
             public void Run(DecoratorPhase phase, SkillExecutionContext ctx, Action onComplete, Action onCancel)
             {
-                if (string.IsNullOrWhiteSpace(_def.castVfxPath))
+                string vfxPath = _def.vfxInfo.hitVfxPath.Resolve(ctx);
+                
+                if (string.IsNullOrWhiteSpace(vfxPath))
                 {
                     onComplete?.Invoke();
                     return;
@@ -62,13 +64,13 @@ namespace DataType.Skill.Factory.Decorator.Strategy
                 }
 
                 float duration = 1f;
-                if (_def.castVfxDuration != null)
-                    duration = _def.castVfxDuration.Resolve(ctx);
+                if (_def.vfxInfo != null)
+                    duration = _def.vfxInfo.hitVfxDuration.Resolve(ctx);
 
                 Vector3 selectPoint = ctx.SelectedPoint.Value;
 
                 float radius = _def.scaleRef.Resolve(ctx);
-                _vfxManager.InstantiateParticleInArea(_def.castVfxPath, selectPoint, duration,localScale: Vector3.one * radius);
+                _vfxManager.InstantiateParticleInArea(vfxPath, selectPoint, duration,localScale: Vector3.one * radius);
 
                 onComplete?.Invoke();
             }

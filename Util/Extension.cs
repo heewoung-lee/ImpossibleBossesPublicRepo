@@ -33,6 +33,16 @@ namespace Util
         }
 
 
+        public static bool TryGetComponentInChildren<T>(this Transform searchPosition, out T findObject)
+            where T : Component
+        {
+            findObject = searchPosition.GetComponentInChildren<T>();
+            
+            if(findObject == null) return false;
+            
+            return true;
+        }
+
         public static GameObject RemoveCloneText(this GameObject go)
         {
             int index = go.name.IndexOf("(Clone)");
@@ -65,5 +75,6 @@ namespace Util
             go.name = sb.ToString();
             return go;
         }
+        
     }
 }

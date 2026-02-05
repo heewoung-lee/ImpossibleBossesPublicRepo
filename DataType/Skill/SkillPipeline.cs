@@ -4,7 +4,7 @@ using DataType.Skill.Factory.Effect;
 using DataType.Skill.Factory.Sequence;
 using DataType.Skill.Factory.Target;
 using Skill;
-using UnityEngine;
+using Zenject;
 
 namespace DataType.Skill
 {
@@ -15,6 +15,8 @@ namespace DataType.Skill
         private readonly IDecoratorModule _decorator;
         private readonly IEffectModule _effect;
 
+        //이거 Inject아님 생성자로 만들어지는거라 Inject를 하면 안됨.
+        //뭐 해도 동작은 동일하지만.
         public SkillPipeline(
             ITargetingModule targeting,
             ISequenceModule sequence,
@@ -30,7 +32,14 @@ namespace DataType.Skill
         public void Execute(SkillExecutionContext ctx, Action onComplete, Action onCancel)
         {
             bool finished = false;
-
+            
+            _targeting.BeginSelection(ctx,OnReady,CancelOnce);
+            void OnReady()
+            {
+                if (ctx != null && ctx.IsCancelled) { CancelOnce(); return; }
+                _sequence.Execute(ctx, _targeting, _decorator, _effect, CompleteOnce, CancelOnce);
+            }
+            
             void CleanupOnce()
             {
                 if (_sequence != null) _sequence.Release();
@@ -53,14 +62,7 @@ namespace DataType.Skill
                 onCancel?.Invoke();
             }
 
-            _targeting.BeginSelection(
-                ctx,
-                onReady: () =>
-                {
-                    if (ctx != null && ctx.IsCancelled) { CancelOnce(); return; }
-                    _sequence.Execute(ctx, _targeting, _decorator, _effect, CompleteOnce, CancelOnce);
-                },
-                onCancel: CancelOnce);
+          
         }
     }
 }

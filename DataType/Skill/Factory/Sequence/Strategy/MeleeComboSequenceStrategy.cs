@@ -126,7 +126,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
                     if (totalSeconds <= 0.0001f || float.IsNaN(totalSeconds) || float.IsInfinity(totalSeconds))
                     {
                         FinishCancel();
-                        Debug.Assert(false, "length is not be read");
+                        Debug.Assert(false, "Length cannot be read");
                         return;
                     }
 

@@ -21,7 +21,6 @@ namespace Skill
         public Vector3? SelectedPoint { get; set; }
         public Collider[] HitTargets { get; set; }= Array.Empty<Collider>();
         public bool IsCancelled { get; private set; }
-        public void Cancel() => IsCancelled = true;
         public SkillExecutionContext(BaseController caster, SkillDataSO data)
             : base(caster, data) { }
     }
@@ -62,9 +61,9 @@ namespace Skill
 
         public void Use()
         {
-            if (_isExecuting) return;
-            if (!IsReady) return;
-            if (_owner.IsAnimationLocked) return;
+            if (_isExecuting == true) return;
+            if (IsReady == false) return;
+            if (_owner.IsAnimationLocked == true) return;
 
             if (Data.trigger == null)
             {
@@ -90,8 +89,6 @@ namespace Skill
             bool finished = false;
 
             _trigger.Fire( ctx, Data.trigger, OnCommit, OnCancel);
-
-
             void OnCommit()
             {
                 _pipeline.Execute(ctx, FinishComplete, FinishCancel);

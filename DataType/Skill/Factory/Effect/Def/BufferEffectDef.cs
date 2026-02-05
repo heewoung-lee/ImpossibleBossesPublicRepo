@@ -8,8 +8,9 @@ namespace DataType.Skill.Factory.Effect.Def
    [Serializable]
     public class BufferEffectDef: IEffectDef
     {
+        //절대 MinValue 잡지 말것 디버프 용으로도 쓸 수 있으니깐
+        //음수가 뜨는것도 정상임
         [SerializeField]
-        [MinValue(0.1f)]
         private int valueInt = 1;
 
         public float Value => valueInt;

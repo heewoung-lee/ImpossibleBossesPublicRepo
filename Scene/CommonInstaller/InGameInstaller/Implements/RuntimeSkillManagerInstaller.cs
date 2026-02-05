@@ -30,7 +30,6 @@ namespace Scene.CommonInstaller.InGameInstaller
             Container.BindInterfacesAndSelfTo<EffectFactory>().AsSingle();
             Container.BindInterfacesAndSelfTo<SequenceFactory>().AsSingle();
 
-     
             
             Container.Bind(x => x.AllInterfaces())
                 .To(x => x.AllNonAbstractClasses().DerivingFrom<ISkillTriggerStrategy>()).AsSingle();

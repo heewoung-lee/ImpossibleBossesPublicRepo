@@ -7,6 +7,7 @@ namespace DataType.Skill.Factory.Effect.Def
 {
     public enum SpecialAttack
     {
+        None,
         BackAttack
     }
     

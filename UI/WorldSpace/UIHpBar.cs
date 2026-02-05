@@ -2,12 +2,13 @@ using System.Collections;
 using Stats.BaseStats;
 using UnityEngine;
 using UnityEngine.UI;
+using Util;
 
 namespace UI.WorldSpace
 {
     public class UIHpBar : UIBase
     {
-        private readonly Vector3 _offsetHpbar = new Vector3(0, 1.5f,0);
+        private readonly Vector3 _offsetHpbar = new Vector3(0, 0.5f,0);
         BaseStats _stats;
         Slider _hpSlider;
         CanvasGroup _canvasGroup;
@@ -28,7 +29,26 @@ namespace UI.WorldSpace
         protected override void StartInit()
         {
             _stats = GetComponentInParent<BaseStats>();
-            transform.position = _stats.transform.position+ _offsetHpbar * (_stats.GetComponent<Collider>().bounds.size.y);
+
+            Vector3 uiHpBarPos;
+            if (_stats.transform.TryGetComponentInChildren(out HeadTr headTr))
+            {
+                uiHpBarPos = headTr.transform.position;
+            }
+            else
+            {
+                if (_stats.transform.TryGetComponentInChildren(out Collider col))
+                {
+                    uiHpBarPos = new Vector3(_stats.transform.position.x, col.bounds.max.y, _stats.transform.position.z);
+                    //uiHpBarPos =  _stats.transform.position + Vector3.up *  col.bounds.size.y;
+                }
+                else
+                {
+                    uiHpBarPos = _stats.transform.position;
+                }
+            }
+            
+            transform.position = _offsetHpbar + uiHpBarPos;
             _stats.EventAttacked += SetHpUI;
         }
 

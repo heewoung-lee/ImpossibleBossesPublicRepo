@@ -29,8 +29,6 @@ namespace DataType.Skill.Factory.Sequence.Strategy
                 Action onComplete,
                 Action onCancel)
             {
-                
-                
                 if (ctx == null) { onCancel?.Invoke(); return; }
                 if (targeting == null) { onCancel?.Invoke(); return; }
                 if (decorator == null) { onCancel?.Invoke(); return; }
@@ -38,7 +36,6 @@ namespace DataType.Skill.Factory.Sequence.Strategy
 
                 bool finished = false;
 
-                // “헛스윙 허용”이면 ok 실패로 취소하지 말 것
                 targeting.FillHitTargets(ctx);
                 // 이 모듈은 시작-> 데코-> 이펙트 순으로 진행
                 decorator.Run(DecoratorPhase.Start, ctx,OnCompleteStartDeco,CancelOnce);

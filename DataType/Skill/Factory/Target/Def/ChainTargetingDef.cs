@@ -11,7 +11,7 @@ namespace DataType.Skill.Factory.Target.Def
         public Material highlightMat;
         
         
-        [SerializeReference]
+        [SerializeField]
         public ExtraTargetCondition extraCondition;
     }
 }

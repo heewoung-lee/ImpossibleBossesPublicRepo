@@ -1,23 +1,25 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using DataType.Skill;
-using GameManagers.Interface.DataManager;
 using GameManagers.Interface.SkillManager;
-using GameManagers.Interface.UIManager;
-using Module.PlayerModule.PlayerClassModule;
-using Scene.CommonInstaller;
-using Skill;
-using UI.Scene.SceneUI;
-using UnityEngine;
+using GameManagers.ResourcesEx;
 using Util;
 using Zenject;
 
-namespace GameManagers
+namespace GameManagers.Skill
 {
     public class SkillManager : IInitializable,ISkillManager
     {
+        private readonly IResourcesServices _resourcesServices;
+        
         private List<SkillDataSO> _allSkillDataList = new List<SkillDataSO>();
+
+        [Inject]
+        public SkillManager(IResourcesServices resourcesServices)
+        {
+            _resourcesServices = resourcesServices;
+        }
+
         public List<SkillDataSO> GetSkillDataList(Define.PlayerClass playerClass)
         {
             return _allSkillDataList
@@ -26,7 +28,7 @@ namespace GameManagers
         }
         public void Initialize()
         {
-            _allSkillDataList = UnityEngine.Resources.LoadAll<SkillDataSO>("SOData").ToList();
+            _allSkillDataList = _resourcesServices.LoadAll<SkillDataSO>("SOData").ToList();
         }
     }
 }

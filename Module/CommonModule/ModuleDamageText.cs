@@ -19,7 +19,7 @@ namespace Module.CommonModule
         public void ShowDamageText_UI(int damage, int currentHp)
         {
             UIDamageText uIDamageText = _uiManagerServices.MakeUIWorldSpaceUI<UIDamageText>();
-            uIDamageText.SetTextAndPosition(transform, damage);
+            uIDamageText.SetTextAndPosition(transform, damage,0.5f);
             uIDamageText.transform.SetParent(transform);
         }
     }

@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using Util;
 
 namespace UI.WorldSpace
 {
@@ -62,20 +63,28 @@ namespace UI.WorldSpace
             }
         }
 
-        public void SetTextAndPosition(Transform parantTransform, int damage)
+        public void SetTextAndPosition(Transform parentTr, int damage, float offset)
         {
             _damageText.text = damage.ToString();
-            Vector3 damageTextPos = default;
 
-            if (parantTransform.TryGetComponent(out Collider collider))
+            Vector3 damageTextPos;
+            if (parentTr.TryGetComponentInChildren(out HeadTr headTr))
             {
-                damageTextPos = parantTransform.position + Vector3.up * collider.bounds.max.y;
+                damageTextPos = headTr.transform.position;
             }
             else
             {
-                damageTextPos = parantTransform.position + Vector3.up * 1.5f;
+                if (parentTr.TryGetComponentInChildren(out Collider col))
+                {
+                    damageTextPos =  parentTr.position + Vector3.up *  col.bounds.size.y;
+                }
+                else
+                {
+                    damageTextPos = parentTr.position;
+                }
             }
-
+            
+            damageTextPos += Vector3.up * offset;
             transform.position = damageTextPos;
         }
 

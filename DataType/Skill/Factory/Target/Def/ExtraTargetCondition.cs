@@ -7,6 +7,7 @@ namespace DataType.Skill.Factory.Target.Def
 {
     public enum TargetState
     {
+        None,
         Die,
         Alive
     }
@@ -26,6 +27,7 @@ namespace DataType.Skill.Factory.Target.Def
             
             switch (targetState)
             {
+                
                 case TargetState.Die:
                     if (playerStat.IsDead == true)
                     {
@@ -38,6 +40,9 @@ namespace DataType.Skill.Factory.Target.Def
                         return true;
                     }
                     return false;
+                
+                case TargetState.None:
+                    return true;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

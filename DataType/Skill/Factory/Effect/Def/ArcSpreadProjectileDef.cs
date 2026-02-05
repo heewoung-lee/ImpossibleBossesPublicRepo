@@ -12,7 +12,7 @@ namespace DataType.Skill.Factory.Effect.Def
         [PropertyRange(0, 360)]
         public float spreadAngle = 90f;
 
-        [Min(1)]
+        [MinValue(1)]
         public int projectileCount = 1;
 
         [Header("Projectile Path")]

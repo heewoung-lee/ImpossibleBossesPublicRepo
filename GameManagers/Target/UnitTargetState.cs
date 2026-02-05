@@ -45,8 +45,6 @@ namespace GameManagers.Target
                 OnCancel();
                 return;
             }
-
-          
             
             Ray ray = _targetManager.MainCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, _layer))

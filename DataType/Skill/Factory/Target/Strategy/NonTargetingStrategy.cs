@@ -18,9 +18,9 @@ namespace DataType.Skill.Factory.Target.Strategy
         
         private sealed class Module : ITargetingModule
         {
-            public void BeginSelection(SkillExecutionContext ctx, Action onReady, Action onCancel)
+            public void BeginSelection(SkillExecutionContext ctx, Action onComplete, Action onCancel)
             {
-                onReady?.Invoke();
+                onComplete?.Invoke();
             }
 
             public void FillHitTargets(SkillExecutionContext ctx)
