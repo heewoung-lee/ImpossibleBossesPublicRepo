@@ -1,4 +1,4 @@
-
+![stealth](https://github.com/user-attachments/assets/26947ddd-cef1-4adb-a112-9cc962f98bf8)
 <img width="1536" height="1024" alt="1titleImage" src="https://github.com/user-attachments/assets/66f55318-9bdb-498f-847a-7edc3d3aa09d" />
 
 ## 📘 목차
@@ -18,9 +18,100 @@
 
 보스의 다양한 공격 패턴을 팀원 간 **협동과 전략**으로 공략하며,  
 전투를 통해 **아이템을 획득**하고, **장비를 교체**하면서  
-플레이어는 점차 강해져 **최종 보스를 처치하는 것**이 목표입니다......
+플레이어는 점차 강해져 **최종 보스를 처치하는 것**이 목표입니다.
+
+
+### 📺 플레이 시연 영상
+
+
+![LoginGif](https://github.com/user-attachments/assets/da46c143-e95c-405a-ac1c-2326575816af)
+<p align="center">&lt;로그인 화면&gt;</p>
+
+
+![LobbyScene](https://github.com/user-attachments/assets/6e6d1c86-d434-4ebc-bbad-5f75b05a3ad7)
+<p align="center">&lt;로비 화면&gt;</p>
+
+
+![ingame](https://github.com/user-attachments/assets/a3e05ab5-83b3-4c27-8271-287ad108915e)
+<p align="center">&lt;게임 플레이1&gt;</p>
+
+<div align="center">
+   
+![ingame2](https://github.com/user-attachments/assets/28115095-2989-43df-9415-eb39d50db800)
+
+</div>
+<p align="center">&lt;게임 플레이2&gt;</p>
+
+<div align="center">
+
+### 🏹 아쳐 (Archer)
+| **화살비** | **대쉬** |
+| :---: | :---: |
+| ![ArrowRain](https://github.com/user-attachments/assets/ad44177b-881c-4880-a6c9-cffdfa9f66df) | ![Dash](https://github.com/user-attachments/assets/65d33da3-c840-4878-bce4-68a0d89639d8) |
+| **표적집중** | **멀티샷** |
+| ![debuff](https://github.com/user-attachments/assets/c83bb9b9-3069-4bce-a1a1-84fb0f49b1cb) | ![Multishot](https://github.com/user-attachments/assets/ac837b5d-9b67-4bac-b34d-8b69939c8fed) |
+
+</div>
+
+### ⚔️ 파이터 (Fighter)
+
+<div align="center">
+
+| **슬래쉬** | **방패들기** |
+| :---: | :---: |
+| ![Slash](https://github.com/user-attachments/assets/eb23752e-f6c9-4571-aef8-c12df4829f67) | ![shield](https://github.com/user-attachments/assets/47051f33-3071-4041-93b1-978c35a3f20b) |
+| **도발** | **포효** |
+| ![aggro](https://github.com/user-attachments/assets/c726a1dc-1f51-435b-a86f-3bafdbe7dd04) | ![Roar](https://github.com/user-attachments/assets/2be53045-0a68-4edb-9b69-b56cad8c0e92) |
+
+</div>
+
+
+### 🔮 메이지 (Mage)
+
+<div align="center">
+
+| **체인라이트닝** | **메테오** |
+| :---: | :---: |
+| ![Lighting](https://github.com/user-attachments/assets/d302be2b-720a-4157-bca7-baee64439c8c) | ![meteor](https://github.com/user-attachments/assets/3deee6ac-f103-4c83-b9ac-7669d87b4c52) |
+| **프로스트노바** | **텔레포트** |
+| ![Nova](https://github.com/user-attachments/assets/5ff096bb-8331-49dd-8f6c-bacfef58ea94) | ![Teleport](https://github.com/user-attachments/assets/6b4a4020-0699-459f-b8ba-d2d23e9383e1) |
+
+</div>
+
+### ✝️ 프리스트 (Priest)
+
+<div align="center">
+
+| **힐링웨이브** | **부활** |
+| :---: | :---: |
+| ![HealingWave](https://github.com/user-attachments/assets/a92563ab-8fdd-47b5-9152-0f6ad0891134) | ![Revival](https://github.com/user-attachments/assets/5025f41e-2403-4001-a0a5-5e915faaa372) |
+| **무적** | **넉백** |
+| ![invincibility](https://github.com/user-attachments/assets/690201ec-3e21-4b2f-9e1b-a1e59da6c491) | ![knockback](https://github.com/user-attachments/assets/b7322156-b8b6-425b-8270-c463cf6caa4b) |
+
+</div>
+
+
+### 🗡️ 시프 (Thief)
+
+<div align="center">
+
+| **스크래치** | **은신** |
+| :---: | :---: |
+| ![Scratch](https://github.com/user-attachments/assets/71fb00e2-05b0-459b-a3c7-72f44abd1cb2) | ![stealth](https://github.com/user-attachments/assets/cc8a3181-0304-4034-a1c7-9e6d5c998b54) |
+| **기습** | **????** |
+| ![combo](https://github.com/user-attachments/assets/ed6cc1ff-944e-4726-bd9c-bd7f20a56617) | ![deathFinger](https://github.com/user-attachments/assets/a9d50d0e-99ad-41dd-9ae0-6e0837f9e1af) |
+
+</div>
+
 
 <br/>
+
+
+
+
+
+
+
 
 ---
 
