@@ -1,10 +1,12 @@
-![stealth](https://github.com/user-attachments/assets/26947ddd-cef1-4adb-a112-9cc962f98bf8)
+
 <img width="1536" height="1024" alt="1titleImage" src="https://github.com/user-attachments/assets/66f55318-9bdb-498f-847a-7edc3d3aa09d" />
 
 ## 📘 목차
 - **[프로젝트 소개](#-프로젝트-소개)**
+  - [플레이 시연 영상](#-플레이-시연-영상)
 - **[사용 기술](#-사용-기술)**
 - **[핵심 로직](#-핵심-로직)**
+- **[문제 해결 및 기술 개선 사례](#-문제-해결-및-기술-개선-사례)**
 
 <br/>
 
@@ -215,89 +217,6 @@
 </p>
 <br/>
 
----
-
-
-### 📥 데이터 불러오기
-> ImpossibleBosses의 데이터 관리는 Managers.DataManager를 중심으로 이루어집니다. 이 매니저는 Google 스프레드시트에서 게임에 필요한 각종 데이터(플레이어 정보, 몬스터 정보)등을 로드하고, 게임 내에서 효율적으로 사용할 수 있도록 처리합니다.
-
-<p align="center">
-  <strong>&lt;데이터 시트&gt;</strong>
-</p>
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/7b68f474-5819-414b-a1e7-6140bab15e9a" alt="데이터 시트 이미지 3" width="100%"/>
-</p>
-
-
-**데이터 로딩 절차:**
-
-1.  **초기화 및 타입 스캔**:
-    <ul>
-      <li><code>Managers.DataManager.Init()</code> 메서드가 데이터 로딩을 시작합니다.</li>
-      <li><code>LoadSerializableTypesFromFolder</code> 메서드는 지정된 경로에서 <code>[Serializable]</code> 어트리뷰트를 가진 클래스들을 리플렉션으로 스캔합니다. 이 클래스들은 스프레드시트의 각 시트 데이터 구조와 매핑됩니다.</li>
-    </ul>
-
-<p align="center">
-  <strong>&lt;DataManger의 타입확인&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/0c779137-163d-42ea-9b53-06abfecbeba5" alt="타입 스캔 이미지 1" width="70%"/>
-</div>
-<br>
-
-
-2.  **Google 스프레드시트 연동**:
-    <ul>
-      <li><code>DatabaseStruct</code>는 Google OAuth 2.0 인증 정보(클라이언트 ID, 시크릿 코드, 애플리케이션 이름, 스프레드시트 ID)를 관리합니다.</li>
-      <li><code>GetGoogleSheetData()</code> 메서드는 이 정보를 사용하여 Google Sheets API 인증 후, 지정된 스프레드시트 데이터를 가져옵니다.</li>
-    </ul>
-
-<p align="center">
-  <strong>&lt;구글 스프레드시트 불러오기&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/fc9c65e6-c48b-4b4b-ae1d-600aae8696a6" alt="스프레드시트 연동" width="70%"/>
-</div>
-<br>
-
-
-3.  **데이터 파싱 및 구조화**:
-    * `LoadDataFromGoogleSheets()`는 인증된 서비스와 스프레드시트 ID로 각 시트의 데이터를 요청합니다.
-    * `ParseSheetData()`는 시트 데이터를 JSON 형식 문자열로 변환합니다.
-    * `AddAllDataDictFromJsonData()`는 JSON 문자열을 C# 객체로 역직렬화합니다.
-        * `GetTypeNameFromFileName()`은 시트 이름에서 데이터 타입을 결정합니다.
-        * `FindGenericKeyType()`은 데이터 타입이 `Ikey<TKey>` 인터페이스를 구현했는지 확인하여 딕셔너리 키 타입을 결정합니다.
-        * `DataToDictionary<TKey, TStat>` 클래스는 로드된 데이터 리스트를 `Dictionary<TKey, TStat>` 형태로 변환하여 `AllDataDict`에 저장합니다.
-
-<p align="center">
-  <strong>&lt;JSON 문자열 역직렬화&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/26519a6e-e5ef-41a9-901d-af0590b3070f" alt="데이터 파싱" width="70%"/>
-</div>
-<br>
-
-4.  **데이터 캐싱 및 접근**:
-    * 처리된 데이터는 `DataManager.AllDataDict` (`Dictionary<Type, object>` 타입)에 데이터 타입별로 캐싱되어, 게임 내 다른 시스템에서 사용됩니다.
-    * `ItemDataManager`는 `DataManager.AllDataDict`에서 아이템 관련 타입의 데이터를 가져와 관리합니다.
-<p align="center">
-  <strong>&lt;아이템 클래스의 데이터 캐싱&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/d0669e1f-c4c7-407f-a049-a5153eda783a" alt="데이터 캐싱" width="70%"/>
-</div>
-<br>
-
-5.  **로컬 데이터 활용**:
-    * Google 스프레드시트 접근 불가 시, `LoadAllDataFromLocal()` 메서드가 로컬에 JSON 파일로 저장된 데이터를 로드합니다.
-    * 스프레드시트에서 새 데이터를 가져오면, `SaveDataToFile()` 메서드가 기존 로컬 데이터와 비교 후 변경된 경우 최신 데이터로 덮어씁니다. `BinaryCheck<T>()`가 데이터 변경 여부를 확인합니다.
-<p align="center">
-  <strong>&lt;데이터 변경 확인(바이너리비교)&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/151fc2ba-32ac-4d26-a628-5fdf6439ea1d" alt="데이터 변경확인" width="30%"/>
-</div>
-<br>
 
 ---
 
