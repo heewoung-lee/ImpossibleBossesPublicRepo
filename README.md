@@ -32,7 +32,7 @@
 | **Voice & Chat** | `Vivox Service` |
 | **Auth / DB** | `Google OAuth 2`, `Google Spreadsheet` |
 | **AI Behavior** | `Behaviour Tree Designer` |
-| **Test Tool** | `Unity Play Mode Scenarios` |
+| **Test Tool** | `Unity Play Mode Scenarios`,`HotReload` |
 | **Frame work** | `Zenject` |
 | **Inspector Customization** | `Odin Inspector` |
 
