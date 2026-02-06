@@ -5,6 +5,7 @@
 - **[프로젝트 소개](#-프로젝트-소개)**
 - **[사용 기술](#-사용-기술)**
 - **[핵심 로직](#-핵심-로직)**
+- **[문제 해결 및 기술 개선 사례](#-문제-해결-및-기술-개선-사례)**
 
 <br/>
 
@@ -20,7 +21,98 @@
 전투를 통해 **아이템을 획득**하고, **장비를 교체**하면서  
 플레이어는 점차 강해져 **최종 보스를 처치하는 것**이 목표입니다.
 
+
+### 📺 플레이 시연 영상
+
+
+![LoginGif](https://github.com/user-attachments/assets/da46c143-e95c-405a-ac1c-2326575816af)
+<p align="center">&lt;로그인 화면&gt;</p>
+
+
+![LobbyScene](https://github.com/user-attachments/assets/6e6d1c86-d434-4ebc-bbad-5f75b05a3ad7)
+<p align="center">&lt;로비 화면&gt;</p>
+
+
+![ingame](https://github.com/user-attachments/assets/a3e05ab5-83b3-4c27-8271-287ad108915e)
+<p align="center">&lt;게임 플레이1&gt;</p>
+
+<div align="center">
+   
+![ingame2](https://github.com/user-attachments/assets/28115095-2989-43df-9415-eb39d50db800)
+
+</div>
+<p align="center">&lt;게임 플레이2&gt;</p>
+
+<div align="center">
+
+### 🏹 아쳐 (Archer)
+| **화살비** | **대쉬** |
+| :---: | :---: |
+| ![ArrowRain](https://github.com/user-attachments/assets/ad44177b-881c-4880-a6c9-cffdfa9f66df) | ![Dash](https://github.com/user-attachments/assets/65d33da3-c840-4878-bce4-68a0d89639d8) |
+| **표적집중** | **멀티샷** |
+| ![debuff](https://github.com/user-attachments/assets/c83bb9b9-3069-4bce-a1a1-84fb0f49b1cb) | ![Multishot](https://github.com/user-attachments/assets/ac837b5d-9b67-4bac-b34d-8b69939c8fed) |
+
+</div>
+
+### ⚔️ 파이터 (Fighter)
+
+<div align="center">
+
+| **슬래쉬** | **방패들기** |
+| :---: | :---: |
+| ![Slash](https://github.com/user-attachments/assets/eb23752e-f6c9-4571-aef8-c12df4829f67) | ![shield](https://github.com/user-attachments/assets/47051f33-3071-4041-93b1-978c35a3f20b) |
+| **도발** | **포효** |
+| ![aggro](https://github.com/user-attachments/assets/c726a1dc-1f51-435b-a86f-3bafdbe7dd04) | ![Roar](https://github.com/user-attachments/assets/2be53045-0a68-4edb-9b69-b56cad8c0e92) |
+
+</div>
+
+
+### 🔮 메이지 (Mage)
+
+<div align="center">
+
+| **체인라이트닝** | **메테오** |
+| :---: | :---: |
+| ![Lighting](https://github.com/user-attachments/assets/d302be2b-720a-4157-bca7-baee64439c8c) | ![meteor](https://github.com/user-attachments/assets/3deee6ac-f103-4c83-b9ac-7669d87b4c52) |
+| **프로스트노바** | **텔레포트** |
+| ![Nova](https://github.com/user-attachments/assets/5ff096bb-8331-49dd-8f6c-bacfef58ea94) | ![Teleport](https://github.com/user-attachments/assets/6b4a4020-0699-459f-b8ba-d2d23e9383e1) |
+
+</div>
+
+### ✝️ 프리스트 (Priest)
+
+<div align="center">
+
+| **힐링웨이브** | **부활** |
+| :---: | :---: |
+| ![HealingWave](https://github.com/user-attachments/assets/a92563ab-8fdd-47b5-9152-0f6ad0891134) | ![Revival](https://github.com/user-attachments/assets/5025f41e-2403-4001-a0a5-5e915faaa372) |
+| **무적** | **넉백** |
+| ![invincibility](https://github.com/user-attachments/assets/690201ec-3e21-4b2f-9e1b-a1e59da6c491) | ![knockback](https://github.com/user-attachments/assets/b7322156-b8b6-425b-8270-c463cf6caa4b) |
+
+</div>
+
+
+### 🗡️ 시프 (Thief)
+
+<div align="center">
+
+| **스크래치** | **은신** |
+| :---: | :---: |
+| ![Scratch](https://github.com/user-attachments/assets/71fb00e2-05b0-459b-a3c7-72f44abd1cb2) | ![stealth](https://github.com/user-attachments/assets/cc8a3181-0304-4034-a1c7-9e6d5c998b54) |
+| **기습** | **????** |
+| ![combo](https://github.com/user-attachments/assets/ed6cc1ff-944e-4726-bd9c-bd7f20a56617) | ![deathFinger](https://github.com/user-attachments/assets/a9d50d0e-99ad-41dd-9ae0-6e0837f9e1af) |
+
+</div>
+
+
 <br/>
+
+
+
+
+
+
+
 
 ---
 
@@ -124,89 +216,6 @@
 </p>
 <br/>
 
----
-
-
-### 📥 데이터 불러오기
-> ImpossibleBosses의 데이터 관리는 Managers.DataManager를 중심으로 이루어집니다. 이 매니저는 Google 스프레드시트에서 게임에 필요한 각종 데이터(플레이어 정보, 몬스터 정보)등을 로드하고, 게임 내에서 효율적으로 사용할 수 있도록 처리합니다.
-
-<p align="center">
-  <strong>&lt;데이터 시트&gt;</strong>
-</p>
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/7b68f474-5819-414b-a1e7-6140bab15e9a" alt="데이터 시트 이미지 3" width="100%"/>
-</p>
-
-
-**데이터 로딩 절차:**
-
-1.  **초기화 및 타입 스캔**:
-    <ul>
-      <li><code>Managers.DataManager.Init()</code> 메서드가 데이터 로딩을 시작합니다.</li>
-      <li><code>LoadSerializableTypesFromFolder</code> 메서드는 지정된 경로에서 <code>[Serializable]</code> 어트리뷰트를 가진 클래스들을 리플렉션으로 스캔합니다. 이 클래스들은 스프레드시트의 각 시트 데이터 구조와 매핑됩니다.</li>
-    </ul>
-
-<p align="center">
-  <strong>&lt;DataManger의 타입확인&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/0c779137-163d-42ea-9b53-06abfecbeba5" alt="타입 스캔 이미지 1" width="70%"/>
-</div>
-<br>
-
-
-2.  **Google 스프레드시트 연동**:
-    <ul>
-      <li><code>DatabaseStruct</code>는 Google OAuth 2.0 인증 정보(클라이언트 ID, 시크릿 코드, 애플리케이션 이름, 스프레드시트 ID)를 관리합니다.</li>
-      <li><code>GetGoogleSheetData()</code> 메서드는 이 정보를 사용하여 Google Sheets API 인증 후, 지정된 스프레드시트 데이터를 가져옵니다.</li>
-    </ul>
-
-<p align="center">
-  <strong>&lt;구글 스프레드시트 불러오기&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/fc9c65e6-c48b-4b4b-ae1d-600aae8696a6" alt="스프레드시트 연동" width="70%"/>
-</div>
-<br>
-
-
-3.  **데이터 파싱 및 구조화**:
-    * `LoadDataFromGoogleSheets()`는 인증된 서비스와 스프레드시트 ID로 각 시트의 데이터를 요청합니다.
-    * `ParseSheetData()`는 시트 데이터를 JSON 형식 문자열로 변환합니다.
-    * `AddAllDataDictFromJsonData()`는 JSON 문자열을 C# 객체로 역직렬화합니다.
-        * `GetTypeNameFromFileName()`은 시트 이름에서 데이터 타입을 결정합니다.
-        * `FindGenericKeyType()`은 데이터 타입이 `Ikey<TKey>` 인터페이스를 구현했는지 확인하여 딕셔너리 키 타입을 결정합니다.
-        * `DataToDictionary<TKey, TStat>` 클래스는 로드된 데이터 리스트를 `Dictionary<TKey, TStat>` 형태로 변환하여 `AllDataDict`에 저장합니다.
-
-<p align="center">
-  <strong>&lt;JSON 문자열 역직렬화&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/26519a6e-e5ef-41a9-901d-af0590b3070f" alt="데이터 파싱" width="70%"/>
-</div>
-<br>
-
-4.  **데이터 캐싱 및 접근**:
-    * 처리된 데이터는 `DataManager.AllDataDict` (`Dictionary<Type, object>` 타입)에 데이터 타입별로 캐싱되어, 게임 내 다른 시스템에서 사용됩니다.
-    * `ItemDataManager`는 `DataManager.AllDataDict`에서 아이템 관련 타입의 데이터를 가져와 관리합니다.
-<p align="center">
-  <strong>&lt;아이템 클래스의 데이터 캐싱&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/d0669e1f-c4c7-407f-a049-a5153eda783a" alt="데이터 캐싱" width="70%"/>
-</div>
-<br>
-
-5.  **로컬 데이터 활용**:
-    * Google 스프레드시트 접근 불가 시, `LoadAllDataFromLocal()` 메서드가 로컬에 JSON 파일로 저장된 데이터를 로드합니다.
-    * 스프레드시트에서 새 데이터를 가져오면, `SaveDataToFile()` 메서드가 기존 로컬 데이터와 비교 후 변경된 경우 최신 데이터로 덮어씁니다. `BinaryCheck<T>()`가 데이터 변경 여부를 확인합니다.
-<p align="center">
-  <strong>&lt;데이터 변경 확인(바이너리비교)&gt;</strong>
-</p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/151fc2ba-32ac-4d26-a628-5fdf6439ea1d" alt="데이터 변경확인" width="30%"/>
-</div>
-<br>
 
 ---
 
@@ -399,76 +408,146 @@
 
 <br/>
 
-#### 1. 상태 관리의 유연성 확보: 유한 상태 머신(FSM)에서 전략 패턴으로
+
+#### 1. 유지보수 및 작업속도 향상을 위한 프레임워크 변경: 싱글톤 패턴 ->컴포넌트 패턴,일반 DI → 젠젝트(Zenject) DI 프레임워크로 전환
 
 * 🤔 문제점:
-    * 초기 플레이어 캐릭터의 상태(이동, 공격, 정지 등)를 유한 상태 머신(FSM) 방식으로 구현했으나, 새로운 상태를 추가하거나 기존 상태의 로직을 변경할 때 코드 수정 범위가 넓어지고 복잡도가 증가했습니다. 특히, 각 상태에 따른 애니메이션 전환 로직이 강하게 결합되어 유지보수가 어려웠습니다.
+    * 초기에 싱글톤으로 빠르게 기능을 붙였지만, 시간이 지나며 싱글톤 의존도가 커지고 객체가 비대화됨에 따라 하나를 수정하면 다른 곳에서 문제가 터지는 현상이 발생했습니다.
+      이를 줄이기 위해 싱글톤을 분해하여 일반 DI 모듈을 만들고, 나머지는 컴포넌트 패턴으로 채워 갔으나, 의존성 주입 컨트롤러가 곳곳에 흩어져 주입 경로 추적과 테스트 교체가 어렵고 불안정했습니다.
 
 * 💡 해결 과정:
-    * 이를 해결하고자 전략 패턴(Strategy Pattern)을 도입하여 각 상태를 독립적인 클래스(`IState` 인터페이스를 구현하는 형태)로 분리했습니다.
-    * `BaseController` 클래스는 현재 상태 객체(`CurrentStateType`)를 통해 해당 상태의 로직을 실행하고, `StateAnimationDict`를 통해 상태 변경 시 적절한 애니메이션을 호출하도록 설계했습니다.
-    * 이를 통해 각 상태의 행동 로직과 애니메이션 전환 로직을 캡슐화하고, 새로운 상태 추가 시 기존 코드에 미치는 영향을 최소화했습니다.
+    * Zenject를 도입하여 주입 지점을 Installer로 일원화하고(의존성성 모듈에 대한 가시성 향상), ProjectContext → SceneContext → GameObjectContext의 상향 단일 흐름으로 컴포지션 루트를 표준화했습니다.
+    * 인터페이스 중심 바인딩과 환경별(프로덕션/테스트) Installer 분리로, 동일 코드에 Real/Mock을 손쉽게 교체할 수 있게 했습니다.
 
 * ✨ 개선 결과:
-    * 코드의 가독성과 확장성이 크게 향상되었습니다. 새로운 플레이어 스킬이나 행동 상태를 추가할 때, `IState`를 구현하는 새 클래스를 만들고 `BaseController`에 등록하는 것만으로 확장이 가능해졌습니다.
-    * 각 상태 로직이 분리되어 테스트와 디버깅이 용이해졌습니다.
+    * 의존성 가시화: “무엇이 어디서 주입되는지”가 한눈에 보이며, 변경 영향 범위가 명확해졌습니다.
+    * 유지보수성 향상: 결합도가 낮아져 수정·확장이 수월해졌고, 도미노 이슈가 크게 감소했습니다.
+    * 작업속도 개선: 테스트에서는 Installer만 바꿔 끼우면 되므로 세팅 시간이 단축되고, 기능 개발과 디버깅 사이클이 빨라졌습니다.
+    * 초기 학습곡선을 넘기기 어려웠지만 이후 생산성과 안정성이 눈에 띄게 향상되었습니다.
+
+
+---
+
+#### 2. 확장성과 재사용성을 위한 스킬 시스템 구조 개선: 타겟+뷰+로직 조합 → 파이프라인 기반 모듈 조합(Trigger/Targeting/Sequence/Decorator/Effect)
+
+* 🤔 문제점:
+  * 초기에는 **타겟 + 프리팹(연출/뷰) + 효과(로직)** 를 조합해 스킬을 만들었습니다.  
+    뷰와 로직이 분리되어 있어 단순한 스킬은 빠르게 만들 수 있었고, 비슷한 형태라면 재사용도 가능했습니다.
+  * 하지만 스킬이 조금만 복잡해져도 **요구조건을 추가하기가 급격히 어려워졌습니다.**  
+    실제 “데미지 스킬” 하나에도 아래 요소들이 붙습니다.
+    * 즉시 발동 / 시전 시간 / 채널링
+    * 단일 타겟 / 범위 / 지점 지정 / 논타겟
+    * 조건부 효과 변화(버프/디버프/상태 조건 등)
+  * 요구조건이 늘어날수록 스킬 전용 코드가 비대해지고,  
+    비슷한 스킬이라도 “조금 다른 요구조건” 때문에 재사용이 깨지면서 **스킬 수만큼 코드가 증가**했습니다.
+  * 결과적으로 유지보수 관점에서 확장 가능한 형태의 조합이 필요했고, 기존 구조로는 한계가 명확했습니다.
+
+* 💡 해결 과정:
+  * 스킬을 하나의 큰 로직으로 만들지 않고, **기능 단위로 단계별 파이프라인**으로 분해했습니다.
+    * Trigger: 스킬이 어떻게 시작되는가
+    * Targeting: 누구/어디에 적용되는가
+    * Sequence: 언제/어떤 순서로/몇 번 실행되는가
+    * Decorator: 어떻게 보여줄 것인가(애니메이션/VFX 등 연출)
+    * Effect: 무엇이 일어나는가(데미지/힐/버프/투사체 등 게임플레이 결과)
+  * 각 단계는 “자기 책임만” 가지도록 제한하고, 스킬은 **모듈을 조합**해서 만들도록 변경했습니다.
+  * 특히 연출(Decorator)과 결과(Effect)를 분리해,  
+    게임플레이 로직이 연출 때문에 오염되지 않도록 구조를 정리했습니다.
+
+* ✨ 개선 결과:
+  * 확장성 향상: 요구조건이 늘어도 “스킬 전용 코드”가 커지지 않고, 필요한 모듈 추가/교체로 대응 가능
+  * 재사용성 향상: 비슷한 스킬은 공통 모듈을 공유하고, 다른 부분만 바꿔서 제작 가능
+  * 유지보수성 향상: 책임 경계가 명확해져 변경 영향 범위가 줄고, 디버깅이 쉬워짐
+  * 작업속도 향상: 스킬을 새로 “작성”하기보다 모듈을 “조합”하는 형태가 되어 제작 속도가 개선됨
+
+
+#### 📚 개발 일지: 모듈형 스킬 시스템
+> 유니티로 확장 가능한 스킬 시스템을 밑바닥부터 구현한 기록입니다.
+
+<details>
+<summary><strong>👇 개발일지 전체 보기 (Click)</strong></summary>
+<br>
+
+| Part | 주제 | 링크 |
+| :---: | :--- | :---: |
+| 1 | **개요** | [보러가기](https://blog.naver.com/hiwoong12/224167895583) |
+| 2 | **스킬 데이터 보관함 만들기** | [보러가기](https://blog.naver.com/hiwoong12/224170411314) |
+| 3 | **스킬 실행** | [보러가기](https://blog.naver.com/hiwoong12/224170589821) |
+| 4 | **RuntimeSkill 조립과 등록** | [보러가기](https://blog.naver.com/hiwoong12/224171700092) |
+| 5 | **SerializeReference로 레시피(SO) 만들기** | [보러가기](https://blog.naver.com/hiwoong12/224171823727) |
+| 6 | **Trigger (어떻게 시작할까?)** | [보러가기](https://blog.naver.com/hiwoong12/224171872345) |
+| 7 | **Targeting (무엇을 모을까?)** | [보러가기](https://blog.naver.com/hiwoong12/224172868239) |
+| 8 | **Sequence (언제/어떤 순서로 실행할까?)** | [보러가기](https://blog.naver.com/hiwoong12/224172947169) |
+| 9 | **Decorator: 연출 (무엇을 보여줄까?)** | [보러가기](https://blog.naver.com/hiwoong12/224173048136) |
+| 10 | **Effect (어떤 효과를 입힐까?)** | [보러가기](https://blog.naver.com/hiwoong12/224173083292) |
+
+</details>
+
+---
+
+#### 3. 애니메이션 속도 동기화: 예측과 보정을 통한 일관된 움직임 구현
+
+* 🤔 문제점:
+    * 온라인 환경에서 모든 참여자에게 동일한 애니메이션을 시각적으로 일관되게 제공하는 것은 기술적 난제였습니다.
+      범용적으로 사용되는 애니메이션 동기화 방식은 애니메이션의 재생 속도 변화를 정확히 반영하지 못할뿐더러,
+      네트워크 지연이 발생한 클라이언트 측에서 애니메이션이 중간 지점부터 시작되는 현상이 생겨 플레이어간 동일한 시각적효과를 얻지 못하게 되었습니다.
+      결과적으로 호스트 환경에서는 정상적인 연출이 이루어지는 반면, 클라이언트에서는 애니메이션의 주요 구간을 놓치거나 갑작스러운 장면 전환을 경험하는 문제가 발생했습니다.
 
 <div align="center">
-   
-<table style="border:0;">
-  <tr>
-    <td align="center" valign="top" style="width:50%;">
-      <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/74a769e2-88da-498b-ae74-19f7687137f4"
-             alt="FSM(유한상태머신)" height="300">
-        <figcaption>
-          <br/>
-          &lt;<strong>FSM(유한상태머신) 다이어그램</strong>&gt;<br>
-        </figcaption>
-      </figure>
-    </td>
-    <td align="center" valign="top" style="width:50%;">
-      <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/e342dd54-8c9d-43ad-90fb-b1b3c7602416"
-             alt="전략패턴" height="300">
-        <figcaption>
-          <br/>
-          &lt;<strong>전략패턴 다이어그램</strong>&gt;<br>
-        </figcaption>
-      </figure>
-    </td>
-  </tr>
-</table>
-
+  <img src="https://github.com/user-attachments/assets/c8edd241-9b23-43be-b10d-3861fa9408b8" alt="동기화 오류: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
+  <br/>
+  <sub><strong>&lt;일반적인 동기화 방식 사용 시 발생한 문제: 좌측(호스트)과 달리 우측(클라이언트)은 애니메이션이 부자연스럽게 시작됨&gt;</strong></sub>
 </div>
-
-#### 2. 보스 AI 확장성 개선: 유한 상태 머신에서 비헤이비어 트리로 전환
-
-* 🤔 문제점:
-    * 초기 보스 몬스터의 AI를 플레이어와 마찬가지로 유한 상태 머신(FSM)으로 구현했으나, 보스의 행동 패턴이 다양해지고 복잡해짐에 따라 상태 추가 및 전환 로직 관리가 어려워졌습니다. FSM은 복잡한 조건 분기나 병렬적인 행동 표현에 한계가 있었습니다.
+<br/>
 
 * 💡 해결 과정:
-    * 보스 AI 구현을 위해 **비헤이비어 트리(Behavior Tree)**를 도입했습니다. 보스의 다양한 행동(이동, 기본 공격, 스킬 사용, 특정 조건에 따른 패턴 변화 등)을 모듈화된 노드 형태로 설계했습니다.
-    * 비헤이비어 트리를 통해 조건 확인, 행동 실행, 흐름 제어(시퀀스, 셀렉터 등)를 직관적으로 구성할 수 있게 되었습니다.
-    * 각 행동 노드는 `BossGolemController` 및 `BossGolemNetworkController`와 상호작용하여 애니메이션, 네트워크 동기화 등을 처리합니다.
+    * 애니메이션 동기화의 정확도를 높이기 위해, 서버(호스트)는 주요 애니메이션 실행 시 **시작 시점, 의도된 전체 길이, 그리고 애니메이션의 속도 변화 계획(예: 특정 구간에서의 점진적 감속, 최종 정지 조건 등)을 포함한 상세한 실행 정보를 모든 클라이언트에게 전달합니다.**
+    * 각 클라이언트는 이 정보를 수신하면, **모든 시스템 참여자가 공유하는 서버 시간을 이용하여 네트워크로 인한 지연 시간을 계산합니다.** 이후, 애니메이션이 각클라이언트마다 재생되면 산출된 지연 시간을 보상하고 호스트와 거의 동시에 애니메이션이 종료될 수 있도록 **재생 속도를 동적으로 조절합니다.** 이러한 속도 조절은 점진적인 보간 방식을 통해 부드럽게 이루어집니다.
 
 * ✨ 개선 결과:
-    * 보스 AI의 복잡한 행동 패턴을 보다 체계적이고 시각적으로 관리할 수 있게 되었습니다.
-    * 새로운 스킬이나 행동 패턴을 추가하거나 기존 패턴을 수정하는 작업이 훨씬 용이해졌으며, 다양한 조건에 따른 AI 반응을 쉽게 구현할 수 있게 되어 보스전의 깊이가 더해졌습니다.
-    * AI 로직과 실제 행동 실행 코드가 분리되어 가독성과 유지보수성이 향상되었습니다.
+    * 본 시스템 적용을 통해, 네트워크 지연이 존재하는 환경에서도 클라이언트 측 애니메이션이 중간 생략 없이 처음부터 부드럽게 재생되며, 호스트와의 시각적 동기화 수준이 크게 향상되었습니다.
+    * 특히, 공격 애니메이션과 실제 피해 판정 발생 시점 간의 일관성이 증대되어, 모든 플레이어에게 동일한 게임 플레이 경험을 제공하게 되었습니다.
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/ca4bdf53-42db-41c2-8bbf-95e03c3f8041" alt="동기화 성공: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
+  <br/>
+  <sub><strong>&lt;개선된 시스템 적용 후: 모든 환경에서 애니메이션이 일관되고 부드럽게 동기화되는 모습&gt;</strong></sub>
+</div>
+<br/>
+<p align="center">
+  <a href="https://blog.naver.com/hiwoong12/223885556696">[개발일지] 애니메이션 싱크를 맞추는방법</a>
+</p>
+<br/>
+
+---
+
+#### 4. 테스트 효율성 증대: 커스텀 인스펙터를 통한 Play Mode Scenario 제어
+* 🤔 문제점:
+    * Unity 6에서 도입된 Play Mode Scenario 기능은 멀티플레이 테스트를 매우 편리하게 만들어주었지만, 테스트 환경(클라이언트 수, 역할 태그 등)을 변경할 때마다 매번 Configure play mode Scenario 메뉴에 들어가 수동으로 수정해야 하는 불편함이 있었습니다.
+
+* 💡 해결 과정:
+
+   * 목표 설정: 인스펙터 내에서 직접 테스트 클라이언트 수와 각 클라이언트의 태그를 설정하고, 시나리오 모드 사용 여부를 토글할 수 있는 커스텀 에디터를 구현하는 것을 목표로 삼았습니다.
+   * 구현 : Scenario 에셋 접근 및 수정: SerializedObject API를 사용하여 Scenario 에셋 파일의 직렬화된 필드(m_MainEditorInstance, m_EditorInstances 등)에 접근했습니다. 이를 통해 인스펙터에서 입력한 태그 값을 에셋에 직접 반영하는 기능을 구현했습니다.
+
+* ✨ 개선 결과:
+
+   * 멀티플레이 테스트 환경 설정을 위해 더 이상 메뉴를 찾아다닐 필요 없이, 인스펙터 내에서 모든 조작이 가능해졌습니다.
+      클라이언트 수를 늘리거나 각 클라이언트에 정보를 추가하는 작업이 매우 직관적이고 빨라져, 테스트 준비 시간이 단축되었습니다.
+      이러한 작업 개선은 디버깅 효율을 높이고, 개발자가 핵심 로직 개발에 더 집중할 수 있는 환경을 만들어주었습니다.
 
 <br/>
 
 <p align="center">
-  &lt;<strong>비헤이비어 트리</strong>&gt;
+  <img src="https://github.com/user-attachments/assets/5cff0332-b284-4424-a231-e48705b2b16e" alt="커스텀 인스펙터 결과물" width="70%"/>
+  <br/>
+  <sub><strong>&lt; 인스펙터에서 테스트 환경 제어&gt;</strong></sub>
 </p>
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/e3d468e1-3853-4536-b5f1-bd971a6796f6" alt="비헤이비어 트리" width="70%"/>
-</div>
+<p align="center">
+  <a href="https://blog.naver.com/hiwoong12/223972484977">[개발일지] 커스텀 인스펙터 제작</a>
 
-<br/>
+---
 
-#### 3. Unity Lobby 서비스 버그 식별 및 해결
+#### 5. Unity Lobby 서비스 버그 식별 및 해결
 
 * 🤔 문제점:
     * Unity Netcode 기반 멀티플레이 게임 개발 중, Unity Lobby 서비스에서 특정 시나리오(호스트 이전 후 이전 호스트 재접속)에서 플레이어의 로비 참가 및 행동 변화에 따른 이벤트 콜백이 정상적으로 호출되지 않는 오류가 발생했습니다.
@@ -534,7 +613,9 @@
 
 <br/>
 
-#### 4. 네트워크 최적화: GC 발생 최소화를 위한 네트워크 오브젝트 풀링
+---
+
+#### 6. 네트워크 최적화: GC 발생 최소화를 위한 네트워크 오브젝트 풀링
 
 * **🤔 문제점:**
     * 보스 스킬이나 플레이어 스킬 사용 시 수많은 네트워크 파티클 효과가 반복적으로 생성되고 소멸되었습니다.
@@ -565,81 +646,75 @@
 </p>
 <br/>
 
-#### 5. 애니메이션 속도 동기화: 예측과 보정을 통한 일관된 움직임 구현
+---
+
+#### 7. 상태 관리의 유연성 확보: 유한 상태 머신(FSM)에서 전략 패턴으로
 
 * 🤔 문제점:
-    * 온라인 환경에서 모든 참여자에게 동일한 애니메이션을 시각적으로 일관되게 제공하는 것은 기술적 난제였습니다.
-      범용적으로 사용되는 애니메이션 동기화 방식은 애니메이션의 재생 속도 변화를 정확히 반영하지 못할뿐더러,
-      네트워크 지연이 발생한 클라이언트 측에서 애니메이션이 중간 지점부터 시작되는 현상이 생겨 플레이어간 동일한 시각적효과를 얻지 못하게 되었습니다.
-      결과적으로 호스트 환경에서는 정상적인 연출이 이루어지는 반면, 클라이언트에서는 애니메이션의 주요 구간을 놓치거나 갑작스러운 장면 전환을 경험하는 문제가 발생했습니다.
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/c8edd241-9b23-43be-b10d-3861fa9408b8" alt="동기화 오류: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
-  <br/>
-  <sub><strong>&lt;일반적인 동기화 방식 사용 시 발생한 문제: 좌측(호스트)과 달리 우측(클라이언트)은 애니메이션이 부자연스럽게 시작됨&gt;</strong></sub>
-</div>
-<br/>
+    * 초기 플레이어 캐릭터의 상태(이동, 공격, 정지 등)를 유한 상태 머신(FSM) 방식으로 구현했으나, 새로운 상태를 추가하거나 기존 상태의 로직을 변경할 때 코드 수정 범위가 넓어지고 복잡도가 증가했습니다. 특히, 각 상태에 따른 애니메이션 전환 로직이 강하게 결합되어 유지보수가 어려웠습니다.
 
 * 💡 해결 과정:
-    * 애니메이션 동기화의 정확도를 높이기 위해, 서버(호스트)는 주요 애니메이션 실행 시 **시작 시점, 의도된 전체 길이, 그리고 애니메이션의 속도 변화 계획(예: 특정 구간에서의 점진적 감속, 최종 정지 조건 등)을 포함한 상세한 실행 정보를 모든 클라이언트에게 전달합니다.**
-    * 각 클라이언트는 이 정보를 수신하면, **모든 시스템 참여자가 공유하는 서버 시간을 이용하여 네트워크로 인한 지연 시간을 계산합니다.** 이후, 애니메이션이 각클라이언트마다 재생되면 산출된 지연 시간을 보상하고 호스트와 거의 동시에 애니메이션이 종료될 수 있도록 **재생 속도를 동적으로 조절합니다.** 이러한 속도 조절은 점진적인 보간 방식을 통해 부드럽게 이루어집니다.
+    * 이를 해결하고자 전략 패턴(Strategy Pattern)을 도입하여 각 상태를 독립적인 클래스(`IState` 인터페이스를 구현하는 형태)로 분리했습니다.
+    * `BaseController` 클래스는 현재 상태 객체(`CurrentStateType`)를 통해 해당 상태의 로직을 실행하고, `StateAnimationDict`를 통해 상태 변경 시 적절한 애니메이션을 호출하도록 설계했습니다.
+    * 이를 통해 각 상태의 행동 로직과 애니메이션 전환 로직을 캡슐화하고, 새로운 상태 추가 시 기존 코드에 미치는 영향을 최소화했습니다.
 
 * ✨ 개선 결과:
-    * 본 시스템 적용을 통해, 네트워크 지연이 존재하는 환경에서도 클라이언트 측 애니메이션이 중간 생략 없이 처음부터 부드럽게 재생되며, 호스트와의 시각적 동기화 수준이 크게 향상되었습니다.
-    * 특히, 공격 애니메이션과 실제 피해 판정 발생 시점 간의 일관성이 증대되어, 모든 플레이어에게 동일한 게임 플레이 경험을 제공하게 되었습니다.
+    * 코드의 가독성과 확장성이 크게 향상되었습니다. 새로운 플레이어 스킬이나 행동 상태를 추가할 때, `IState`를 구현하는 새 클래스를 만들고 `BaseController`에 등록하는 것만으로 확장이 가능해졌습니다.
+    * 각 상태 로직이 분리되어 테스트와 디버깅이 용이해졌습니다.
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/ca4bdf53-42db-41c2-8bbf-95e03c3f8041" alt="동기화 성공: 왼쪽 서버,오른쪽 클라이언트" width="70%"/>
-  <br/>
-  <sub><strong>&lt;개선된 시스템 적용 후: 모든 환경에서 애니메이션이 일관되고 부드럽게 동기화되는 모습&gt;</strong></sub>
+   
+<table style="border:0;">
+  <tr>
+    <td align="center" valign="top" style="width:50%;">
+      <figure style="margin:0;">
+        <img src="https://github.com/user-attachments/assets/74a769e2-88da-498b-ae74-19f7687137f4"
+             alt="FSM(유한상태머신)" height="300">
+        <figcaption>
+          <br/>
+          &lt;<strong>FSM(유한상태머신) 다이어그램</strong>&gt;<br>
+        </figcaption>
+      </figure>
+    </td>
+    <td align="center" valign="top" style="width:50%;">
+      <figure style="margin:0;">
+        <img src="https://github.com/user-attachments/assets/e342dd54-8c9d-43ad-90fb-b1b3c7602416"
+             alt="전략패턴" height="300">
+        <figcaption>
+          <br/>
+          &lt;<strong>전략패턴 다이어그램</strong>&gt;<br>
+        </figcaption>
+      </figure>
+    </td>
+  </tr>
+</table>
+
 </div>
-<br/>
-<p align="center">
-  <a href="https://blog.naver.com/hiwoong12/223885556696">[개발일지] 애니메이션 싱크를 맞추는방법</a>
-</p>
-<br/>
-
-#### 6. 유지보수 및 작업속도 향상을 위한 프레임워크 변경: 싱글톤 패턴 ->컴포넌트 패턴,일반 DI → 젠젝트(Zenject) DI 프레임워크로 전환
-
-* 🤔 문제점:
-    * 초기에 싱글톤으로 빠르게 기능을 붙였지만, 시간이 지나며 싱글톤 의존도가 커지고 객체가 비대화됨에 따라 하나를 수정하면 다른 곳에서 문제가 터지는 현상이 발생했습니다.
-      이를 줄이기 위해 싱글톤을 분해하여 일반 DI 모듈을 만들고, 나머지는 컴포넌트 패턴으로 채워 갔으나, 의존성 주입 컨트롤러가 곳곳에 흩어져 주입 경로 추적과 테스트 교체가 어렵고 불안정했습니다.
-
-* 💡 해결 과정:
-    * Zenject를 도입하여 주입 지점을 Installer로 일원화하고(의존성성 모듈에 대한 가시성 향상), ProjectContext → SceneContext → GameObjectContext의 상향 단일 흐름으로 컴포지션 루트를 표준화했습니다.
-    * 인터페이스 중심 바인딩과 환경별(프로덕션/테스트) Installer 분리로, 동일 코드에 Real/Mock을 손쉽게 교체할 수 있게 했습니다.
-
-* ✨ 개선 결과:
-    * 의존성 가시화: “무엇이 어디서 주입되는지”가 한눈에 보이며, 변경 영향 범위가 명확해졌습니다.
-    * 유지보수성 향상: 결합도가 낮아져 수정·확장이 수월해졌고, 도미노 이슈가 크게 감소했습니다.
-    * 작업속도 개선: 테스트에서는 Installer만 바꿔 끼우면 되므로 세팅 시간이 단축되고, 기능 개발과 디버깅 사이클이 빨라졌습니다.
-    * 초기 학습곡선을 넘기기 어려웠지만 이후 생산성과 안정성이 눈에 띄게 향상되었습니다.
 
 ---
 
-#### 7. 테스트 효율성 증대: 커스텀 인스펙터를 통한 Play Mode Scenario 제어
+#### 8. 보스 AI 확장성 개선: 유한 상태 머신에서 비헤이비어 트리로 전환
+
 * 🤔 문제점:
-    * Unity 6에서 도입된 Play Mode Scenario 기능은 멀티플레이 테스트를 매우 편리하게 만들어주었지만, 테스트 환경(클라이언트 수, 역할 태그 등)을 변경할 때마다 매번 Configure play mode Scenario 메뉴에 들어가 수동으로 수정해야 하는 불편함이 있었습니다.
+    * 초기 보스 몬스터의 AI를 플레이어와 마찬가지로 유한 상태 머신(FSM)으로 구현했으나, 보스의 행동 패턴이 다양해지고 복잡해짐에 따라 상태 추가 및 전환 로직 관리가 어려워졌습니다. FSM은 복잡한 조건 분기나 병렬적인 행동 표현에 한계가 있었습니다.
 
 * 💡 해결 과정:
-
-   * 목표 설정: 인스펙터 내에서 직접 테스트 클라이언트 수와 각 클라이언트의 태그를 설정하고, 시나리오 모드 사용 여부를 토글할 수 있는 커스텀 에디터를 구현하는 것을 목표로 삼았습니다.
-   * 구현 : Scenario 에셋 접근 및 수정: SerializedObject API를 사용하여 Scenario 에셋 파일의 직렬화된 필드(m_MainEditorInstance, m_EditorInstances 등)에 접근했습니다. 이를 통해 인스펙터에서 입력한 태그 값을 에셋에 직접 반영하는 기능을 구현했습니다.
+    * 보스 AI 구현을 위해 **비헤이비어 트리(Behavior Tree)**를 도입했습니다. 보스의 다양한 행동(이동, 기본 공격, 스킬 사용, 특정 조건에 따른 패턴 변화 등)을 모듈화된 노드 형태로 설계했습니다.
+    * 비헤이비어 트리를 통해 조건 확인, 행동 실행, 흐름 제어(시퀀스, 셀렉터 등)를 직관적으로 구성할 수 있게 되었습니다.
+    * 각 행동 노드는 `BossGolemController` 및 `BossGolemNetworkController`와 상호작용하여 애니메이션, 네트워크 동기화 등을 처리합니다.
 
 * ✨ 개선 결과:
-
-   * 멀티플레이 테스트 환경 설정을 위해 더 이상 메뉴를 찾아다닐 필요 없이, 인스펙터 내에서 모든 조작이 가능해졌습니다.
-      클라이언트 수를 늘리거나 각 클라이언트에 정보를 추가하는 작업이 매우 직관적이고 빨라져, 테스트 준비 시간이 단축되었습니다.
-      이러한 작업 개선은 디버깅 효율을 높이고, 개발자가 핵심 로직 개발에 더 집중할 수 있는 환경을 만들어주었습니다.
+    * 보스 AI의 복잡한 행동 패턴을 보다 체계적이고 시각적으로 관리할 수 있게 되었습니다.
+    * 새로운 스킬이나 행동 패턴을 추가하거나 기존 패턴을 수정하는 작업이 훨씬 용이해졌으며, 다양한 조건에 따른 AI 반응을 쉽게 구현할 수 있게 되어 보스전의 깊이가 더해졌습니다.
+    * AI 로직과 실제 행동 실행 코드가 분리되어 가독성과 유지보수성이 향상되었습니다.
 
 <br/>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/5cff0332-b284-4424-a231-e48705b2b16e" alt="커스텀 인스펙터 결과물" width="70%"/>
-  <br/>
-  <sub><strong>&lt; 인스펙터에서 테스트 환경 제어&gt;</strong></sub>
+  &lt;<strong>비헤이비어 트리</strong>&gt;
 </p>
-<p align="center">
-  <a href=https://blog.naver.com/hiwoong12/223972484977">[개발일지] 커스텀 인스펙터 제작</a>
-</p>
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/e3d468e1-3853-4536-b5f1-bd971a6796f6" alt="비헤이비어 트리" width="70%"/>
+</div>
+
 <br/>
