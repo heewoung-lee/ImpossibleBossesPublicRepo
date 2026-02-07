@@ -1,5 +1,8 @@
 
-<img width="1536" height="1024" alt="1titleImage" src="https://github.com/user-attachments/assets/66f55318-9bdb-498f-847a-7edc3d3aa09d" />
+<img width="1536" height="1024" alt="1titleImage" src="https://github.com/user-attachments/assets/3e5274a9-52b6-423a-a319-4c4c355f43ba" />
+
+
+
 
 ## 📘 목차
 - **[프로젝트 소개](#-프로젝트-소개)**
