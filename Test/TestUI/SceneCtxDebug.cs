@@ -1,4 +1,5 @@
 using UnityEngine;
+using Util;
 
 namespace Test.TestUI
 {
@@ -6,12 +7,12 @@ namespace Test.TestUI
     {
         void Awake()
         {
-            Debug.Log($"[SceneCtxDebug] Awake  →  {gameObject.scene.name}");
+            UtilDebug.Log($"[SceneCtxDebug] Awake  →  {gameObject.scene.name}");
         }
 
         void OnDestroy()
         {
-            Debug.Log($"[SceneCtxDebug] Destroy →  {gameObject.scene.name}");
+            UtilDebug.Log($"[SceneCtxDebug] Destroy →  {gameObject.scene.name}");
         }
     }
 }

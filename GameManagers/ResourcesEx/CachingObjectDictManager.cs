@@ -4,6 +4,7 @@ using GameManagers.Interface.ResourcesManager;
 using ProjectContextInstaller;
 using Scene.CommonInstaller;
 using UnityEngine;
+using Util;
 using Zenject;
 using ZenjectContext.ProjectContextInstaller;
 
@@ -39,7 +40,7 @@ namespace GameManagers.ResourcesEx
         public void AddData(string key, GameObject go)
         {
             _cachingobjectDict.Add(key, go);
-            Debug.Log($"CachingDict called AddData {go.name}");
+            UtilDebug.Log($"CachingDict called AddData {go.name}");
         }
 
         public void OverwriteData(string key, GameObject go)

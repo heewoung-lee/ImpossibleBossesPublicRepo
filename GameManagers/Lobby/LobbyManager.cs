@@ -141,7 +141,7 @@ namespace GameManagers
                 _taskChecker[(int)LoadingProcess.CheckAlreadyLogInID] = true;
                 if (isalready is true)
                 {
-                    Debug.Log("이미 접속되어있음");
+                    UtilDebug.Log("이미 접속되어있음");
                     return true;
                 }
 
@@ -151,7 +151,7 @@ namespace GameManagers
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Initialization failed: {ex.Message}");
+                UtilDebug.LogError($"Initialization failed: {ex.Message}");
                 if (_sceneManagerEx.GetCurrentScene is LoadingScene loadingScene)
                 {
                     loadingScene.IsErrorOccurred = true;
@@ -181,7 +181,7 @@ namespace GameManagers
                 if (AuthenticationService.Instance.IsSignedIn)
                 {
                     await LogoutAndAllLeaveLobby();
-                    Debug.Log("Logging out from previous session...");
+                    UtilDebug.Log("Logging out from previous session...");
                     AuthenticationService.Instance.SignOut();
                 }
 
@@ -204,7 +204,7 @@ namespace GameManagers
                         {
                             if (player.Data == null && PlayerID == player.Id) //나인데 데이터를 할당 못받았으면,다시 초기화
                             {
-                                Debug.LogError($" Player {player.Id} in lobby {lobby.Id} has NULL Data!");
+                                UtilDebug.LogError($" Player {player.Id} in lobby {lobby.Id} has NULL Data!");
                                 return await Utill.RateLimited(async () => await InitLobbyScene(), 5000); // 재시도
                             }
 
@@ -246,12 +246,12 @@ namespace GameManagers
                 catch (Exception notSetObjectException) when (notSetObjectException.Message.Equals(
                                                                   "Object reference not set to an instance of an object"))
                 {
-                    Debug.Log("The Lobby hasnt reference so We Rate Secend");
+                    UtilDebug.Log("The Lobby hasnt reference so We Rate Secend");
                     return await Utill.RateLimited(() => IsAlreadyLogInNickNameinLobby(usernickName));
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"Failed to query lobbies: {ex.Message}");
+                    UtilDebug.LogError($"Failed to query lobbies: {ex.Message}");
                     return false;
                 }
             }
@@ -261,7 +261,7 @@ namespace GameManagers
         private void SetVivoxTaskCheker()
         {
             _taskChecker[(int)LoadingProcess.VivoxLogin] = true;
-            Debug.Log("VivoxLogin켜짐");
+            UtilDebug.Log("VivoxLogin켜짐");
         }
 
         private async UniTaskVoid HeartbeatLoop(string lobbyId, float waitTimeSeconds, CancellationToken token)
@@ -273,18 +273,18 @@ namespace GameManagers
                 while (token.IsCancellationRequested == false) //토큰이 취소 요청을 보내기 전까지 반복
                 {
                     await LobbyService.Instance.SendHeartbeatPingAsync(lobbyId);
-                    Debug.Log("HeartBeat Sent (Ping)");
+                    UtilDebug.Log("HeartBeat Sent (Ping)");
 
                     await UniTask.Delay(delay, ignoreTimeScale: true, cancellationToken: token);
                 }
             }
             catch (OperationCanceledException)
             {
-                Debug.Log("Heartbeat Loop Stopped.");
+                UtilDebug.Log("Heartbeat Loop Stopped.");
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"Heartbeat Error: {ex.Message}");
+                UtilDebug.LogWarning($"Heartbeat Error: {ex.Message}");
                 StopHeartbeat(); // 에러 발생 시 안전하게 종료
             }
         }
@@ -293,19 +293,19 @@ namespace GameManagers
         {
             try
             {
-                Debug.Log($"로비의 호스트 ID:{lobby.HostId} 나의 아이디{PlayerID}");
+                UtilDebug.Log($"로비의 호스트 ID:{lobby.HostId} 나의 아이디{PlayerID}");
                 StopHeartbeat();
 
                 if (lobby.HostId == PlayerID)
                 {
-                    Debug.Log("하트비트 시작 (UniTask)");
+                    UtilDebug.Log("하트비트 시작 (UniTask)");
                     _heartbeatCts = new CancellationTokenSource();
                     HeartbeatLoop(lobby.Id, interval, _heartbeatCts.Token).Forget();
                 }
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                UtilDebug.Log(e);
             }
         }
 
@@ -353,15 +353,15 @@ namespace GameManagers
                 switch (ex.Reason)
                 {
                     case LobbyExceptionReason.AlreadySubscribedToLobby:
-                        Debug.LogWarning(
+                        UtilDebug.LogWarning(
                             $"Already subscribed to lobby[{lobby.Id}]. We did not need to try and subscribe again. Exception Message: {ex.Message}");
                         break;
                     case LobbyExceptionReason.SubscriptionToLobbyLostWhileBusy:
-                        Debug.LogError(
+                        UtilDebug.LogError(
                             $"Subscription to lobby events was lost while it was busy trying to subscribe. Exception Message: {ex.Message}");
                         throw;
                     case LobbyExceptionReason.LobbyEventServiceConnectionError:
-                        Debug.LogError($"Failed to connect to lobby events. Exception Message: {ex.Message}");
+                        UtilDebug.LogError($"Failed to connect to lobby events. Exception Message: {ex.Message}");
                         throw;
                     default: throw;
                 }
@@ -376,7 +376,7 @@ namespace GameManagers
             try
             {
                 string joincode = await _relayManager.StartHostWithRelay(lobby.MaxPlayers);
-                Debug.Log(lobby.Name + "로비의 이름");
+                UtilDebug.Log(lobby.Name + "로비의 이름");
                 await InjectionRelayJoinCodeintoLobby(lobby, joincode);
             }
             catch (LobbyServiceException timeLimmitException) when (timeLimmitException.Message.Contains(
@@ -391,7 +391,7 @@ namespace GameManagers
         {
             if (lobby == null)
             {
-                Debug.Log($"{lobby.Name}가 존재하지 않습니다.");
+                UtilDebug.Log($"{lobby.Name}가 존재하지 않습니다.");
                 return;
             }
 
@@ -406,7 +406,7 @@ namespace GameManagers
             }
             catch (KeyNotFoundException exception)
             {
-                Debug.Log($"릴레이 코드가 존재하지 않습니다.{exception}");
+                UtilDebug.Log($"릴레이 코드가 존재하지 않습니다.{exception}");
                 await Utill.RateLimited(async () =>
                 {
                     Lobby currentLobby = await GetLobbyAsyncCustom(lobby.Id);
@@ -432,12 +432,12 @@ namespace GameManagers
                 Lobby lobbyResult = await AvailableLobby(lobbyName);
                 if (lobbyResult == null)
                 {
-                    Debug.Log("There is not WaitLobby, so Create Wait Lobby");
+                    UtilDebug.Log("There is not WaitLobby, so Create Wait Lobby");
                     _currentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, lobbyOption);
                 }
                 else
                 {
-                    Debug.Log("Find WaitLobby, Join to Lobby");
+                    UtilDebug.Log("Find WaitLobby, Join to Lobby");
                     _currentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyResult.Id);
                 }
 
@@ -454,7 +454,7 @@ namespace GameManagers
             catch (LobbyServiceException alreayException) when (alreayException.Message.Contains(
                                                                     "player is already a member of the lobby"))
             {
-                Debug.Log("플레이어가 이미 접속중입니다. 정보삭제후 재진입을 시도 합니다.");
+                UtilDebug.Log("플레이어가 이미 접속중입니다. 정보삭제후 재진입을 시도 합니다.");
                 _sceneManagerEx.SetCheckTaskChecker(_taskChecker);
                 await InitLobbyScene();
             }
@@ -467,12 +467,12 @@ namespace GameManagers
             catch (KeyNotFoundException keynotFoundExceoption) when (keynotFoundExceoption.Message.Contains(
                                                                          "The given key 'RelayCode' was not present in the dictionary"))
             {
-                Debug.Log("릴레이코드가 없습니다. 다시 찾습니다");
+                UtilDebug.Log("릴레이코드가 없습니다. 다시 찾습니다");
                 await Utill.RateLimited(() => TryJoinLobbyByNameOrCreateLobby(lobbyName, maxPlayers, lobbyOption));
             }
             catch (Exception ex)
             {
-                Debug.Log(ex);
+                UtilDebug.Log(ex);
             }
 
             async UniTask OnLobbyHostChangeEvent(ILobbyChanges lobbyChanges)
@@ -487,7 +487,7 @@ namespace GameManagers
                 }
                 catch (Exception errer)
                 {
-                    Debug.Log(errer);
+                    UtilDebug.Log(errer);
                 }
             }
 
@@ -517,7 +517,7 @@ namespace GameManagers
                         {
                             // roomFieldChange.Value : PlayerDataObject
                             string newRoomId = roomFieldChange.Value.Value;
-                            Debug.Log($"다른 플레이어가 새 방을 만들었습니다!  RoomId = {newRoomId}");
+                            UtilDebug.Log($"다른 플레이어가 새 방을 만들었습니다!  RoomId = {newRoomId}");
 
                             // 필요하다면 즉시 방 목록 갱신
                             await ReFreshRoomList();
@@ -526,7 +526,7 @@ namespace GameManagers
                 }
                 catch (Exception error)
                 {
-                    Debug.Log(error);
+                    UtilDebug.Log(error);
                 }
             }
         }
@@ -558,7 +558,7 @@ namespace GameManagers
         {
             if (joincode == null || lobby == null)
             {
-                Debug.Log(
+                UtilDebug.Log(
                     $"Data has been NULL, is Check Lobby Null?: {lobby.Equals(null)} is Check JoinCode Null? {lobby.Equals(null)}");
                 return;
             }
@@ -589,7 +589,7 @@ namespace GameManagers
 
             catch (Exception ex)
             {
-                Debug.LogError($"JoinRoomInitalize 중 오류 발생: {ex}");
+                UtilDebug.LogError($"JoinRoomInitalize 중 오류 발생: {ex}");
                 _isDoneLobbyInitEvent = false;
                 throw; // 상위 호출부에 예외를 전달
             }
@@ -626,7 +626,7 @@ namespace GameManagers
             foreach (Lobby lobby in lobbyinPlayerList)
             {
                 await ExitLobbyAsync(lobby);
-                Debug.Log($"{lobby}에서 나갔습니다.");
+                UtilDebug.Log($"{lobby}에서 나갔습니다.");
                 StopHeartbeat();
             }
 
@@ -654,10 +654,10 @@ namespace GameManagers
             try
             {
                 await AuthenticationService.Instance.SignInAnonymouslyAsync();
-                Debug.Log("Sign in anonymously succeeded!");
+                UtilDebug.Log("Sign in anonymously succeeded!");
 
                 string anonymouslyID = AuthenticationService.Instance.PlayerId;
-                Debug.Log($"플레이어 ID 만들어짐{anonymouslyID}");
+                UtilDebug.Log($"플레이어 ID 만들어짐{anonymouslyID}");
 
                 CurrentPlayerIngameInfo = new PlayerIngameLoginInfo(_playerLogininfo.PlayerNickName, anonymouslyID);
 
@@ -668,14 +668,14 @@ namespace GameManagers
             {
                 // Compare error code to AuthenticationErrorCodes
                 // Notify the player with the proper error message
-                Debug.LogException(ex);
+                UtilDebug.LogError(ex);
                 return null;
             }
             catch (RequestFailedException ex)
             {
                 // Compare error code to CommonErrorCodes
                 // Notify the player with the proper error message
-                Debug.LogException(ex);
+                UtilDebug.LogError(ex);
                 return null;
             }
         }
@@ -700,17 +700,17 @@ namespace GameManagers
                     Data = updatedData
                 });
 
-                Debug.Log($"로비ID: {lobby.Id} \t 플레이어ID: {PlayerID} 정보가 입력되었습니다.");
+                UtilDebug.Log($"로비ID: {lobby.Id} \t 플레이어ID: {PlayerID} 정보가 입력되었습니다.");
             }
             catch (Exception error)
             {
-                Debug.LogError($"에러 발생{error}");
+                UtilDebug.LogError($"에러 발생{error}");
             }
         }
 
         private async UniTask RemovePlayerData(Lobby lobby)
         {
-            Debug.Log($"로비ID{lobby.Id} \t 플레이어ID{PlayerID} 정보가 제거되었습니다.");
+            UtilDebug.Log($"로비ID{lobby.Id} \t 플레이어ID{PlayerID} 정보가 제거되었습니다.");
             await LobbyService.Instance.RemovePlayerAsync(lobby.Id, PlayerID);
         }
 
@@ -734,13 +734,13 @@ namespace GameManagers
             }
             catch (LobbyServiceException playerNotFound) when (playerNotFound.Message.Contains("player not found"))
             {
-                Debug.Log("Player Not Found");
+                UtilDebug.Log("Player Not Found");
                 await InitLobbyScene();
                 return;
             }
             catch (Exception e)
             {
-                Debug.Log("여기서 문제가 발생" + e);
+                UtilDebug.Log("여기서 문제가 발생" + e);
             }
         }
 
@@ -811,12 +811,12 @@ namespace GameManagers
                 {
                     //내가 호스트도 로비에 나만 남았다면 로비삭제
                     await LobbyService.Instance.DeleteLobbyAsync(lobby.Id);
-                    Debug.Log("로비삭제");
+                    UtilDebug.Log("로비삭제");
                 }
                 else
                 {
                     //마지막에 남은 사람이 나말고 다른 사람도 있는데, 내가 호스트인경우
-                    Debug.Log("로비데이터 내 내 데이터 삭제");
+                    UtilDebug.Log("로비데이터 내 내 데이터 삭제");
                     await RemovePlayerData(lobby);
                     DeleteRelayCodefromLobby(lobby);
                 }
@@ -826,11 +826,11 @@ namespace GameManagers
             }
             catch (System.ObjectDisposedException disposedException)
             {
-                Debug.Log($"이미 객체가 제거되었습니다.{disposedException.Message}");
+                UtilDebug.Log($"이미 객체가 제거되었습니다.{disposedException.Message}");
             }
             catch (Exception e)
             {
-                Debug.Log($"LeaveLobby 메서드 안에서의 에러{e}");
+                UtilDebug.Log($"LeaveLobby 메서드 안에서의 에러{e}");
             }
         }
 
@@ -843,7 +843,7 @@ namespace GameManagers
                 _currentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
                 if (_currentLobby != null && waitLobby != null)
                 {
-                    Debug.Log($"로비 만들어짐{_currentLobby.Name}");
+                    UtilDebug.Log($"로비 만들어짐{_currentLobby.Name}");
                     await CreateRoomWriteinWaitLobby(waitLobby.Id, PlayerID);
                     await ExitLobbyAsync(waitLobby);
                 }
@@ -855,7 +855,7 @@ namespace GameManagers
 
             catch (Exception e)
             {
-                Debug.Log($"An error occurred while creating the room.{e}");
+                UtilDebug.Log($"An error occurred while creating the room.{e}");
                 throw;
             }
 
@@ -893,12 +893,12 @@ namespace GameManagers
             }
             catch (LobbyServiceException notfound) when (notfound.Reason == LobbyExceptionReason.LobbyNotFound)
             {
-                Debug.Log($"LobbyNotFound{notfound.Message}");
+                UtilDebug.Log($"LobbyNotFound{notfound.Message}");
                 throw;
             }
             catch (Exception error)
             {
-                Debug.Log($"An Error Occured ErrorCode:{error}");
+                UtilDebug.Log($"An Error Occured ErrorCode:{error}");
                 throw;
             }
 
@@ -921,16 +921,16 @@ namespace GameManagers
             try
             {
                 await LeaveAllLobby();
-                Debug.Log("Player removed from lobby.");
+                UtilDebug.Log("Player removed from lobby.");
             }
             catch (LobbyServiceException ex) when (ex.Reason == LobbyExceptionReason.RateLimited)
             {
-                Debug.Log($"Failed to remove player from lobby: {ex.Message} 다시 시도중");
+                UtilDebug.Log($"Failed to remove player from lobby: {ex.Message} 다시 시도중");
                 await Utill.RateLimited(LogoutAndAllLeaveLobby);
             }
             catch (Exception ex)
             {
-                Debug.Log($"에러발생: {ex}");
+                UtilDebug.Log($"에러발생: {ex}");
             }
 
             // 사용자 인증 로그아웃
@@ -938,7 +938,7 @@ namespace GameManagers
             AuthenticationService.Instance.ClearSessionToken();
             CurrentPlayerIngameInfo = default;
             _currentLobby = null;
-            Debug.Log("User signed out successfully.");
+            UtilDebug.Log("User signed out successfully.");
         }
 
         public void InitializeVivoxEvent()
@@ -991,7 +991,7 @@ namespace GameManagers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log($"에러발생:{e}");
+                UtilDebug.Log($"에러발생:{e}");
                 _isRefreshing = false;
                 throw;
             }
@@ -1034,7 +1034,7 @@ namespace GameManagers
         {
             foreach (var data in _currentLobby.Data)
             {
-                Debug.Log($"{data.Key}의 값은 {data.Value.Value}");
+                UtilDebug.Log($"{data.Key}의 값은 {data.Value.Value}");
             }
         }
 
@@ -1048,25 +1048,25 @@ namespace GameManagers
                     Unity.Services.Lobbies.Models.Player hostPlayer =
                         lobby.Players.FirstOrDefault(player => player.Id == lobby.HostId);
 
-                    Debug.Log(
+                    UtilDebug.Log(
                         $"현재 로비이름: {lobby.Name} 로비ID: {lobby.Id} 호스트닉네임: {hostPlayer.Data["NickName"].Value} 로비호스트: {lobby.HostId} ");
-                    Debug.Log($"-----------------------------------");
+                    UtilDebug.Log($"-----------------------------------");
                     foreach (var player in lobby.Players)
                     {
-                        Debug.Log($"플레이어 아이디: {player.Id} 플레이어 닉네임:{player.Data["NickName"].Value}");
+                        UtilDebug.Log($"플레이어 아이디: {player.Id} 플레이어 닉네임:{player.Data["NickName"].Value}");
                     }
 
-                    Debug.Log($"-----------------------------------");
+                    UtilDebug.Log($"-----------------------------------");
                 }
             }
             catch (LobbyServiceException e) when (e.Reason == LobbyExceptionReason.RequestTimeOut)
             {
-                Debug.LogError($"RequestTimeOut");
+                UtilDebug.LogError($"RequestTimeOut");
                 await Utill.RateLimited(async () => { await ShowUpdatedLobbyPlayers(); });
             }
             catch (Exception ex)
             {
-                Debug.Log($"에러{ex}");
+                UtilDebug.Log($"에러{ex}");
             }
         }
 

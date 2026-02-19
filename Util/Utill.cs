@@ -113,7 +113,7 @@ namespace Util
         {
             RuntimeAnimatorController ac = anim.runtimeAnimatorController;
             
-            Debug.Assert(ac != null, $"anim is null");
+            UnityEngine.Debug.Assert(ac != null, $"anim is null");
             
             for (int i = 0; i < ac.animationClips.Length; i++)
             {
@@ -129,7 +129,7 @@ namespace Util
                     return clip.length;
                 }
             }
-            Debug.LogWarning($"[AttackSkillStrategy] Could not find AnimationClip named '{animationName}'. Defaulting to 1.0f.");
+            UtilDebug.LogWarning($"[AttackSkillStrategy] Could not find AnimationClip named '{animationName}'. Defaulting to 1.0f.");
             return 1.0f;
         }
 
@@ -179,13 +179,13 @@ namespace Util
 
         //public static async Task<T> RateLimited<T>(Func<Task<T>> action, int millisecondsDelay = 1000)
         //{
-        //    Debug.LogWarning($"Rate limit exceeded. Retrying in {millisecondsDelay / 1000} seconds...");
+        //    UtilDebug.LogWarning($"Rate limit exceeded. Retrying in {millisecondsDelay / 1000} seconds...");
         //    await Task.Delay(millisecondsDelay); // 대기
         //    return await action.Invoke(); // 전달받은 작업 실행 및 결과 반환
         //}
         //public static async Task RateLimited(Func<Task> action, int millisecondsDelay = 1000)
         //{
-        //    Debug.LogWarning($"Rate limit exceeded. Retrying in {millisecondsDelay / 1000} seconds...");
+        //    UtilDebug.LogWarning($"Rate limit exceeded. Retrying in {millisecondsDelay / 1000} seconds...");
         //    await Task.Delay(millisecondsDelay); // 대기
         //    await action.Invoke(); // 전달받은 작업 실행 및 결과 반환
         //}
@@ -205,13 +205,13 @@ namespace Util
 
             try
             {
-                Debug.LogWarning($"Rate limit exceeded. Retrying in {delayMs / 1000f} seconds…");
+                UtilDebug.LogWarning($"Rate limit exceeded. Retrying in {delayMs / 1000f} seconds…");
                 await UniTask.Delay(delayMs, ignoreTimeScale: true, cancellationToken: newCts.Token); 
                 return await action();
             }
             catch (OperationCanceledException) // [수정] UniTask 취소 표준 예외
             {
-                Debug.Log("RateLimited<T>: 이전 예약이 취소되어 실행하지 않습니다.");
+                UtilDebug.Log("RateLimited<T>: 이전 예약이 취소되어 실행하지 않습니다.");
                 return default;
             }
             finally
@@ -233,13 +233,13 @@ namespace Util
 
             try
             {
-                Debug.LogWarning($"Rate limit exceeded. Retrying in {delayMs / 1000f} seconds…");
+                UtilDebug.LogWarning($"Rate limit exceeded. Retrying in {delayMs / 1000f} seconds…");
                 await UniTask.Delay(delayMs, ignoreTimeScale: true, cancellationToken: newCts.Token); 
                 await action();
             }
             catch (OperationCanceledException) // [수정] UniTask 취소 표준 예외
             {
-                Debug.Log("RateLimited<T>: 이전 예약이 취소되어 실행하지 않습니다.");
+               UtilDebug.Log("RateLimited<T>: 이전 예약이 취소되어 실행하지 않습니다.");
             }
             finally
             {

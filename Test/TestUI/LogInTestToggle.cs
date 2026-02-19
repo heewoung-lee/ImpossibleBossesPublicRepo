@@ -8,6 +8,7 @@ using UI.Scene;
 using Unity.Multiplayer.Playmode;
 using UnityEngine;
 using UnityEngine.UI;
+using Util;
 using Zenject;
 
 namespace Test.TestUI
@@ -62,7 +63,7 @@ namespace Test.TestUI
                 if (tagValue.Length > 0 && Enum.TryParse(typeof(Players), tagValue[0], out var parsedEnum))
                 {
                     currentPlayer = (Players)parsedEnum;
-                    Debug.Log($"Current player: {currentPlayer}");
+                    UtilDebug.Log($"Current player: {currentPlayer}");
                 }
                 switch (currentPlayer)
                 {

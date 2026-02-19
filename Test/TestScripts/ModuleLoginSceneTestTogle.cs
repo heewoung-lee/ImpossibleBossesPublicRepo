@@ -1,10 +1,10 @@
 using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.UIManager;
 using Test.TestUI;
 using UnityEngine;
 using Zenject;
 
+
+#if UNITY_EDITOR
 namespace Test.TestScripts
 {
     public class ModuleLoginSceneTestTogle : MonoBehaviour
@@ -17,3 +17,5 @@ namespace Test.TestScripts
         }
     }
 }
+
+#endif

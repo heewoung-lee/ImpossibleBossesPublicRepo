@@ -91,7 +91,7 @@ namespace GameManagers.RelayManager
                 GameObject networkPrefab = Resources.Load<GameObject>("Prefabs/NGO/NetworkManager");
                 if (networkPrefab == null)
                 {
-                    Debug.LogError("there is not Prefabs/NGO/NetworkManager");
+                    UtilDebug.LogError("there is not Prefabs/NGO/NetworkManager");
                 }
 
                 UnityEngine.Object.Instantiate(networkPrefab);
@@ -100,7 +100,7 @@ namespace GameManagers.RelayManager
 
                 //6.28일 수정: 오브젝트가 생성될떄 부모값이 Null인결우 컨테이너를 통해 인젝션을 하면 컨테이너가 부모를 멋대로 넣음. 그래도 순서를 일반 생성 -> 컨테이너 주입으로 변경 
                 //7.2일 수정: 어차피 NetworkManager는 inject이 필요없는 객체이므로 일반 스폰
-                //7.3일 Debug.Log("it is NetworkManager" + Object.ReferenceEquals(instantiateOBj.GetComponent<NetworkManager>(),NetworkManager.Singleton)); == true로 확인
+                //7.3일 UtilDebug.Log("it is NetworkManager" + Object.ReferenceEquals(instantiateOBj.GetComponent<NetworkManager>(),NetworkManager.Singleton)); == true로 확인
 
                 #endregion
 
@@ -168,7 +168,7 @@ namespace GameManagers.RelayManager
             NgoRPCCaller.SubmitSelectedCharactertoServerRpc(NetworkManagerEx.LocalClientId,
                 playerClass.ToString());
 
-            Debug.Log($"{NetworkManagerEx.LocalClientId}플레이어가 {playerClass.ToString()}를 선택했습니다 ");
+            UtilDebug.Log($"{NetworkManagerEx.LocalClientId}플레이어가 {playerClass.ToString()}를 선택했습니다 ");
         }
         
         public void RegisterSelectedCharacterInDict(ulong clientId, Define.PlayerClass playerClass)
@@ -257,7 +257,6 @@ namespace GameManagers.RelayManager
         {
             return SpawnAndInjectionNgo(ngo, clientId, position, parent, destroyOption);
         }
-
         private GameObject SpawnAndInjectionNgo(GameObject instanceObj, ulong clientId,
             Vector3 position,
             Transform parent = null, bool destroyOption = true)
@@ -304,17 +303,17 @@ namespace GameManagers.RelayManager
             }
             catch (RelayServiceException ex) when (ex.Message.Contains("join code not found"))
             {
-                Debug.LogWarning($"RelayCode not Found: {joinCode}");
+                UtilDebug.LogWarning($"RelayCode not Found: {joinCode}");
                 return false;
             }
             catch (RelayServiceException ex) when (ex.ErrorCode == 404)
             {
-                Debug.LogWarning("RelayCode hasnt Available");
+                UtilDebug.LogWarning("RelayCode hasnt Available");
                 return false;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Exception: {ex}");
+                UtilDebug.LogError($"Exception: {ex}");
                 return false;
             }
         }
@@ -325,7 +324,7 @@ namespace GameManagers.RelayManager
             {
                 if (NetworkManagerEx.IsClient || NetworkManagerEx.IsServer)
                 {
-                    Debug.LogWarning("Client or Server is already running.");
+                    UtilDebug.LogWarning("Client or Server is already running.");
                     return false;
                 }
 
@@ -337,17 +336,17 @@ namespace GameManagers.RelayManager
             }
             catch (RelayServiceException ex) when (ex.ErrorCode == 404)
             {
-                Debug.Log("소켓에러");
+                UtilDebug.Log("소켓에러");
                 return false;
             }
             catch (RelayServiceException ex) when (ex.Message.Contains("join code not found"))
             {
-                Debug.LogWarning("로비에 릴레이코드가 유효하지 않음 새로 만들어야함");
+                UtilDebug.LogWarning("로비에 릴레이코드가 유효하지 않음 새로 만들어야함");
                 return false;
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                UtilDebug.LogError(ex);
                 return false;
             }
         }
@@ -365,7 +364,7 @@ namespace GameManagers.RelayManager
         }
         public void JoinLocal()
         {
-            Debug.Log("[RelayManager] 로컬 모드로 접속을 시도합니다...");
+            UtilDebug.Log("[RelayManager] 로컬 모드로 접속을 시도합니다...");
 
             // 1. NetworkManager에서 UnityTransport 컴포넌트 가져오기
             var transport = _netWorkManager.GetComponent<UnityTransport>();
@@ -381,11 +380,11 @@ namespace GameManagers.RelayManager
             // 4. 클라이언트 시작
             if (_netWorkManager.StartClient())
             {
-                Debug.Log("[RelayManager] Local Client 시작 성공 (Target: 127.0.0.1:7777)");
+                UtilDebug.Log("[RelayManager] Local Client 시작 성공 (Target: 127.0.0.1:7777)");
             }
             else
             {
-                Debug.LogError("[RelayManager] Local Client 시작 실패");
+                UtilDebug.LogError("[RelayManager] Local Client 시작 실패");
             }
         }
 

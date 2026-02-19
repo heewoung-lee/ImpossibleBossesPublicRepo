@@ -10,6 +10,7 @@ using DataType.Skill.Factory.Sequence.GetLength.Strategy;
 using DataType.Skill.Factory.Target;
 using Skill;
 using UnityEngine;
+using Util;
 
 namespace DataType.Skill.Factory.Sequence.Strategy
 {
@@ -203,7 +204,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
 
                 void FinishComplete()
                 {
-                    Debug.Log("FinishComplete");
+                    UtilDebug.Log("FinishComplete");
 
                     if (finished) return;
                     finished = true;

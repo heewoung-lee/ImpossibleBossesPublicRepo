@@ -98,7 +98,7 @@ namespace GameManagers.Scene
         public void InvokeOnBeforeSceneUnloadLocalEvent()
         {
             _onBeforeSceneUnloadLocalEvent?.Invoke();
-            Debug.Log("씬 로드 되기전 호출");
+            UtilDebug.Log("씬 로드 되기전 호출");
         }
 
 

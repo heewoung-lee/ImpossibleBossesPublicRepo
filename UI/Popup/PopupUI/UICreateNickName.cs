@@ -7,6 +7,7 @@ using Module.UI_Module;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Util;
 using Zenject;
 
 namespace UI.Popup.PopupUI
@@ -85,7 +86,7 @@ namespace UI.Popup.PopupUI
             }
             catch (Exception e)
             {
-                Debug.LogError($"[CreateNickName] Error: {e}");
+                UtilDebug.LogError($"[CreateNickName] Error: {e}");
                 //에러 발생 시 버튼이 잠긴 채로 남지 않게 해제
                 _confirmButton.interactable = true;
                 

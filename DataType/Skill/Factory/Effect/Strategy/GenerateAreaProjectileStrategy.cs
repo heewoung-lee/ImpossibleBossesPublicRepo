@@ -57,10 +57,10 @@ namespace DataType.Skill.Factory.Effect.Strategy
                     selectArea = skillExecutionContext.SelectedPoint.Value;
                 }
 
-                if (selectArea == Vector3.zero) Debug.Log("Select area is null");
+                if (selectArea == Vector3.zero) UtilDebug.Log("Select area is null");
 
                 if (String.IsNullOrEmpty(_generateProjectileDef.projectilePrefabPath) == true)
-                    Debug.LogError("projectilePath is null");
+                    UtilDebug.LogError("projectilePath is null");
 
 
                 NetworkParams networkParams = new NetworkParams

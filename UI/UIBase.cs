@@ -54,7 +54,7 @@ namespace UI
         {
             StartInit();
         }
-        protected void Bind<T>(Type type) where T : Object
+        protected void Bind<T>(Type type,Transform targetTr = null) where T : Object
         {
 
             if (type.IsEnum == false)
@@ -62,7 +62,7 @@ namespace UI
 
             string[] names = Enum.GetNames(type);
             Object[] objects = new Object[names.Length];
-            objects = FindObjects<T>(objects, 0, names.Length, names);
+            objects = FindObjects<T>(objects, 0, names.Length, names,targetTr);
 
             _bindDictionary.Add(typeof(T), objects);
         }
@@ -72,9 +72,20 @@ namespace UI
             Canvas.sortingOrder = soringOrder;
         }
 
-        protected void AddBind<T>(Type type,out string[] indexString) where T: Object
+        /// <summary>
+        /// 26.2.18일 주석 추가.
+        /// 특정 타입(T)의 객체들을 Enum 이름 기반으로 바인딩함
+        /// 이미 바인딩된 타입이 있다면 기존 목록 뒤에 새로운 객체들을 추가(Append)함.
+        /// (주로 상속받은 UI 클래스에서 부모의 바인딩을 유지한 채 자식 UI 요소를 추가할 때 사용)
+        /// </summary>
+        /// <typeparam name="T">바인딩할 컴포넌트 타입 (예: Button, Image, GameObject)</typeparam>
+        /// <param name="type">추가할 오브젝트들의 이름이 정의된 Enum 타입</param>
+        /// <param name="indexString">결과로 반환되는 모든 바인딩 객체(기존 + 신규)의 이름 목록</param>
+        /// <param name="targetTr">어디서 부터 계층을 탐색해서 바인드된 </param>
+        protected void AddBind<T>(Type type,out string[] indexString,Transform targetTr = null) where T: Object
         {
         
+            //이미 해당 타입으로 바인딩된 내역이 있는 경우 (추가 모드)
             if(_bindDictionary.ContainsKey(typeof(T)))
             {
                 Object[] objects = _bindDictionary[typeof(T)];
@@ -90,30 +101,42 @@ namespace UI
                 }
                 Object[] newObjects = new Object[nameList.Count];
                 Array.Copy(objects, newObjects, objects.Length);
-                newObjects = FindObjects<T>(newObjects, objects.Length, newObjects.Length, nameList.ToArray());
+                newObjects = FindObjects<T>(newObjects, objects.Length, newObjects.Length, nameList.ToArray(),targetTr);
                 _bindDictionary[typeof(T)] = newObjects;
                 indexString = nameList.ToArray();
             }
-            else
+            else//최초 바인딩인 경우 (신규 모드)
             {
-                Bind<T>(type);
+                Bind<T>(type,targetTr);
                 indexString = _bindDictionary[typeof(T)].Select(bindObject=>bindObject.name).ToArray();
             }
         }
 
-        private Object[] FindObjects<T>(Object[] objects,int startIndex,int endIndex, string[] names) where T : Object
+        private Object[] FindObjects<T>(Object[] objects,int startIndex,int endIndex, string[] names,Transform targetTr = null) where T : Object
         {
             Object[] newObjects = objects;
 
+
+            GameObject targetGameObject;
+            
+            if (targetTr == null)
+            {
+                targetGameObject = gameObject;
+            }
+            else
+            {
+                targetGameObject = targetTr.gameObject;
+            }
+            
             for (int i = startIndex; i < endIndex; i++)
             {
                 if (typeof(T) == typeof(GameObject))
                 {
-                    newObjects[i] = Utill.FindChild(gameObject, names[i], true);
+                    newObjects[i] = Utill.FindChild(targetGameObject, names[i], true);
                 }
                 else
                 {
-                    newObjects[i] = Utill.FindChild<T>(gameObject, names[i], true);
+                    newObjects[i] = Utill.FindChild<T>(targetGameObject, names[i], true);
                 }
             }
             return newObjects;
@@ -127,7 +150,7 @@ namespace UI
 
             if(_bindDictionary.TryGetValue(typeof(T),out objects) == false)
             {
-                Debug.LogError($"not Found Object{typeof(T)}");
+                UtilDebug.LogError($"not Found Object{typeof(T)}");
                 return null;
             }
             return objects[idx] as T;

@@ -59,7 +59,7 @@ namespace UI.Scene.SceneUI
                     return skillFrameTr;
                 }
             }
-            Debug.LogError("Skill slots are full.");
+            UtilDebug.LogError("Skill slots are full.");
             return null;
         }
 

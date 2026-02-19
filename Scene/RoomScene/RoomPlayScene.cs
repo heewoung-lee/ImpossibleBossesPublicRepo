@@ -10,28 +10,16 @@ using Zenject;
 
 namespace Scene.RoomScene
 {
-    public class RoomPlayScene : BaseScene,ISceneTestMode,ISceneMultiMode
+    public class RoomPlayScene : BaseScene
     {
-        private IUIManagerServices _uiManagerServices;
-        private ISceneConnectOnline _sceneConnectOnline;
         private ISceneStarter _roomSceneStarter;
-        private RelayManager _relayManager;
-        
+
         [Inject]
-        public void Construct(IUIManagerServices uiManagerServices, ISceneConnectOnline sceneConnectOnline,ISceneStarter roomSceneStarter,RelayManager relayManager)
+        public void Construct(ISceneStarter roomSceneStarter)
         {
-            _uiManagerServices = uiManagerServices;
-            _sceneConnectOnline = sceneConnectOnline;
             _roomSceneStarter = roomSceneStarter;
-            _relayManager = relayManager;
         }
-        
-
-
-        [SerializeField] private TestMode testMode;
-        [SerializeField] private MultiMode multiMode;
         public override Define.Scene CurrentScene => Define.Scene.RoomScene;
-
 
         protected override void AwakeInit()
         {
@@ -39,24 +27,7 @@ namespace Scene.RoomScene
         protected override void StartInit()
         {
             base.StartInit();
-            StartInitAsync().Forget();
+            _roomSceneStarter.SceneStart();
         }
-        
-        private async UniTaskVoid StartInitAsync()
-        {
-            try
-            {
-                await _sceneConnectOnline.SceneConnectOnlineStart();
-                _roomSceneStarter.SceneStart();
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"[RoomPlayScene] 초기화 중 예외: {e}");
-            }
-        }
-
-        public TestMode GetTestMode()=>testMode;
-
-        public MultiMode GetMultiTestMode() => multiMode;
     }
 }

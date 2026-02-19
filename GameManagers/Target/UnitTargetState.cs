@@ -2,6 +2,7 @@ using System;
 using Controller;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Util;
 
 namespace GameManagers.Target
 {
@@ -93,14 +94,14 @@ namespace GameManagers.Target
 
         public void Exit()
         {
-            Debug.Log("[UnitTargetState] Exit");
+            UtilDebug.Log("[UnitTargetState] Exit");
             ClearHighlight();
             _targetManager.CursorService.Reset();
         }
 
         public void OnCancel()
         {
-            Debug.Log("[UnitTargetState] OnCancel]");
+            UtilDebug.Log("[UnitTargetState] OnCancel]");
             _onCanceled?.Invoke();
         }
 

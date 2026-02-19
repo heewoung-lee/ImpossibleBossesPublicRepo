@@ -5,6 +5,7 @@ using GameManagers.ResourcesEx;
 using UI.Popup;
 using UI.Popup.PopupUI;
 using UnityEngine;
+using Util;
 
 namespace GameManagers.UI.Implements
 {
@@ -35,7 +36,7 @@ namespace GameManagers.UI.Implements
             {
                 return value as T;
             }
-            Debug.Log($"Not Found KeyType: {typeof(T)}");
+            UtilDebug.Log($"Not Found KeyType: {typeof(T)}");
             return null;
         }
     

@@ -6,6 +6,7 @@ using DataType.Skill.ShareDataDef;
 using Module.PlayerModule.PlayerClassModule;
 using Skill;
 using UnityEngine;
+using Util;
 
 namespace DataType.Skill.Factory.Decorator.Strategy
 {
@@ -43,6 +44,7 @@ namespace DataType.Skill.Factory.Decorator.Strategy
                 {
                     _animInfo = _def.animNameRef.Resolve(ctx);
                     string name = _animInfo.AnimationName;
+                    
                     if (!string.IsNullOrWhiteSpace(name))
                         _animHash = Animator.StringToHash(name);
                 }
@@ -60,14 +62,14 @@ namespace DataType.Skill.Factory.Decorator.Strategy
                 ModulePlayerClass playerModule = controller.GetComponent<ModulePlayerClass>();
                 if (playerModule == null)
                 {
-                    Debug.LogWarning("[PlayAnimationDecorator] ModulePlayerClass missing on caster. Controller=" + controller.name);
+                    UtilDebug.LogWarning("[PlayAnimationDecorator] ModulePlayerClass missing on caster. Controller=" + controller.name);
                     if (onComplete != null) onComplete();
                     return;
                 }
 
                 if (playerModule.CommonSkillState == null)
                 {
-                    Debug.LogError("[PlayAnimationDecorator] CommonSkillState is NOT initialized yet!");
+                    UtilDebug.LogError("[PlayAnimationDecorator] CommonSkillState is NOT initialized yet!");
                     if (onCancel != null) onCancel();   // 여기서는 실패로 보는 게 맞음
                     return;
                 }
@@ -77,7 +79,8 @@ namespace DataType.Skill.Factory.Decorator.Strategy
                     _animInfo.IsAnimationLocked,
                     _animInfo.TransitionDuration
                 );
-                controller.CurrentStateType = playerModule.CommonSkillState;
+                
+                controller.CurrentStateType = playerModule.CommonSkillState; //스킬상태를 현재 상태에 덮어쓰기
 
                 if (onComplete != null) onComplete();
             }

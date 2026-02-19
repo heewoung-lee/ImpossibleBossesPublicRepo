@@ -1,6 +1,7 @@
 ﻿using System;
 using Controller;
 using UnityEngine;
+using Util;
 
 namespace DataType.Skill.Factory.Effect
 {
@@ -31,7 +32,7 @@ namespace DataType.Skill.Factory.Effect
 
             public void Apply(ExecutionContext ctx, Action onComplete, Action onCancel)
             {
-                Debug.Log($"[DebugCancelEffect] Cancel Fired / Caster={_owner.name} / Msg={_def.message}");
+                UtilDebug.Log($"[DebugCancelEffect] Cancel Fired / Caster={_owner.name} / Msg={_def.message}");
                 onCancel?.Invoke(); // 핵심: Complete가 아니라 Cancel 호출
             }
         }

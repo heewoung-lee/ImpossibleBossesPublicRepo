@@ -33,7 +33,7 @@ namespace GameManagers
             {
                 if (_vivoxDoneLoginEvent == null || _vivoxDoneLoginEvent.GetInvocationList().Contains(value) == false)
                 {
-                    Debug.LogWarning($"There is no such event to remove. Event Target:{value?.Target}, Method:{value?.Method.Name}");
+                    UtilDebug.LogWarning($"There is no such event to remove. Event Target:{value?.Target}, Method:{value?.Method.Name}");
                     return;
                 }
                 _vivoxDoneLoginEvent -= value;
@@ -54,7 +54,7 @@ namespace GameManagers
                 }
                 if (_currentChanel != null)
                 {
-                    Debug.Log($"Vivox 채널{_currentChanel}지워짐");
+                    UtilDebug.Log($"Vivox 채널{_currentChanel}지워짐");
                     await LeaveEchoChannelAsyncCustom(_currentChanel);
                 }
                 _currentChanel = chanelID;
@@ -62,16 +62,16 @@ namespace GameManagers
             }
             catch (RequestFailedException requestFailExceoption)
             {
-                Debug.Log($"오류발생{requestFailExceoption}");
+                UtilDebug.Log($"오류발생{requestFailExceoption}");
                 await Utill.RateLimited(async ()=> await JoinChannelAsync(chanelID));
             }
             catch(ArgumentException alreadyAddKey) when (alreadyAddKey.Message.Contains("An item with the same key has already been added"))
             {
-                Debug.Log($"{alreadyAddKey}이미 키가 있음 무시해도 됨");
+                UtilDebug.Log($"{alreadyAddKey}이미 키가 있음 무시해도 됨");
             }
             catch (Exception ex) 
             {
-                Debug.LogError($"JoinChannel 에러 발생{ex}");
+                UtilDebug.LogError($"JoinChannel 에러 발생{ex}");
                 throw;
             }
 
@@ -80,14 +80,14 @@ namespace GameManagers
         {
             try
             {
-                Debug.Log("vivox 로그아웃");
+                UtilDebug.Log("vivox 로그아웃");
                 await VivoxService.Instance.LogoutAsync();
                 _checkDoneLoginProcess = false;
                 _currentChanel = null;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"LogoutOfVivoxAsync 에러 발생{ex}");
+                UtilDebug.LogError($"LogoutOfVivoxAsync 에러 발생{ex}");
                 throw;
             }
         }
@@ -103,7 +103,7 @@ namespace GameManagers
             }
             catch (Exception ex)
             {
-                Debug.LogError($"SendSystemMessageAsync error:{ex}");
+                UtilDebug.LogError($"SendSystemMessageAsync error:{ex}");
                 throw;
             }
         }
@@ -119,7 +119,7 @@ namespace GameManagers
             }
             catch (Exception ex)
             {
-                Debug.LogError($"SendMessageAsync 에러 발생{ex}");
+                UtilDebug.LogError($"SendMessageAsync 에러 발생{ex}");
                 throw;
             }
         }
@@ -138,7 +138,7 @@ namespace GameManagers
             }
             catch (Exception ex)
             {
-                Debug.LogError($"InitializeAsync 에러 발생{ex}");
+                UtilDebug.LogError($"InitializeAsync 에러 발생{ex}");
                 throw;
             }
         }
@@ -146,7 +146,7 @@ namespace GameManagers
         {
             if (VivoxService.Instance.IsLoggedIn)
             {
-                Debug.Log("로그인이 되어있음 리턴하겠음");
+                UtilDebug.Log("로그인이 되어있음 리턴하겠음");
                 return;
 
             }
@@ -159,11 +159,11 @@ namespace GameManagers
                 await VivoxService.Instance.LoginAsync(_loginOptions);
                 _checkDoneLoginProcess = true;
                 _vivoxDoneLoginEvent?.Invoke();
-                Debug.Log("ViVox 로그인완료");
+                UtilDebug.Log("ViVox 로그인완료");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"LoginToVivoxAsync 에러 발생{ex}");
+                UtilDebug.LogError($"LoginToVivoxAsync 에러 발생{ex}");
                 throw;
             }
         }
@@ -176,7 +176,7 @@ namespace GameManagers
             }
             catch (Exception e) when (e.Message.Contains("Request timeout"))
             {
-                Debug.LogError($"LeaveEchoChannelAsync 에러 발생{e}");
+                UtilDebug.LogError($"LeaveEchoChannelAsync 에러 발생{e}");
                 await Utill.RateLimited(async () => await VivoxService.Instance.JoinGroupChannelAsync(currentChanel, chatCapbillty));
                 throw;
             }
@@ -186,7 +186,7 @@ namespace GameManagers
             }
             catch (Exception error)
             {
-                Debug.LogError($"에러발생{error}");
+                UtilDebug.LogError($"에러발생{error}");
                 throw;
             }
         }
@@ -200,13 +200,13 @@ namespace GameManagers
             }
             catch (Exception e) when (e.Message.Contains("Request timeout"))
             {
-                Debug.LogError($"LeaveEchoChannelAsync 에러 발생{e}");
+                UtilDebug.LogError($"LeaveEchoChannelAsync 에러 발생{e}");
                 await Utill.RateLimited(async () => await LeaveEchoChannelAsyncCustom(chanelID));
                 throw;
             }
             catch(Exception error)
             {
-                Debug.LogError($"에러발생{error}");
+                UtilDebug.LogError($"에러발생{error}");
                 throw;
             }
         }

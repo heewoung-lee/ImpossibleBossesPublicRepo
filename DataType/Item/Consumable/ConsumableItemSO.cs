@@ -59,7 +59,7 @@ namespace DataType.Item.Consumable
                 else
                 {
                     iconPath = "";
-                    Debug.LogError($"[Path Error] '{icon.name}' 이미지는 반드시 Resources 폴더 안에 있어야 합니다!");
+                    UtilDebug.LogError($"[Path Error] '{icon.name}' 이미지는 반드시 Resources 폴더 안에 있어야 합니다!");
                 }
 #endif
             }

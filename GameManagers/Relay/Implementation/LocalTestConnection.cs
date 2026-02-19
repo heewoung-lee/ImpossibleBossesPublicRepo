@@ -4,6 +4,7 @@ using GameManagers.RelayManager;
 using Scene.CommonInstaller;
 using Unity.Netcode;
 using UnityEngine;
+using Util;
 
 namespace GameManagers.Interface.RelayManagerInterface.Implementation
 {
@@ -12,7 +13,7 @@ namespace GameManagers.Interface.RelayManagerInterface.Implementation
         public UniTask<string> StartHostAsync(NetworkManager networkManager, int maxConnections)
         {
             // 1. Transport 설정을 건드리지 않음 (기본값 127.0.0.1 사용)
-            Debug.Log("[Local] 로컬 호스트 모드로 시작합니다. (Relay 미사용)");
+            UtilDebug.Log("[Local] 로컬 호스트 모드로 시작합니다. (Relay 미사용)");
 
             // 2. 바로 호스트 시작
             if (networkManager.StartHost())

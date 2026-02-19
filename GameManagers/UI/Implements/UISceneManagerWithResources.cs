@@ -31,7 +31,7 @@ namespace GameManagers.Interface.UIManager.Implements
             {
                 return scene as T;
             }
-            Debug.LogError($"Not Found KeyType: {typeof(T)}");
+            UtilDebug.LogError($"Not Found KeyType: {typeof(T)}");
             return null;
         }
         public T GetSceneUIFromResource<T>(string name = null, string path = null) where T : UIScene

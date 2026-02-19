@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DataType.Item;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace DataType.Skill.Factory
@@ -33,7 +34,7 @@ namespace DataType.Skill.Factory
                     return rawStrategy;
                 }
             }
-            Debug.LogError($"[Factory] 전략을 찾을 수 없습니다: {data.dataName}");
+            UtilDebug.LogError($"[Factory] 전략을 찾을 수 없습니다: {data.dataName}");
             return null;
         }
     }

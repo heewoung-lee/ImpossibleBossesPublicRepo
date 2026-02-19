@@ -15,6 +15,7 @@ using TMPro;
 using UI.Popup.PopupUI;
 using UnityEngine;
 using UnityEngine.UI;
+using Util;
 using Zenject;
 
 namespace UI.Scene.SceneUI
@@ -110,7 +111,7 @@ namespace UI.Scene.SceneUI
                 TestIteminInventort();
                 TestGetGold();
                 TestGetExp();
-                TestGetDamaged(10000000);
+                //TestGetDamaged(10000000);
             }
             void MoveScene()
             {
@@ -178,21 +179,21 @@ namespace UI.Scene.SceneUI
             if (targetItem != null)
             {
                 inventory.AddItem(targetItem);
-                Debug.Log($"[TestUI] 아이템 생성됨: {targetItem.dataName}");
+                UtilDebug.Log($"[TestUI] 아이템 생성됨: {targetItem.dataName}");
             }
             else
             {
-                Debug.LogWarning("[TestUI] 조건에 맞는 아이템을 찾지 못했습니다.");
+                UtilDebug.LogWarning("[TestUI] 조건에 맞는 아이템을 찾지 못했습니다.");
             }
         }
 
         private async UniTask FindMyJoinCodeAsync()
         {
-            Debug.Log($"내 조인코드는 {_relayManager.JoinCode}");
+            UtilDebug.Log($"내 조인코드는 {_relayManager.JoinCode}");
             var lobby = await _lobbyManager.GetCurrentLobby();
             if (lobby != null)
             {
-                Debug.Log($"로비의 조인코드는{lobby.Data["RelayCode"].Value}");
+                UtilDebug.Log($"로비의 조인코드는{lobby.Data["RelayCode"].Value}");
             }
         }
     }

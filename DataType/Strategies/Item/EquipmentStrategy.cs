@@ -6,6 +6,7 @@ using GameManagers.Interface.BufferManager;
 using Skill;
 using Stats.BaseStats;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace DataType.Strategies
@@ -25,7 +26,7 @@ namespace DataType.Strategies
             BaseController controller = context.Caster;
             BaseDataSO data = context.Data;
 
-            Debug.LogError(
+            UtilDebug.LogError(
                 $"[EquipmentStrategy] Do NOT use IStrategy.Execute! Use IEquippable.Equip instead! Target: {controller.name}");
             if (controller.TryGetComponent(out BaseStats stats))
             {
@@ -33,7 +34,7 @@ namespace DataType.Strategies
             }
             else
             {
-                UnityEngine.Debug.LogWarning($"[EquipmentStrategy] Check the {controller.name} controller.!");
+                UtilDebug.LogWarning($"[EquipmentStrategy] Check the {controller.name} controller.!");
             }
         }
 

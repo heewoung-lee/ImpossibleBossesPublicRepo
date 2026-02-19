@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Controller;
 using Scene.CommonInstaller;
 using UnityEngine;
+using Util;
 using VFX;
 using Zenject;
 
@@ -95,7 +96,7 @@ namespace GameManagers.Target
 
             if (prefab == null)
             {
-                Debug.LogError($"[TargetManager] 인디케이터를 로드 실패! 경로: Resources/{INDICATOR_PATH}");
+                UtilDebug.LogError($"[TargetManager] 인디케이터를 로드 실패! 경로: Resources/{INDICATOR_PATH}");
                 return;
             }
 
@@ -158,7 +159,7 @@ namespace GameManagers.Target
 
         public void StopTargeting()
         {
-            Debug.Log("[TargetManager] StopTargeting -> Idle");
+            UtilDebug.Log("[TargetManager] StopTargeting -> Idle");
             ChangeState(new IdleState());
             CursorService.Set(CursorState.Base);
         }

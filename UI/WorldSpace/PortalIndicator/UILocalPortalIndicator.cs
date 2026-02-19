@@ -18,12 +18,12 @@ namespace UI.WorldSpace.PortalIndicator
 
         public void Initialize()
         {
-            Debug.Log("Initializing PortalIndicator");
+            UtilDebug.Log("Initializing PortalIndicator");
         }
 
         public void OnDisableIndicator()
         {
-            Debug.Log("OnDisableIndicator");
+            UtilDebug.Log("OnDisableIndicator");
         }
     }
 }

@@ -2,12 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Scene.CommonInstaller.TestInstaller;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace Scene.CommonInstaller
 {
-    public interface ITestInstaller {}
-    
+    //2.12일 내가 생각하더라도 이건 좀 이상하긴 한데 우선 이거보다 좋은 방법이 없으므로 이렇게 쓴다.
+    public interface ITestPreInstaller {} //테스트 환경을 만들기 위한 인스톨러
+    public interface ITestPostInstaller {} //최종적으로 단위 테스트를 위해 리바인드를 하기 위한 인스톨러
     
    [DisallowMultipleComponent]
     public class AutoInstallBinder : MonoInstaller
@@ -15,8 +17,8 @@ namespace Scene.CommonInstaller
         
         public override void InstallBindings()
         {
-            List<ITestInstaller> testInstallers = new List<ITestInstaller>();
-            
+            List<ITestPreInstaller> testPreInstallers = new List<ITestPreInstaller>();
+            List<ITestPostInstaller> testPostInstallers = new List<ITestPostInstaller>();
             MonoInstaller[] installers = 
                 this.GetComponents<MonoInstaller>()
                     .Where(installer => installer != this).ToArray();
@@ -24,21 +26,35 @@ namespace Scene.CommonInstaller
 
             foreach (MonoInstaller installer in installers)
             {
-                if (installer is ITestInstaller testInstaller)
+                if (installer is ITestPreInstaller testPreInstaller)
                 {
-                    testInstallers.Add(testInstaller);
+                    testPreInstallers.Add(testPreInstaller);
                     continue;
                 }
+                if (installer is ITestPostInstaller testPostInstaller)
+                {
+                    testPostInstallers.Add(testPostInstaller);
+                    continue;
+                }
+                
                 Container.Inject(installer);
                 installer.InstallBindings();    
             }
-
-            foreach (ITestInstaller testInstaller in testInstallers)
+            
+            foreach (ITestPreInstaller preInstaller in testPreInstallers)
             {
-                MonoInstaller installer = testInstaller as MonoInstaller;
+                MonoInstaller installer = preInstaller as MonoInstaller;
                 Container.Inject(installer);
                 installer.InstallBindings();   
             }
+            
+            foreach (ITestPostInstaller postInstaller in testPostInstallers)
+            {
+                MonoInstaller installer = postInstaller as MonoInstaller;
+                Container.Inject(installer);
+                installer.InstallBindings();   
+            }
+            
         }
     }
 }

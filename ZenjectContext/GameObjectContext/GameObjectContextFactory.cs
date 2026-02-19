@@ -9,6 +9,7 @@ using NetWork.NGO;
 using Scene.CommonInstaller.Interfaces;
 using Unity.Netcode;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace ZenjectContext.GameObjectContext
@@ -47,7 +48,7 @@ namespace ZenjectContext.GameObjectContext
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[Factory] {typeof(T).Name} 생성 중 오류 발생: {ex.Message}");
+                UtilDebug.LogError($"[Factory] {typeof(T).Name} 생성 중 오류 발생: {ex.Message}");
                 throw;
             }
             finally
@@ -71,7 +72,7 @@ namespace ZenjectContext.GameObjectContext
         //you should remove the key–value pair from the dictionary in the CreateFactory.
         public void Dispose()
         {
-            // Debug.Log($"factoryName : {typeof(T)} Dispose called");
+            // UtilDebug.Log($"factoryName : {typeof(T)} Dispose called");
 
             if (_factoryManager.IsKeyRegistered(_requestGO))
             {
@@ -129,7 +130,7 @@ namespace ZenjectContext.GameObjectContext
             }
             catch (Exception e)
             {
-                Debug.LogError($"[Factory] {typeof(T).Name} 생성 중 오류 발생: {e.Message}");
+                UtilDebug.LogError($"[Factory] {typeof(T).Name} 생성 중 오류 발생: {e.Message}");
                 throw;
             }
             finally
@@ -163,7 +164,7 @@ namespace ZenjectContext.GameObjectContext
             {
                 _factoryManager.RemoveFactory(RequestObject); //생성 팩토리 모음에 등록된 것 제거
             }
-            //Debug.Log($"factoryName : {typeof(T)} Dispose called");
+            //UtilDebug.Log($"factoryName : {typeof(T)} Dispose called");
         }
     }
 }

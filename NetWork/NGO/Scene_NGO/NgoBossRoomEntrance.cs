@@ -115,14 +115,15 @@ namespace NetWork.NGO.Scene_NGO
         {
             if (IsHost == false)
                 return;
+            
 
-            if (other.GetComponent<PlayerStats>() != null)
+            if (other.transform.TryGetComponentInParents(out PlayerStats playerStats) == true)
             {
                 _playerCountInPortal.Value++;
 
-                if (other.TryGetComponent(out NetworkObject playerngo))
+                if (playerStats.TryGetComponent(out NetworkObject playerNgo))
                 {
-                    EnteredPlayerInPortalRpc(playerngo.NetworkObjectId);
+                    EnteredPlayerInPortalRpc(playerNgo.NetworkObjectId);
                 }
             }
         }
@@ -133,12 +134,12 @@ namespace NetWork.NGO.Scene_NGO
             if (IsHost == false)
                 return;
 
-            if (other.GetComponent<PlayerStats>() != null)
+            if (other.transform.TryGetComponentInParents(out PlayerStats playerStats) == true)
             {
                 _playerCountInPortal.Value--;
-                if (other.TryGetComponent(out NetworkObject playerngo))
+                if (playerStats.TryGetComponent(out NetworkObject playergo))
                 {
-                    ExitedPlayerInPortalRpc(playerngo.NetworkObjectId);
+                    ExitedPlayerInPortalRpc(playergo.NetworkObjectId);
                 }
             }
         }

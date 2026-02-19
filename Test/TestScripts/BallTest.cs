@@ -1,4 +1,5 @@
 using UnityEngine;
+using Util;
 
 namespace Test.TestScripts
 {
@@ -6,7 +7,7 @@ namespace Test.TestScripts
     {
         private void OnCollisionEnter(Collision collision)
         {
-            Debug.Log(collision.gameObject.layer);
+            UtilDebug.Log(collision.gameObject.layer);
         }
     }
 }

@@ -1,5 +1,3 @@
-using System;
-using NUnit.Framework;
 using UnityEngine;
 using Zenject;
 
@@ -24,7 +22,7 @@ namespace CoreScripts
         {
             if (_isDoneInject == false)
             {
-                //Debug.LogError($"{gameObject.name} hasn't been injected yet.");
+                //UtilDebug.LogError($"{gameObject.name} hasn't been injected yet.");
                 return;
             }
             ZenjectEnable();
@@ -34,7 +32,7 @@ namespace CoreScripts
         {
             if (_isDoneInject == false)
             {
-                //Debug.LogError($"{gameObject.name} hasn't been injected yet.");
+                //UtilDebug.LogError($"{gameObject.name} hasn't been injected yet.");
                 return;
             }
             

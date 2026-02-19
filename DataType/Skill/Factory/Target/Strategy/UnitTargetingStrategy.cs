@@ -5,6 +5,7 @@ using GameManagers.Target;
 using Skill;
 using Stats.BaseStats;
 using UnityEngine;
+using Util;
 
 namespace DataType.Skill.Factory.Target.Strategy
 {
@@ -113,7 +114,7 @@ namespace DataType.Skill.Factory.Target.Strategy
 
             public void Release()
             {
-                Debug.Log("[UnitTargetingModule] Release");
+                UtilDebug.Log("[UnitTargetingModule] Release");
                 
                 if (_released) return;
                 _released = true;

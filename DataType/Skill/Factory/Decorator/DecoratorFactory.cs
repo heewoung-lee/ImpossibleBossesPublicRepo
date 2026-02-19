@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace DataType.Skill.Factory.Decorator
@@ -25,7 +26,7 @@ namespace DataType.Skill.Factory.Decorator
         {
             if (decoratorDef == null)
             {
-                Debug.LogError("[DecoratorFactory] decoratorDef is null");
+                UtilDebug.LogError("[DecoratorFactory] decoratorDef is null");
                 return null;
             }
 
@@ -33,7 +34,7 @@ namespace DataType.Skill.Factory.Decorator
             if (_map.TryGetValue(defType, out var decorator))
                 return decorator;
 
-            Debug.LogError($"[DecoratorFactory] No decorator for defType: {defType.Name}");
+            UtilDebug.LogError($"[DecoratorFactory] No decorator for defType: {defType.Name}");
             return null;
         }
     }

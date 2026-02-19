@@ -12,7 +12,7 @@ namespace Util
         void Awake()
         {
             _lastParent = transform.parent;
-            Debug.Log($"[ParentTrace/Awake] {FullPath(transform)} parent={FullPath(_lastParent)} local={transform.localScale} lossy={transform.lossyScale}");
+            UtilDebug.Log($"[ParentTrace/Awake] {FullPath(transform)} parent={FullPath(_lastParent)} local={transform.localScale} lossy={transform.lossyScale}");
         }
 
         void OnTransformParentChanged()
@@ -24,7 +24,7 @@ namespace Util
             sb.AppendLine($"  to  : {FullPath(newParent)}");
             sb.AppendLine($"  local={transform.localScale} lossy={transform.lossyScale}");
             sb.AppendLine(new StackTrace(1, true).ToString()); // 가능하면 호출 스택
-            Debug.Log(sb.ToString());
+            UtilDebug.Log(sb.ToString());
             _lastParent = newParent;
         }
 

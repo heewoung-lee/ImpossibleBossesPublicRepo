@@ -6,6 +6,7 @@ using NetWork.NGO;
 using Scene.CommonInstaller;
 using Unity.Netcode;
 using UnityEngine;
+using Util;
 using Zenject;
 using Object = UnityEngine.Object;
 
@@ -27,7 +28,7 @@ namespace GameManagers.ResourcesEx.implementation
         {
             if (go == null)
             {
-                Debug.LogWarning("Destroy object is null");
+                UtilDebug.LogWarning("Destroy object is null");
                 return;
             }
 

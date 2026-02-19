@@ -5,6 +5,7 @@ using DataType.Item;
 using GameManagers.ItamData.Interface;
 using GameManagers.ItamDataManager.Interface;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace GameManagers.ItamData
@@ -29,12 +30,12 @@ namespace GameManagers.ItamData
             {
                 if (_itemDatabase.ContainsKey(item.itemNumber))
                 {
-                    Debug.LogWarning($"중복 ID 발견: {item.itemNumber} ({item.name})");
+                    UtilDebug.LogWarning($"중복 ID 발견: {item.itemNumber} ({item.name})");
                     continue;
                 }
                 _itemDatabase.Add(item.itemNumber, item);
             }
-            Debug.Log($"[ItemDataManager] SO 데이터 {loadedItems.Length}개 로드 완료.");
+            UtilDebug.Log($"[ItemDataManager] SO 데이터 {loadedItems.Length}개 로드 완료.");
         }
 
         public bool TryGetItemData(int itemNumber, out ItemDataSO itemData)
@@ -46,7 +47,7 @@ namespace GameManagers.ItamData
         {
             if (_itemDatabase == null || _itemDatabase.Count == 0)
             {
-                Debug.LogWarning("[ItemDataManager] 등록된 아이템 데이터가 없습니다.");
+                UtilDebug.LogWarning("[ItemDataManager] 등록된 아이템 데이터가 없습니다.");
                 return null;
             }
 

@@ -9,8 +9,6 @@ namespace Module.PlayerModule.PlayerClassModule
 {
     public class ModulePlayerColliderController : NetworkBehaviour
     {
-        Collider[] _aliveColliders = new Collider[2];
-        private SphereCollider _headCollider;
         private CapsuleCollider _bodyCollider;
 
         private BoxCollider _deadCollider;
@@ -18,9 +16,7 @@ namespace Module.PlayerModule.PlayerClassModule
 
         private void Awake()
         {
-            _headCollider = GetComponent<SphereCollider>();
             _bodyCollider = GetComponent<CapsuleCollider>();
-            _aliveColliders = new Collider[] { _headCollider, _bodyCollider };
 
             _deadCollider = GetComponent<BoxCollider>();
             _baseStats = GetComponent<BaseStats>();
@@ -51,10 +47,8 @@ namespace Module.PlayerModule.PlayerClassModule
 
         private void SetCollider(bool isDead)
         {
-            foreach (Collider colliderComponent in _aliveColliders)
-            {
-                colliderComponent.enabled = !isDead;
-            }
+           
+            _bodyCollider.enabled = !isDead;
             _deadCollider.enabled = isDead;
         }
 

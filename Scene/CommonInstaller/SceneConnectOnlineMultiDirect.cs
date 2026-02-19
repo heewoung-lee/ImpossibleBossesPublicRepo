@@ -26,7 +26,7 @@ namespace Scene.CommonInstaller
         {
             PlayerIngameLoginInfo playerinfo = new PlayerIngameLoginInfo(TestMultiUtil.GetPlayerTag().ToString(),"testMode");
             _lobbyManager.SetPlayerLoginInfo(playerinfo);
-            Debug.LogWarning("[SceneConnectLocalDirect] 로컬 리바인딩 적용됨: 로비 과정을 생략합니다.");
+            UtilDebug.LogWarning("[SceneConnectLocalDirect] 로컬 리바인딩 적용됨: 로비 과정을 생략합니다.");
             PlayersTag playerType = TestMultiUtil.GetPlayerTag();
 
             if (playerType == PlayersTag.Player1)

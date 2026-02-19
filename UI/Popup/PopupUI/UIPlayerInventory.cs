@@ -163,7 +163,7 @@ namespace UI.Popup.PopupUI
             UIItemComponentInventory item = _itemFactory.CreateItemUI(data, _itemInventoryTr, count);
             if (item == null)
             {
-                Debug.LogError($"[UIInventory] 생성 실패 Key: {data.name}");
+                UtilDebug.LogError($"[UIInventory] 생성 실패 Key: {data.name}");
                 return;
             }
         }

@@ -100,7 +100,7 @@ namespace NetWork.Item
                 //서버라면 아이템의 값을 할당
             }
             LoadItemData(_itemNumberNetVar.Value);
-            SpawnBehaviour(); 
+            SpawnBehaviour();
         }
 
         public override void OnNetworkDespawn()
@@ -124,7 +124,7 @@ namespace NetWork.Item
             }
             else
             {
-                Debug.LogError($"{itemNumber}의 아이템 정보가 없습니다.");
+                UtilDebug.LogError($"{itemNumber}의 아이템 정보가 없습니다.");
             }
         }
 

@@ -1,3 +1,6 @@
+#if UNITY_EDITOR
+
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,11 +8,9 @@ using System.Linq;
 using System.Reflection;
 using CustomEditor.Interfaces;
 using Scene;
-using Scene.GamePlayScene;
 using UnityEditor;
-using UnityEditor.VersionControl;
 using UnityEngine;
-
+using Util;
 
 namespace CustomEditor.Multiplay
 {
@@ -95,7 +96,7 @@ namespace CustomEditor.Multiplay
         {
             if (multiTestscene == null)
             {
-                Debug.LogError("Multiplay scene cannot be null");
+                UtilDebug.LogError("Multiplay scene cannot be null");
                 return;
             }
 
@@ -133,7 +134,7 @@ namespace CustomEditor.Multiplay
                     memberInfo = type.GetField(name, flags);
                     if (memberInfo == null)
                     {
-                        Debug.Log($"{type.Name} scenario {typeof(T).Name} didn't found {name} flag{flags} ");    
+                        UtilDebug.Log($"{type.Name} scenario {typeof(T).Name} didn't found {name} flag{flags} ");    
                         return null;
                     }
                     memberInfos.Add((name,flags),memberInfo); //중복되면 안되니깐 Add로 선언
@@ -143,7 +144,7 @@ namespace CustomEditor.Multiplay
                     memberInfo = type.GetMethod(name, flags);
                     if (memberInfo == null)
                     {
-                        Debug.Log($"{type.Name} scenario {typeof(T).Name} didn't found {name} flag{flags} ");    
+                        UtilDebug.Log($"{type.Name} scenario {typeof(T).Name} didn't found {name} flag{flags} ");    
                         return null;
                     }
                     memberInfos.Add((name,flags),memberInfo); //중복되면 안되니깐 Add로 선언
@@ -153,7 +154,7 @@ namespace CustomEditor.Multiplay
                     memberInfo = type.GetProperty(name, flags);
                     if (memberInfo == null)
                     {
-                        Debug.Log($"{type.Name} scenario {typeof(T).Name} didn't found {name} flag{flags} ");    
+                        UtilDebug.Log($"{type.Name} scenario {typeof(T).Name} didn't found {name} flag{flags} ");    
                         return null;
                     }
                     memberInfos.Add((name,flags),memberInfo); //중복되면 안되니깐 Add로 선언
@@ -361,3 +362,4 @@ namespace CustomEditor.Multiplay
         }
     }
 }
+#endif

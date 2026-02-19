@@ -1,6 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 
+#if  UNITY_EDITOR
+
+
 namespace Util
 {
     public class SelectGameObjectsWithMissingScripts : UnityEditor.Editor
@@ -30,7 +33,8 @@ namespace Util
 
             }
         
-            Debug.Log($"Removed {totalComponentCount} missing script component(s) from {totalGameObjectCount} game object(s).");
+            UtilDebug.Log($"Removed {totalComponentCount} missing script component(s) from {totalGameObjectCount} game object(s).");
         }
     }
 }
+#endif

@@ -31,7 +31,7 @@ namespace GameManagers.Interface.UIManager.Implements
             Canvas canvas = go.GetComponent<Canvas>();
             if (canvas == null)
             {
-                Debug.Log($"Failed to Load Canvas: GameObject Name:{go.name}");
+                UtilDebug.Log($"Failed to Load Canvas: GameObject Name:{go.name}");
                 return null;
             }
             canvas.renderMode = RenderMode.WorldSpace;

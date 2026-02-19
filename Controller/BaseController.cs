@@ -199,7 +199,7 @@ namespace Controller
             }
             else
             {
-                Debug.LogError($"[BaseController] 애니메이터에 존재하지 않는 State Hash입니다! Hash: {hashCode}");
+                UtilDebug.LogError($"[BaseController] 애니메이터에 존재하지 않는 State Hash입니다! Hash: {hashCode}");
             }
         }
     }

@@ -117,18 +117,18 @@ namespace UI.Scene.SceneUI
 
             if (activeChannels.Count == 0)
             {
-                Debug.Log("현재 접속 중인 채널이 없습니다.");
+                UtilDebug.Log("현재 접속 중인 채널이 없습니다.");
                 return;
             }
 
-            Debug.Log($"현재 접속 중인 VIVOX 채널 수: {activeChannels.Count}");
+            UtilDebug.Log($"현재 접속 중인 VIVOX 채널 수: {activeChannels.Count}");
 
             foreach (var channel in activeChannels)
             {
                 string channelName = channel.Key; // 채널 ID 또는 이름
                 var channelSession = channel.Value; // 채널 세션 정보
 
-                Debug.Log($"채널 이름: {channelName}");
+                UtilDebug.Log($"채널 이름: {channelName}");
             }
         }
         private void InitButtonInteractable()
@@ -178,7 +178,7 @@ namespace UI.Scene.SceneUI
             }
             catch (Exception e)
             {
-                Debug.Log($"에러가 발생했습니다.{e}");
+                UtilDebug.Log($"에러가 발생했습니다.{e}");
                 return;
             }
             _sceneManagerEx.LoadScene(Define.Scene.LoginScene);

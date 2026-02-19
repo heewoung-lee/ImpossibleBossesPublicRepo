@@ -115,7 +115,7 @@ namespace UI.Popup.PopupUI
             }
             catch (LobbyServiceException notfound) when (notfound.Reason == LobbyExceptionReason.LobbyNotFound)
             {
-                Debug.Log("로비를 찾을 수 없습니다");
+                UtilDebug.Log("로비를 찾을 수 없습니다");
 
                 if (_uiManagerServices.TryGetPopupDictAndShowPopup(out UIAlertDialog loginPopup) == true)
                 {
@@ -131,7 +131,7 @@ namespace UI.Popup.PopupUI
             }
             catch (Exception error)
             {
-                Debug.Log($"에러가 발생했습니다{error}");
+                UtilDebug.Log($"에러가 발생했습니다{error}");
                 _confirmButton.interactable = true;
                 return;
             }

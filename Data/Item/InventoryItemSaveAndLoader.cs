@@ -7,6 +7,7 @@ using GameManagers.Scene;
 using UI.Popup.PopupUI;
 using UI.SubItem;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace Data.Item
@@ -63,7 +64,7 @@ namespace Data.Item
                     }
                     else
                     {
-                        Debug.LogWarning($"[SaveLoader] 저장된 아이템 ID {info.ItemNumber}에 해당하는 데이터를 찾을 수 없습니다.");
+                        UtilDebug.LogWarning($"[SaveLoader] 저장된 아이템 ID {info.ItemNumber}에 해당하는 데이터를 찾을 수 없습니다.");
                     }
                 }
             }

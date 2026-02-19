@@ -1,10 +1,16 @@
 ﻿using System;
+using System.ComponentModel.Design;
 using Controller;
 using DataType;
 using DataType.Skill;
 using DataType.Skill.Factory.Trigger;
+using GameManagers.ResourcesEx;
+using Unity.VisualScripting;
 using UnityEngine;
 using Util;
+using Zenject;
+using Debug = UnityEngine.Debug;
+using Object = System.Object;
 
 namespace Skill
 {
@@ -50,7 +56,10 @@ namespace Skill
         public float CurrentCooldown => Mathf.Max(0, (_lastUsedTime + Data.cooldown) - Time.time);
         public bool IsReady => CurrentCooldown <= 0;
         private bool _isExecuting;
-        public RuntimeSkill(SkillDataSO data, ISkillTriggerStrategy trigger, ISkillPipeline pipeline, BaseController owner)
+        
+        public RuntimeSkill(
+            SkillDataSO data, ISkillTriggerStrategy trigger,
+            ISkillPipeline pipeline, BaseController owner)
         {
             Data = data;
             _trigger = trigger;
@@ -67,19 +76,19 @@ namespace Skill
 
             if (Data.trigger == null)
             {
-                Debug.LogError($"[RuntimeSkill] triggerDef is null. Skill: {Data.name}");
+                UtilDebug.LogError($"[RuntimeSkill] triggerDef is null. Skill: {Data.name}");
                 return;
             }
 
             if (_trigger == null)
             {
-                Debug.LogError($"[RuntimeSkill] trigger strategy is null. Skill: {Data.name}");
+                UtilDebug.LogError($"[RuntimeSkill] trigger strategy is null. Skill: {Data.name}");
                 return;
             }
 
             if (_pipeline == null)
             {
-                Debug.LogError($"[RuntimeSkill] pipeline is null. Skill: {Data.name}");
+                UtilDebug.LogError($"[RuntimeSkill] pipeline is null. Skill: {Data.name}");
                 return;
             }
 
@@ -88,7 +97,7 @@ namespace Skill
             _isExecuting = true;
             bool finished = false;
 
-            _trigger.Fire( ctx, Data.trigger, OnCommit, OnCancel);
+            _trigger.Fire(ctx, Data.trigger, OnCommit, OnCancel);
             void OnCommit()
             {
                 _pipeline.Execute(ctx, FinishComplete, FinishCancel);
@@ -104,7 +113,7 @@ namespace Skill
             {
                 if (finished) return;
                 finished = true;
-                Debug.Log("[RuntimeSkill] FinishCancel");
+                UtilDebug.Log("[RuntimeSkill] FinishCancel");
                 _isExecuting = false;
                 // cooldown/event X
             }
@@ -113,11 +122,11 @@ namespace Skill
             {
                 if (finished) return;
                 finished = true;
-                Debug.Log("[RuntimeSkill] FinishComplete");
+                UtilDebug.Log("[RuntimeSkill] FinishComplete");
                 _isExecuting = false;
                 _lastUsedTime = Time.time;
                 _onCompleteSkill?.Invoke();
-                Debug.Log("[RuntimeSkill] OnCompleteSkill invoked");
+                UtilDebug.Log("[RuntimeSkill] OnCompleteSkill invoked");
             }
         }
     }

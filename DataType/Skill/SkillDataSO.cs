@@ -61,11 +61,11 @@ namespace DataType.Skill
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (trigger == null) Debug.LogError($"[{name}] Trigger is null");
-            if (targeting == null) Debug.LogError($"[{name}] Targeting is null");
-            if (sequence == null) Debug.LogError($"[{name}] Sequence is null");
-            if (decorator == null) Debug.LogError($"[{name}] Decorator is null");
-            if (effect == null) Debug.LogError($"[{name}] Effect is null");
+            if (trigger == null) UtilDebug.LogError($"[{name}] Trigger is null");
+            if (targeting == null) UtilDebug.LogError($"[{name}] Targeting is null");
+            if (sequence == null) UtilDebug.LogError($"[{name}] Sequence is null");
+            if (decorator == null) UtilDebug.LogError($"[{name}] Decorator is null");
+            if (effect == null) UtilDebug.LogError($"[{name}] Effect is null");
 
             SetPrimeShareValue();
         }

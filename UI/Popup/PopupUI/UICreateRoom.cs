@@ -108,7 +108,7 @@ namespace UI.Popup.PopupUI
                         return;
                     }
 
-                    Debug.Log($"비밀번호가 있음{value}");
+                    UtilDebug.Log($"비밀번호가 있음{value}");
                     option = new CreateLobbyOptions()
                     {
                         IsPrivate = false,
@@ -138,7 +138,7 @@ namespace UI.Popup.PopupUI
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                UtilDebug.Log(e);
                 _buttonConnect.interactable = true;
             }
 

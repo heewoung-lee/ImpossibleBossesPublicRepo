@@ -101,7 +101,7 @@ namespace UI.SubItem
                 catch (LobbyServiceException notFoundLobby) when(notFoundLobby.Message.Contains("lobby not found")) 
                 {
                     string errorMsg = "방이 없습니다.";
-                    Debug.Log($"{errorMsg}");
+                    UtilDebug.Log($"{errorMsg}");
 
                     if (UIManagerServices.TryGetPopupDictAndShowPopup(out UIAlertDialog dialog) == true)
                     {

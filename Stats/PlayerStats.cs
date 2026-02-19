@@ -9,6 +9,7 @@ using GameManagers.Interface.VFXManager;
 using Module.PlayerModule.PlayerClassModule;
 using Stats.BaseStats;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace Stats
@@ -27,15 +28,13 @@ namespace Stats
 
     public class PlayerStats : BaseStats.BaseStats, IAttackRange
     {
-        private IAllData _allData;
         private IPlayerIngameLogininfo _playerIngameLogininfo;
         private IVFXManagerServices _vfxManager;
 
         [Inject]
-        public void Construct(IAllData allData, IPlayerIngameLogininfo playerIngameLogininfo,
+        public void Construct(IPlayerIngameLogininfo playerIngameLogininfo,
             IVFXManagerServices vfxManager)
         {
-            _allData = allData;
             _playerIngameLogininfo = playerIngameLogininfo;
             _vfxManager = vfxManager;
         }
@@ -125,7 +124,7 @@ namespace Stats
 
             if (playerModule == null)
             {
-                Debug.LogError("[PlayerStats] ModulePlayerClass not found on this GameObject!");
+                UtilDebug.LogError("[PlayerStats] ModulePlayerClass not found on this GameObject!");
                 return;
             }
 
@@ -172,7 +171,7 @@ namespace Stats
         {
             if (IsOwner)
             {
-                Debug.Log("Player Dead");
+                UtilDebug.Log("Player Dead");
                 PlayerDeadEvent.Invoke();
             }
         }

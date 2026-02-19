@@ -5,6 +5,7 @@ using DataType.Skill.Factory.Sequence;
 using DataType.Skill.Factory.Target;
 using Skill;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace DataType.Skill.Factory
@@ -38,7 +39,7 @@ namespace DataType.Skill.Factory
         {
             if (data.targeting == null || data.sequence == null || data.decorator == null || data.effect == null)
             {
-                Debug.LogError($"[PipelineFactory] Def is null. Skill: {data.name}");
+                UtilDebug.LogError($"[PipelineFactory] Def is null. Skill: {data.name}");
                 return null;
             }
 
@@ -49,7 +50,7 @@ namespace DataType.Skill.Factory
 
             if (targetingStrategy == null || sequenceStrategy == null || decoratorStrategy == null || effectStrategy == null)
             {
-                Debug.LogError($"[PipelineFactory] Strategy missing. Skill: {data.name}");
+                UtilDebug.LogError($"[PipelineFactory] Strategy missing. Skill: {data.name}");
                 return null;
             }
 

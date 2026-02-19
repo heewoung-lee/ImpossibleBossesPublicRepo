@@ -16,12 +16,10 @@ namespace Scene.CommonInstaller
     
     public class SceneModeProvider: ISceneProvider
     {
-        private ISceneTestMode _sceneTestMode;
         private ISceneMultiMode _sceneMultiMode;
 
-        public SceneModeProvider(ISceneTestMode sceneTestMode, ISceneMultiMode sceneMultiMode)
+        public SceneModeProvider(ISceneMultiMode sceneMultiMode)
         {
-            _sceneTestMode = sceneTestMode;
             _sceneMultiMode = sceneMultiMode;
         }
         
@@ -32,9 +30,6 @@ namespace Scene.CommonInstaller
             get
             {
                 if (SceneManagerEx.IsCurrentBootNormal) return SceneMode.NormalBoot;
-
-                if (_sceneTestMode.GetTestMode() == TestMode.Local)
-                    return SceneMode.LocalTest;
 
                 if (_sceneMultiMode.GetMultiTestMode() == MultiMode.Solo)
                     return SceneMode.MultiTest_Solo;

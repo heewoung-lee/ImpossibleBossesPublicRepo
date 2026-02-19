@@ -24,16 +24,16 @@ using Object = UnityEngine.Object;
 
 namespace Scene
 {
-    
     public class MultiTestPlayerInfo
     {
         private Define.PlayerClass _playerClass;
         private PlayersTag _tag;
-        public MultiTestPlayerInfo SetPlayerInfo(Define.PlayerClass playerClass,PlayersTag tag)
+
+        public MultiTestPlayerInfo SetPlayerInfo(Define.PlayerClass playerClass, PlayersTag tag)
         {
             _playerClass = playerClass;
             _tag = tag;
-            
+
             return this;
         }
 
@@ -41,8 +41,8 @@ namespace Scene
         public PlayersTag GetTagInfo() => _tag;
     }
 
-    
-    public abstract class BaseScene : ZenjectMonoBehaviour,IDisposable
+
+    public abstract class BaseScene : ZenjectMonoBehaviour, IDisposable
     {
         private IResourcesServices _resourcesServices;
         private IEnumerable<ISceneUI> _sceneUIs;
@@ -54,12 +54,13 @@ namespace Scene
         private bool _checkDoneZenjectInitialize = false;
         private bool _isExitProcessDone = false;
         public bool CheckDoneZenjectInitialize => _checkDoneZenjectInitialize;
+
         public event Action OnZenjectInitializeAfterEvent
         {
-            add=> UniqueEventRegister.AddSingleEvent(ref _onZenjectInitializeAfterEvent,value);
-            remove => UniqueEventRegister.AddSingleEvent(ref _onZenjectInitializeAfterEvent,value);
+            add => UniqueEventRegister.AddSingleEvent(ref _onZenjectInitializeAfterEvent, value);
+            remove => UniqueEventRegister.AddSingleEvent(ref _onZenjectInitializeAfterEvent, value);
         }
-        
+
         [Inject]
         public void Construct(
             IResourcesServices resourcesServices,
@@ -74,7 +75,7 @@ namespace Scene
             _sceneManagerEx = sceneManagerEx;
             _relayManager = relayManager;
         }
-        
+
         public abstract Define.Scene CurrentScene { get; }
 
 
@@ -85,8 +86,8 @@ namespace Scene
                 scneeUI.SceneGameObjectCreate();
             }
         }
-        
-        
+
+
         void Start()
         {
             StartInit();
@@ -97,8 +98,8 @@ namespace Scene
         {
 #if UNITY_EDITOR
             if (FindAnyObjectByType<SceneContext>() == null)
-            { 
-                Debug.LogWarning("There is no Scene Context");
+            {
+                UtilDebug.LogWarning("There is no Scene Context");
             }
 #endif
             AwakeInit();
@@ -111,17 +112,18 @@ namespace Scene
             {
                 _resourcesServices.InstantiateByKey("Prefabs/UI/EventSystem").name = "@EventSystem";
             }
+
             _checkDoneZenjectInitialize = true;
             _onZenjectInitializeAfterEvent?.Invoke();
             _onZenjectInitializeAfterEvent = null;
             Application.wantsToQuit += OnWantsToQuit;
         }
 
-        protected virtual void AwakeInit()  {}
-        
-        
-        
-        
+        protected virtual void AwakeInit()
+        {
+        }
+
+
         private bool OnWantsToQuit()
         {
             // 1. 이미 정리가 끝났다면 종료 허용 (true 반환)
@@ -134,45 +136,55 @@ namespace Scene
             ExitSequence().Forget();
             return false;
         }
-        
+
         private async UniTaskVoid ExitSequence()
         {
             Assert.IsNotNull(_socketEventManager, "socketEventManager is null");
-            
+
             if (_socketEventManager != null)
             {
                 try
                 {
+                    //소켓 정리 시작
                     var cleanupTask = UniTask.Create(async () =>
                     {
                         await _socketEventManager.InvokeDisconnectRelayEvent();
                         await _socketEventManager.InvokeLogoutVivoxEvent();
                         await _socketEventManager.InvokeLogoutAllLeaveLobbyEvent();
                     });
+
+                    //3초 동안 혹은 작업이 끝날 때까지 대기 함 무제한으로 기다릴 수 없으니.
                     await cleanupTask.TimeoutWithoutException(TimeSpan.FromSeconds(3f));
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    UtilDebug.LogError(e);
                 }
             }
 
+
+            // 방금 전 OnWantsToQuit에서 종료를 취소(return false)했기 때문에,
+            // 유니티 내부 상태가 '취소 처리'를 완료하고 초기화될 때까지 1프레임 대기함.
+            // 이 대기가 없으면 바로 이어지는 Application.Quit() 명령이 무시될 수 있음
+            await UniTask.Yield(PlayerLoopTiming.Update);
+
+
             _isExitProcessDone = true;
-            Debug.Log("Safe Exit Completed. Quitting application.");
-            
+            UtilDebug.Log("Safe Exit Completed. Quitting application.");
+
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+    Application.Quit(); // 검문 없이 즉시 꺼집니다.
 #endif
         }
 
         protected override void InitAfterInject()
         {
             base.InitAfterInject();
-            Debug.Log($"Initializing scene + {SceneManagerEx.IsCurrentBootNormal}");
-            
-            Debug.Log($"{gameObject.name}씬초기화 완료");
+            UtilDebug.Log($"Initializing scene + {SceneManagerEx.IsCurrentBootNormal}");
+
+            UtilDebug.Log($"{gameObject.name}씬초기화 완료");
             if (_relayManager.NetworkManagerEx.IsConnectedClient == false)
             {
                 _relayManager.NetworkManagerEx.OnClientConnectedCallback += ReadySender.SendClientReady;
@@ -182,6 +194,7 @@ namespace Scene
                 ReadySender.SendClientReady(_relayManager.NetworkManagerEx.LocalClientId);
             }
         }
+
         public void Dispose()
         {
             if (_relayManager.NetworkManagerEx.IsConnectedClient == true)

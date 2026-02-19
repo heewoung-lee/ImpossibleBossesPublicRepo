@@ -61,7 +61,7 @@ namespace NetWork.NGO
 
         public override void OnNetworkSpawn()
         {
-            Debug.Log($"OnNetworkSpawn{gameObject.name}");
+            UtilDebug.Log($"OnNetworkSpawn{gameObject.name}");
             base.OnNetworkSpawn();
             if (IsOwner)
             {

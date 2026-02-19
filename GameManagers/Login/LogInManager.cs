@@ -6,6 +6,7 @@ using GameManagers.Interface.LoginManager;
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace GameManagers
@@ -80,7 +81,7 @@ namespace GameManagers
 
             if (userAthenticateData == null)
             {
-                Debug.LogError($"Not Found {UserAuthenticateDatasheetName} Sheet");
+                UtilDebug.LogError($"Not Found {UserAuthenticateDatasheetName} Sheet");
                 return default;
             }
 
@@ -91,7 +92,7 @@ namespace GameManagers
 
             if (response == null)
             {
-                Debug.LogError("There is Empty UserAuthenticateData");
+                UtilDebug.LogError("There is Empty UserAuthenticateData");
                 return default;
             }
 
@@ -132,7 +133,7 @@ namespace GameManagers
             {
                 if (userID == currentPlayerInfo.ID && userPW == currentPlayerInfo.Password)
                 {
-                    Debug.Log("DB Has ID And PW");
+                    UtilDebug.Log("DB Has ID And PW");
                     return true;
                 }
                 return false;
@@ -144,7 +145,7 @@ namespace GameManagers
             {
                 if (userID == currentPlayerInfo.ID)
                 {
-                    Debug.Log("DB Has ID");
+                    UtilDebug.Log("DB Has ID");
                     return true;
                 }
                 return false;
@@ -156,7 +157,7 @@ namespace GameManagers
             {
                 if (userNickName == currentPlayerInfo.NickName)
                 {
-                    Debug.Log("DB Has Nickname");
+                    UtilDebug.Log("DB Has Nickname");
                     return true;
                 }
                 return false;
@@ -199,7 +200,7 @@ namespace GameManagers
             }
             catch(Exception ex)
             {
-                Debug.Log($"{ex}오류가 발생했습니다");
+                UtilDebug.Log($"{ex}오류가 발생했습니다");
                 return (false, "DB를 쓰는중 오류가 발생했습니다.");
             }
             return (true, "회원가입을 축하드립니다.");

@@ -105,6 +105,8 @@ namespace DataType.Skill.Factory.Decorator.Strategy
                 var casterNetObj = ctx.Caster.GetComponent<NetworkObject>();
 
                 
+                
+                
                 if (casterNetObj != null && casterNetObj.IsOwner)
                 {
                     ISkillNetworkRouter router = ctx.Caster.GetComponent<ISkillNetworkRouter>();

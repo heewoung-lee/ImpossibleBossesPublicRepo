@@ -8,6 +8,7 @@ using Unity.Networking.Transport.Relay;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using Util;
 
 namespace GameManagers.Interface.RelayManagerInterface.Implementation
 {
@@ -21,7 +22,7 @@ namespace GameManagers.Interface.RelayManagerInterface.Implementation
                 RelayServerData relaydata = AllocationUtils.ToRelayServerData(allocation, "dtls");
                 networkManager.GetComponent<UnityTransport>().SetRelayServerData(relaydata);
                 string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-                Debug.Log($"호출 됐나요 릴레이코드: {joinCode}");
+                UtilDebug.Log($"호출 됐나요 릴레이코드: {joinCode}");
                 if (networkManager.StartHost())
                 {
                     return joinCode;
@@ -30,7 +31,7 @@ namespace GameManagers.Interface.RelayManagerInterface.Implementation
             }
             catch (Exception ex)
             {
-                Debug.LogException(ex);
+                UtilDebug.LogError(ex);
                 return null;
             }
         }

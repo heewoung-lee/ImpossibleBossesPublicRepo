@@ -11,18 +11,15 @@ namespace Scene.GamePlayScene
 {
     public class PlayScene : BaseScene, ISkillInit, IHasSceneMover
     {
-        private ISceneConnectOnline _sceneConnectOnline;
         private ISceneStarter _gameplaySceneStarter;
         private ISceneMover _sceneMover;
 
 
         [Inject]
         public void Construct(
-            ISceneConnectOnline sceneConnectOnline,
             ISceneStarter gameplaySceneStarter,
             ISceneMover sceneMover)
         {
-            _sceneConnectOnline = sceneConnectOnline;
             _gameplaySceneStarter = gameplaySceneStarter;
             _sceneMover = sceneMover;
             
@@ -38,20 +35,7 @@ namespace Scene.GamePlayScene
         protected override void StartInit()
         {
             base.StartInit();
-            StartInitAsync().Forget();
-        }
-
-        private async UniTaskVoid StartInitAsync()
-        {
-            await _sceneConnectOnline.SceneConnectOnlineStart();
-            try
-            {
-                _gameplaySceneStarter.SceneStart();
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"[RoomPlayScene] 초기화 중 예외: {e}");
-            }
+            _gameplaySceneStarter.SceneStart();
         }
 
         

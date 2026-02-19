@@ -192,7 +192,7 @@ namespace GameManagers.Data
             }
             if (statType == null)
             {
-                Debug.LogError($"Type '{typeName}' not found.");
+                UtilDebug.LogError($"Type '{typeName}' not found.");
                 return;
             }
 
@@ -224,12 +224,12 @@ namespace GameManagers.Data
                 string existingJson = File.ReadAllText(filePath);
                 if (existingJson == jsonString)
                 {
-                    Debug.Log($"{fileName} 데이터에 변경 사항이 없습니다.");
+                    UtilDebug.Log($"{fileName} 데이터에 변경 사항이 없습니다.");
                     return;
                 }
             }
             File.WriteAllText(filePath, jsonString);
-            Debug.Log($"{fileName} 데이터를 로컬에 저장했습니다.");
+            UtilDebug.Log($"{fileName} 데이터를 로컬에 저장했습니다.");
         }
         
         private void LoadDataFromGoogleSheets(IList<Type> requestDataTypes)
@@ -284,20 +284,20 @@ namespace GameManagers.Data
                     {
                         if (LoadAllDataFromLocal(requestType.Name) == false)
                         {
-                            Debug.LogError($"Not Found RequestType  \"{requestType.Name}\"");
+                            UtilDebug.LogError($"Not Found RequestType  \"{requestType.Name}\"");
                         }
                     }
                 }
             }
             catch (Exception error)//구글 스프레드시트에 연결이 안될때 에러처리
             {
-                Debug.Log(error);
-                Debug.Log("Load from LocalJson");
+                UtilDebug.Log(error);
+                UtilDebug.Log("Load from LocalJson");
                 foreach (Type requestType in requestDataTypes)
                 {
                     if (LoadAllDataFromLocal(requestType.Name) == false)
                     {
-                        Debug.LogError($"Not Found RequestType  \"{requestType.Name}\"");
+                        UtilDebug.LogError($"Not Found RequestType  \"{requestType.Name}\"");
                     }
                 }
             }
@@ -307,7 +307,7 @@ namespace GameManagers.Data
         {
             if (string.IsNullOrEmpty(filepath))
             {
-                Debug.LogError("File name is null or empty.");
+                UtilDebug.LogError("File name is null or empty.");
                 return null;
             }
 
@@ -372,7 +372,7 @@ namespace GameManagers.Data
                 return true;
             }
     
-            Debug.Log("Data has changed");
+            UtilDebug.Log("Data has changed");
             return false;
         }
 

@@ -142,7 +142,7 @@ namespace UI.Popup.PopupUI
             }
             catch (Exception ex)
             {
-                Debug.Log($"Error: {ex}\nNot Connetced Internet");
+                UtilDebug.Log($"Error: {ex}\nNot Connetced Internet");
                 if (_uiManagerServices.TryGetPopupDictAndShowPopup(out UIAlertDialog dialog) == true)
                 {
                     dialog.AlertSetText("오류", "인터넷 연결이 안됐습니다.")
@@ -172,7 +172,7 @@ namespace UI.Popup.PopupUI
             }
             catch (Exception ex)
             {
-                Debug.Log($"오류{ex}");
+                UtilDebug.Log($"오류{ex}");
                 if (_uiManagerServices.TryGetPopupDictAndShowPopup(out UIAlertDialog dialog) == true)
                 {
                     dialog.AfterAlertEvent(() => { _confirmButton.interactable = true; })

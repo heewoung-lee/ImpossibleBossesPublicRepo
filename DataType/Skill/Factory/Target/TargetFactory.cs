@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace DataType.Skill.Factory.Target
@@ -25,7 +26,7 @@ namespace DataType.Skill.Factory.Target
         {
             if (targetingDef == null)
             {
-                Debug.LogError("[TargetingFactory] targetingDef is null");
+                UtilDebug.LogError("[TargetingFactory] targetingDef is null");
                 return null;
             }
 
@@ -33,7 +34,7 @@ namespace DataType.Skill.Factory.Target
             if (_map.TryGetValue(defType, out var targeting))
                 return targeting;
 
-            Debug.LogError($"[TargetingFactory] No targeting for defType: {defType.Name}");
+            UtilDebug.LogError($"[TargetingFactory] No targeting for defType: {defType.Name}");
             return null;
         }
     }

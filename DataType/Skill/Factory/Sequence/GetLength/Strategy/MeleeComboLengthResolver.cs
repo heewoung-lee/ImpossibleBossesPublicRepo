@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using DataType.Skill.Factory.Sequence.Def;
 using Skill;
 using UnityEngine;
+using Util;
 
 namespace DataType.Skill.Factory.Sequence.GetLength.Strategy
 {
@@ -42,7 +43,7 @@ namespace DataType.Skill.Factory.Sequence.GetLength.Strategy
         {
             if (lengthDef == null)
             {
-                Debug.Log("lengthDef is null");
+                UtilDebug.Log("lengthDef is null");
                 return UniTask.FromResult(0f);
             }
 

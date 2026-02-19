@@ -114,7 +114,7 @@ namespace Skill
         {
             if (gameObject.activeInHierarchy) // 코루틴 실행 전 활성화 체크
             {
-                Debug.Log("[UI] OnCompleteSkill received -> start cooldown");
+                UtilDebug.Log("[UI] OnCompleteSkill received -> start cooldown");
                 StartCoroutine(TriggerCooldown());
             }
         }

@@ -75,7 +75,7 @@ namespace NetWork.BaseNGO
 
             if (_bindDictionary.TryGetValue(typeof(T), out objects) == false)
             {
-                Debug.LogError($"not Found Object{typeof(T)}");
+                UtilDebug.LogError($"not Found Object{typeof(T)}");
                 return null;
             }
             return objects[idx] as T;

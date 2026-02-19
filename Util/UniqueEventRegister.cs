@@ -12,7 +12,7 @@ namespace Util
             //Action이 널이 아니고 이미 action에 들어가 있는 델리게이트 라면 반환
             if (eventSource != null && eventSource.GetInvocationList().Contains(toaddEvent) == true)
             {
-                //Debug.Log($"{callerName} is already registered");
+                //UtilDebug.Log($"{callerName} is already registered");
                 return;
             }
 
@@ -23,7 +23,7 @@ namespace Util
         {
             if(eventSource == null || eventSource.GetInvocationList().Contains(removeEvent) == false)
             {
-               // Debug.Log($"{callerName} is not registered");
+               // UtilDebug.Log($"{callerName} is not registered");
                 return;
             }
 

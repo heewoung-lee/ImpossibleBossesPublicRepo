@@ -36,7 +36,7 @@ namespace Controller
         {
             if (AttackStopTimingRatioDict.TryGetValue(attackType, out float preTimetoDict) == false)
             {
-                Debug.LogError($"Attack type {attackType} not found in AttackPreFrameDict.");
+                UtilDebug.LogError($"Attack type {attackType} not found in AttackPreFrameDict.");
                 preTime = default;
                 return false;
             }

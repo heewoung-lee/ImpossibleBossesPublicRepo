@@ -78,7 +78,7 @@ namespace Module.PlayerModule.PlayerClassModule
         {
             if (_cachedStatTable == null)
             {
-                Debug.LogError(
+                UtilDebug.LogError(
                     $"[{gameObject.name}] StatTable is empty! You must call the InitializeStatTable method in your module");
             }
 
@@ -89,7 +89,7 @@ namespace Module.PlayerModule.PlayerClassModule
         {
             if (originData == null)
             {
-                Debug.LogError($"[{GetType().Name}] Origin Data is Null.");
+                UtilDebug.LogError($"[{GetType().Name}] Origin Data is Null.");
                 return;
             }
 

@@ -1,14 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Util;
-using static UnityEditor.Progress;
-
+#if UNITY_EDITOR
 public class RockNeedValue : MonoBehaviour, IPopulatingDefaultValue
 {
-
-#if UNITY_EDITOR
     public void PopulatingDefaultValue(List<Object> searchedObject)
     {
         List<Mesh> meshList = searchedObject.Where(mesh=> mesh is Mesh).Cast<Mesh>().ToList();
@@ -21,5 +17,5 @@ public class RockNeedValue : MonoBehaviour, IPopulatingDefaultValue
             childmesh.mesh = meshList.Find(findMesh => findMesh.name == child.name);
         }
     }
-#endif
 }
+#endif

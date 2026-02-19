@@ -14,6 +14,7 @@ using Module.PlayerModule.PlayerClassModule;
 using Skill;
 using Stats.BaseStats;
 using UnityEngine;
+using Util;
 
 namespace DataType.Skill.Factory.Sequence.Strategy
 {
@@ -99,7 +100,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
 
                 if (string.IsNullOrEmpty(ctx.SkillData.animationStateName))
                 {
-                    Debug.LogError(
+                    UtilDebug.LogError(
                         $"[ChannelingStrategy] Animation State Name is missing in SkillData: {ctx.SkillData.name}");
                     onCancel?.Invoke();
                     return;
@@ -177,7 +178,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
                     //채널링 이후 애니메이션 실행로직
                     if (string.IsNullOrEmpty(_def.channelingAnimationNameAfterCasting) == true)
                     {
-                        Debug.LogWarning($"There is no AnimationName {_def}");
+                        UtilDebug.LogWarning($"There is no AnimationName {_def}");
                     }
                     else
                     {
@@ -284,7 +285,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
 
                 void FinishComplete()
                 {
-                    Debug.Log("FinishComplete");
+                    UtilDebug.Log("FinishComplete");
 
                     if (finished) return;
                     finished = true;

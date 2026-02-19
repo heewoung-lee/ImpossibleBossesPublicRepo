@@ -44,7 +44,7 @@ namespace DataType.Skill.Factory.Effect.Strategy
             public void Apply(ExecutionContext ctx, Action onComplete, Action onCancel)
             {
                 if(String.IsNullOrEmpty(_arcSpreadProjectileDef.projectilePrefabPath) == true)
-                    Debug.LogError("projectilePath is null");
+                    UtilDebug.LogError("projectilePath is null");
                 
                 
                 List<Quaternion> shotRotations = TargetInSight.GenerateSpreadRotations(

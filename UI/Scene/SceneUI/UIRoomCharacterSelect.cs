@@ -199,7 +199,7 @@ namespace UI.Scene.SceneUI
 
         private void DisConnetedPlayerinLobby(ulong playerIndex)
         {
-            Debug.Log("플레이어가 나갔습니다.");
+            UtilDebug.Log("플레이어가 나갔습니다.");
             IsCheckAllReadyToPlayers(playerIndex);
         }
 
@@ -243,7 +243,7 @@ namespace UI.Scene.SceneUI
             }
             catch (Exception error)
             {
-                Debug.Log($"에러코드{error}");
+                UtilDebug.Log($"에러코드{error}");
             }
         }
 
@@ -349,7 +349,7 @@ namespace UI.Scene.SceneUI
             void ClientLoadedEvent(ulong clientId)
             {
                 _relayManager.NgoRPCCaller.GetPlayerChoiceCharacterRpc(clientId);
-                Debug.Log(_sceneManagerEx.GetCurrentScene.CurrentScene + "씬네임" + "플레이어 ID" + clientId);
+                UtilDebug.Log(_sceneManagerEx.GetCurrentScene.CurrentScene + "씬네임" + "플레이어 ID" + clientId);
             }
         }
 

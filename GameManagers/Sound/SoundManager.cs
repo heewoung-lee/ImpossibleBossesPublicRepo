@@ -115,7 +115,7 @@ namespace GameManagers
             }
 
             if (clip == null)
-                Debug.Log("Fail to Load Clip");
+                UtilDebug.Log("Fail to Load Clip");
 
 
             return clip;

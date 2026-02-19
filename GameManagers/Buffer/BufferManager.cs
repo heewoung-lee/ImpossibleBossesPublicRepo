@@ -66,7 +66,7 @@ namespace GameManagers
             //         break;
             //     // 새로운 스탯이 생기면 여기에 case만 추가
             //     default:
-            //         Debug.LogWarning($"[BufferManager] 정의되지 않은 StatType: {type}");
+            //         UtilDebug.LogWarning($"[BufferManager] 정의되지 않은 StatType: {type}");
             //         break;
             // }
 

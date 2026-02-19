@@ -202,7 +202,7 @@ namespace NetWork.NGO
 
         private void LoadedPlayerCountValueChanged(int previousValue, int newValue)
         {
-            //Debug.Log($"이전값{previousValue} 이후값{newValue}");
+            //UtilDebug.Log($"이전값{previousValue} 이후값{newValue}");
             LoadedPlayerCountRpc();
         }
 
@@ -244,7 +244,7 @@ namespace NetWork.NGO
             }
             else
             {
-                Debug.LogWarning($"아이템 데이터를 찾을 수 없습니다. ID: {itemStruct.ItemNumber}");
+                UtilDebug.LogWarning($"아이템 데이터를 찾을 수 없습니다. ID: {itemStruct.ItemNumber}");
             }
         }
 
@@ -423,7 +423,7 @@ namespace NetWork.NGO
             }
             catch (Exception e)
             {
-                Debug.LogError($"[Disconneted NetWorkError] Error: {e}");
+                UtilDebug.LogError($"[Disconneted NetWorkError] Error: {e}");
             }
         }
 
@@ -455,7 +455,7 @@ namespace NetWork.NGO
         [Rpc(SendTo.Server)]
         public void SubmitSelectedCharactertoServerRpc(ulong clientId, string selectCharacterName)
         {
-            //Debug.Log($"{clientId} 유저가 {selectCharacterName}을 등록함");
+            //UtilDebug.Log($"{clientId} 유저가 {selectCharacterName}을 등록함");
             Define.PlayerClass selectCharacter =
                 (Define.PlayerClass)Enum.Parse(typeof(Define.PlayerClass), selectCharacterName);
             _relayManager.RegisterSelectedCharacterInDict(clientId, selectCharacter);
@@ -512,7 +512,7 @@ namespace NetWork.NGO
                     break;
                 }
                 default:
-                    Debug.LogError("Too many positions! Maximum supported is 340.");
+                    UtilDebug.LogError("Too many positions! Maximum supported is 340.");
                     break;
             }
         }
@@ -588,7 +588,7 @@ namespace NetWork.NGO
         public void ResetManagersRpc()
         {
             //Managers.Clear();
-            Debug.Log("Call RPCCaller in ResetManagersRpc");
+            UtilDebug.Log("Call RPCCaller in ResetManagersRpc");
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
@@ -605,7 +605,7 @@ namespace NetWork.NGO
 
                 if (ngo.TryGetComponent(out ISceneChangeBehaviour behaviour))
                 {
-                    Debug.Log((behaviour as Component).name + " 초기화 처리 됨");
+                    UtilDebug.Log((behaviour as Component).name + " 초기화 처리 됨");
                     behaviour.OnBeforeSceneUnload();
                 }
             }

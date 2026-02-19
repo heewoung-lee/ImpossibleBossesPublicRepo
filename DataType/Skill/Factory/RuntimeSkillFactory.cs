@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
 using Controller;
 using DataType.Skill.Factory.Trigger;
+using GameManagers.ResourcesEx;
 using GameManagers.Target;
 using Scene.CommonInstaller;
 using Skill;
 using UnityEngine;
+using Util;
 using Zenject;
 using ZenjectContext.ProjectContextInstaller;
+using Object = UnityEngine.Object;
 
 namespace DataType.Skill.Factory
 {
@@ -21,7 +26,9 @@ namespace DataType.Skill.Factory
         private readonly ITriggerFactory _triggerFactory;
         private readonly ISkillPipelineFactory _pipelineFactory;
         private readonly SignalBus _runTimeSkillfactoryReadySignal;
-
+        private List<SkillDataSO> _skills;
+        
+        
         private bool _checkinitdone = false;
 
         public bool CheckInitDone => _checkinitdone;
@@ -35,6 +42,8 @@ namespace DataType.Skill.Factory
             _runTimeSkillfactoryReadySignal = runTimeSkillfactoryReadySignal;
             _triggerFactory = triggerFactory;
             _pipelineFactory = pipelineFactory;
+
+            _skills = new List<SkillDataSO>();
         }
         public void Initialize()
         {
@@ -45,25 +54,32 @@ namespace DataType.Skill.Factory
         public void Dispose()
         {
             _checkinitdone = false;
+            foreach (SkillDataSO skilldata in _skills)
+            {
+                Object.Destroy(skilldata);
+            }
         }
         public RuntimeSkill CreateSkill(SkillDataSO data, BaseController owner)
         {
             if (data == null || owner == null)
             {
-                Debug.LogError("[RuntimeSkillFactory] data/owner is null");
+                UtilDebug.LogError("[RuntimeSkillFactory] data/owner is null");
                 return null;
             }
 
-            ISkillTriggerStrategy trigger = _triggerFactory.GetTrigger(data.trigger);
-            ISkillPipeline pipeline = _pipelineFactory.Create(data, owner);
+            SkillDataSO dataInstance = Object.Instantiate(data);
+            _skills.Add(dataInstance);
+            
+            ISkillTriggerStrategy trigger = _triggerFactory.GetTrigger(dataInstance.trigger);
+            ISkillPipeline pipeline = _pipelineFactory.Create(dataInstance, owner);
 
             if (trigger == null || pipeline == null)
             {
-                Debug.LogError($"[RuntimeSkillFactory] Create failed. Skill: {data.name}");
+                UtilDebug.LogError($"[RuntimeSkillFactory] Create failed. Skill: {dataInstance.name}");
                 return null;
             }
 
-            return new RuntimeSkill(data, trigger, pipeline, owner);
+            return new RuntimeSkill(dataInstance, trigger, pipeline, owner);
         }
 
 

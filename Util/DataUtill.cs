@@ -34,7 +34,7 @@ namespace Util
             }
             catch (Exception ex)
             {
-                Debug.LogError(ex.Message);
+                UtilDebug.LogError(ex.Message);
             }
 
             DataTable data = JsonConvert.DeserializeObject<DataTable>(value);

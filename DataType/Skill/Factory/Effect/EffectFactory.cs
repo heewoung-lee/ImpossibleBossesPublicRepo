@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace DataType.Skill.Factory.Effect
@@ -25,7 +26,7 @@ namespace DataType.Skill.Factory.Effect
         {
             if (effectDef == null)
             {
-                Debug.LogError("[EffectFactory] effectDef is null");
+                UtilDebug.LogError("[EffectFactory] effectDef is null");
                 return null;
             }
 
@@ -33,7 +34,7 @@ namespace DataType.Skill.Factory.Effect
             if (_map.TryGetValue(defType, out var effect))
                 return effect;
 
-            Debug.LogError($"[EffectFactory] No effect for defType: {defType.Name}");
+            UtilDebug.LogError($"[EffectFactory] No effect for defType: {defType.Name}");
             return null;
         }
     }

@@ -8,6 +8,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Util;
 using Zenject;
 
 namespace UI.Popup.PopupUI
@@ -79,7 +80,7 @@ namespace UI.Popup.PopupUI
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[SignUp Error]: {ex}");
+                UtilDebug.LogError($"[SignUp Error]: {ex}");
                 _alertPopup = ShowAlertDialogUI<UIAlertDialog>(_alertPopup, "오류", "알 수 없는 오류가 발생했습니다.");
             }
             finally

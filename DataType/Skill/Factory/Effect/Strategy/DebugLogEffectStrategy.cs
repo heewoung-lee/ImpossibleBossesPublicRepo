@@ -2,6 +2,7 @@
 using Controller;
 using Skill;
 using UnityEngine;
+using Util;
 
 namespace DataType.Skill.Factory.Effect
 {
@@ -29,9 +30,9 @@ namespace DataType.Skill.Factory.Effect
             {
                 if (ctx is SkillExecutionContext context)
                 {
-                    Debug.Log($"<color=red>[DebugEffect]</color> {_def.message} / Caster={ctx.Caster.name}");
+                    UtilDebug.Log($"<color=red>[DebugEffect]</color> {_def.message} / Caster={ctx.Caster.name}");
 
-                    Debug.Log($"[Effect] HitTargets Count = {context.HitTargets.Length}");
+                    UtilDebug.Log($"[Effect] HitTargets Count = {context.HitTargets.Length}");
                     onComplete?.Invoke();
                 }
             }

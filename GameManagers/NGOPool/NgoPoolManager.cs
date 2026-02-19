@@ -11,6 +11,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Pool;
+using Util;
 using Zenject;
 using ZenjectContext.ProjectContextInstaller;
 
@@ -114,7 +115,7 @@ namespace GameManagers.Pool
             else
             {
                 _ngoPool.RegisterPrefabInternal(prefabPath);
-                Debug.LogWarning($"[NgoPoolManager] {prefabPath} does not have INgoPoolData. Using default capacity.");
+                UtilDebug.LogWarning($"[NgoPoolManager] {prefabPath} does not have INgoPoolData. Using default capacity.");
             }
         }
 

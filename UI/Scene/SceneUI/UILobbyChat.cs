@@ -6,6 +6,7 @@ using TMPro;
 using Unity.Services.Vivox;
 using UnityEngine;
 using UnityEngine.UI;
+using Util;
 using Zenject;
 
 namespace UI.Scene.SceneUI
@@ -102,7 +103,7 @@ namespace UI.Scene.SceneUI
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Error sending message: {ex.Message}");
+                UtilDebug.LogError($"Error sending message: {ex.Message}");
             }
             _chattingScrollRect.verticalNormalizedPosition = 0f;
             _chattingInputField.text = "";

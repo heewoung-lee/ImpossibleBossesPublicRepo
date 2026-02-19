@@ -2,6 +2,7 @@ using GameManagers;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using Util;
 
 namespace NetWork
 {
@@ -12,7 +13,7 @@ namespace NetWork
             if (NetworkManager.Singleton.IsHost == true)
                 return;
             
-           Debug.Log(playerNgoId+"번 User 초기화 완료");
+           UtilDebug.Log(playerNgoId+"번 User 초기화 완료");
             
             // writer 용량은 여유 있게(예: 32바이트). 부족하면 OverflowException.
             using var writer = new FastBufferWriter(32, Allocator.Temp);

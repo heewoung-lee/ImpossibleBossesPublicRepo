@@ -477,7 +477,7 @@ namespace Stats.BaseStats
             {
                 return new NetworkObjectReference(ngo);
             }
-            Debug.Log("Attacker hasn't a BaseStats");
+            UtilDebug.Log("Attacker hasn't a BaseStats");
             return default;
         }
 
@@ -518,7 +518,7 @@ namespace Stats.BaseStats
                     break;
                 // 새로운 스탯이 생기면 여기에 case만 추가
                 default:
-                    Debug.LogWarning($"[BufferManager] 정의되지 않은 StatType: {statType}");
+                    UtilDebug.LogWarning($"[BufferManager] 정의되지 않은 StatType: {statType}");
                     break;
             }
         }

@@ -97,7 +97,7 @@ namespace NetWork.NGO
                 }
                 else
                 {
-                    Debug.Log($"{networkObject.name} can't return the Pool");
+                    UtilDebug.Log($"{networkObject.name} can't return the Pool");
                 }
             }
         }
@@ -106,7 +106,7 @@ namespace NetWork.NGO
             GameObject prefab = _resourcesServices.Load<GameObject>(prefabPath);
             if (_relayManager.NetworkManagerEx.GetNetworkPrefabOverride(prefab) == null)
             {
-                Debug.Log($"{prefab.name} is not registed the NetworkManager");
+                UtilDebug.Log($"{prefab.name} is not registed the NetworkManager");
                 return;
             }
             m_PooledObjects[prefabPath] = new ObjectPool<NetworkObject>(CreateFunc, ActionOnGet, ActionOnRelease, ActionOnDestroy, defaultCapacity: prewarmCount);

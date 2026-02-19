@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System.Collections.Generic;
 using System.Reflection;
 using CustomEditor.Interfaces;
@@ -6,6 +8,7 @@ using Scene.GamePlayScene;
 using Unity.Multiplayer;
 using UnityEditor;
 using UnityEngine;
+
 
 namespace CustomEditor.Multiplay
 {
@@ -94,3 +97,4 @@ namespace CustomEditor.Multiplay
         }
     }
 }
+#endif

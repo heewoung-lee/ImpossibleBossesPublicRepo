@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Character.Skill;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace DataType.Skill.Factory.Trigger
@@ -26,7 +27,7 @@ namespace DataType.Skill.Factory.Trigger
         {
             if (triggerDef == null)
             {
-                Debug.LogError("[TriggerFactory] triggerDef is null");
+                UtilDebug.LogError("[TriggerFactory] triggerDef is null");
                 return null;
             }
 
@@ -34,7 +35,7 @@ namespace DataType.Skill.Factory.Trigger
             if (_map.TryGetValue(defType, out var trigger))
                 return trigger;
 
-            Debug.LogError($"[TriggerFactory] No trigger for defType: {defType.Name}");
+            UtilDebug.LogError($"[TriggerFactory] No trigger for defType: {defType.Name}");
             return null;
         }
     }

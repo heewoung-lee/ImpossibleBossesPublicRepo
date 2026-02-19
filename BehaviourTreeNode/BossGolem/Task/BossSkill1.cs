@@ -91,6 +91,7 @@ namespace BehaviourTreeNode.BossGolem.Task
                     return;
 
                 _allTargets = Physics.OverlapSphere(Owner.transform.position, float.MaxValue, _stats.TarGetLayer);
+                
                 OnBossGolemAnimationChanged(BossAnimNetworkController, _controller.BossSkill1State);
                 CurrentAnimInfo animInfo = new CurrentAnimInfo(_animLength, decelerationRatio, _skill1AnimStopThreshold,_skill1DurationTime,RelayManager.NetworkManagerEx.ServerTime.Time, _skill1StartAnimSpeed);
                 _networkController.StartAnimChagnedRpc(animInfo);

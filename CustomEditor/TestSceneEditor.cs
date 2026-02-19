@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using CustomEditor.Interfaces;
@@ -5,10 +7,10 @@ using CustomEditor.Multiplay;
 using Scene;
 using Scene.CommonInstaller;
 using Scene.CommonInstaller.Interfaces;
+using Scene.GamePlayScene.Installer;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Util;
-
 
 namespace CustomEditor
 {
@@ -44,15 +46,14 @@ namespace CustomEditor
             => MultiPlayScenarioReflectionCustom.SyncScenarioFromInspector(multiTestscene);
     }
 
-    
-    
-    
-    public class TestSceneEditor : MonoBehaviour, ISceneTestMode, ISceneMultiMode, ISceneSelectCharacter, IMultiTestScene
+    [RequireComponent(typeof(TestNetworkConnector))]
+    public class TestSceneEditor : MonoBehaviour, ISceneMultiMode, ISceneSelectCharacter, IMultiTestScene
     {
         [SerializeField] private ScriptableObject _playSceneSenario;
         private ScenarioSerializeController _scenarioSerializeController;
         private ScenarioReflectionController _scenarioReflectionController;
-
+  
+        
         public ScenarioReflectionController ReflectionController
         {
             get
@@ -86,16 +87,21 @@ namespace CustomEditor
             {
                 if (_scenarioController == null)
                 {
-                    return SerializeController;
+                    if (useSerializeVersion)
+                    {
+                        _scenarioController = SerializeController;
+                    }
+                    else
+                    {
+                        _scenarioController = ReflectionController;
+                    }
                 }
                 return _scenarioController;
             }
-
             private set => _scenarioController = value;
         }
+
         
-        
-        public TestMode GetTestMode() => testMode;
         public MultiMode GetMultiTestMode() => multiMode;
 
         public Define.PlayerClass GetPlayerableCharacter()
@@ -135,16 +141,11 @@ namespace CustomEditor
         }
         
 
-        // 상단 공통 옵션
-        [Title("테스트모드"), LabelWidth(90)] [SerializeField, EnumToggleButtons, LabelText("Test Mode")]
-        [PropertySpace(SpaceAfter = 16)]
-        private TestMode testMode = TestMode.Local;
-
-        [ShowIfGroup("Multi", Condition = "@testMode == Scene.TestMode.Multi")]
-        [LabelWidth(90)]
+        [Title("테스트모드"), LabelWidth(90)]
+        [BoxGroup("Multi")]
         [PropertySpace(SpaceAfter = 16)]
         [SerializeField, EnumToggleButtons, LabelText("Multi Mode"), Space(6)]
-        [OnValueChanged("OnModeChanged")]
+        [OnValueChanged(nameof(OnModeChanged))]
         private MultiMode multiMode = MultiMode.Solo;
 
 
@@ -165,11 +166,11 @@ namespace CustomEditor
         }
         
         
-        [ShowIfGroup("Multi")]
+        [BoxGroup("Multi")]
         [ShowIf("@multiMode == MultiMode.Multi")]
         [PropertySpace(SpaceAfter = 24)]
         [SerializeField, Range(1, 4), LabelText("Playable Count")]
-        [OnValueChanged("OnPlayerCountChanged")]
+        [OnValueChanged(nameof(OnPlayerCountChanged))]
         private int _playableCharacterCount = 1;
 
         private void OnPlayerCountChanged()
@@ -180,95 +181,99 @@ namespace CustomEditor
 
 // === Players ===
 // P1 : 항상 노출 (상위 Multi 그룹에 들어가면 보임)
-        [ShowIfGroup("Multi")]
-        [BoxGroup("Multi/Players")] // 행을 박스로 감싸 안정감
+        [BoxGroup("Multi/Players")]
         [HorizontalGroup("Multi/Players/P1", Width = 0.55f)]
         [SerializeField, EnumToggleButtons, LabelText("Playable 1")]
         [PropertySpace(SpaceAfter = 16)]
-        [OnValueChanged("OnPlayer1ClassChanged")]
+        [OnValueChanged(nameof(OnPlayer1ClassChanged))]
         private Define.PlayerClass playerableCharacter1 = Define.PlayerClass.Archer;
 
-        [HorizontalGroup("Multi/Players/P1")] [SerializeField, EnumPaging, LabelText("Tag"), LabelWidth(30)]
+        [HorizontalGroup("Multi/Players/P1")]
+        [SerializeField, EnumPaging, LabelText("Tag"), LabelWidth(30)]
         [PropertySpace(SpaceAfter = 16)]
-        [OnValueChanged("OnPlayer1ClassChanged")]
+        [OnValueChanged(nameof(OnPlayer1ClassChanged))]
         private PlayersTag playableCharacter1Tag = PlayersTag.Player1;
 
 
         private void OnPlayer1ClassChanged()
         {
             MultiTestPlayerInfo[0].SetPlayerInfo(playerableCharacter1,playableCharacter1Tag);
-            Debug.Log("OnPlayer1ClassChanged");
+            UtilDebug.Log("OnPlayer1ClassChanged");
             ScenarioController.UpdateTag(this);
         }
         
         
 // P2
-        [ShowIfGroup("Multi")]
-        [ShowIfGroup("Multi/Players/P2", Condition = "@multiMode == MultiMode.Multi && _playableCharacterCount >= 2")]
-        [HorizontalGroup("Multi/Players/P2/Row", Width = 0.55f)]
+        [BoxGroup("Multi/Players")]
+        [ShowIf("@multiMode == MultiMode.Multi && _playableCharacterCount >= 2")]
+        [HorizontalGroup("Multi/Players/P2", Width = 0.55f)]
         [SerializeField, EnumToggleButtons, LabelText("Playable 2")]
         [PropertySpace(SpaceAfter = 16)]
-        [OnValueChanged("OnPlayer2ClassChanged")]
+        [OnValueChanged(nameof(OnPlayer2ClassChanged))]
         private Define.PlayerClass playerableCharacter2 = Define.PlayerClass.Archer;
 
-        [HorizontalGroup("Multi/Players/P2/Row")] [SerializeField, EnumPaging, LabelText("Tag"), LabelWidth(30)]
-        [PropertySpace(SpaceAfter = 16)]
-        [OnValueChanged("OnPlayer2ClassChanged")]
+        [ShowIf("@multiMode == MultiMode.Multi && _playableCharacterCount >= 2")]
+        [HorizontalGroup("Multi/Players/P2")]
+        [SerializeField, EnumPaging, LabelText("Tag"), LabelWidth(30)]
+        [OnValueChanged(nameof(OnPlayer2ClassChanged))]
         private PlayersTag playerableCharacter2Tag = PlayersTag.Player2;
         
         private void OnPlayer2ClassChanged()
         {
             MultiTestPlayerInfo[1].SetPlayerInfo(playerableCharacter2,playerableCharacter2Tag);
-            Debug.Log("OnPlayer2ClassChanged");
+            UtilDebug.Log("OnPlayer2ClassChanged");
             ScenarioController.UpdateTag(this);
         }
 
 // P3
-        [ShowIfGroup("Multi")]
-        [ShowIfGroup("Multi/Players/P3", Condition = "@multiMode == MultiMode.Multi && _playableCharacterCount >= 3")]
-        [HorizontalGroup("Multi/Players/P3/Row", Width = 0.55f)]
+        [BoxGroup("Multi/Players")]
+        [ShowIf("@multiMode == MultiMode.Multi && _playableCharacterCount >= 3")]
+        [HorizontalGroup("Multi/Players/P3", Width = 0.55f)]
         [SerializeField, EnumToggleButtons, LabelText("Playable 3")]
         [PropertySpace(SpaceAfter = 16)]
-        [OnValueChanged("OnPlayer3ClassChanged")]
+        [OnValueChanged(nameof(OnPlayer3ClassChanged))]
         private Define.PlayerClass playerableCharacter3 = Define.PlayerClass.Archer;
 
-        [HorizontalGroup("Multi/Players/P3/Row")] [SerializeField, EnumPaging, LabelText("Tag"), LabelWidth(30)]
-        [PropertySpace(SpaceAfter = 16)]
-        [OnValueChanged("OnPlayer3ClassChanged")]
+        [ShowIf("@multiMode == MultiMode.Multi && _playableCharacterCount >= 3")]
+        [HorizontalGroup("Multi/Players/P3")]
+        [SerializeField, EnumPaging, LabelText("Tag"), LabelWidth(30)]
+        [OnValueChanged(nameof(OnPlayer3ClassChanged))]
         private PlayersTag playerableCharacter3Tag = PlayersTag.Player3;
 
         private void OnPlayer3ClassChanged()
         {
             MultiTestPlayerInfo[2].SetPlayerInfo(playerableCharacter3,playerableCharacter3Tag);
-            Debug.Log("OnPlayer3ClassChanged");
+            UtilDebug.Log("OnPlayer3ClassChanged");
             ScenarioController.UpdateTag(this);
         }
 // P4
-        [ShowIfGroup("Multi")]
-        [ShowIfGroup("Multi/Players/P4", Condition = "@multiMode == MultiMode.Multi && _playableCharacterCount >= 4")]
-        [HorizontalGroup("Multi/Players/P4/Row", Width = 0.55f)]
+        [BoxGroup("Multi/Players")]
+        [ShowIf("@multiMode == MultiMode.Multi && _playableCharacterCount >= 4")]
+        [HorizontalGroup("Multi/Players/P4", Width = 0.55f)]
+        [PropertySpace(SpaceAfter = 16)]
         [SerializeField, EnumToggleButtons, LabelText("Playable 4")]
-        [OnValueChanged("OnPlayer4ClassChanged")]
+        [OnValueChanged(nameof(OnPlayer4ClassChanged))]
         private Define.PlayerClass playerableCharacter4 = Define.PlayerClass.Archer;
 
-        [HorizontalGroup("Multi/Players/P4/Row")] [SerializeField, EnumPaging, LabelText("Tag"), LabelWidth(30)]
-        [OnValueChanged("OnPlayer4ClassChanged")]
+        [ShowIf("@multiMode == MultiMode.Multi && _playableCharacterCount >= 4")]
+        [HorizontalGroup("Multi/Players/P4")]
+        [SerializeField, EnumPaging, LabelText("Tag"), LabelWidth(30)]
+        [OnValueChanged(nameof(OnPlayer4ClassChanged))]
         private PlayersTag playerableCharacter4Tag = PlayersTag.Player4;
         
         private void OnPlayer4ClassChanged()
         {
             MultiTestPlayerInfo[3].SetPlayerInfo(playerableCharacter4,playerableCharacter4Tag);
-            Debug.Log("OnPlayer4ClassChanged");
+            UtilDebug.Log("OnPlayer4ClassChanged");
             ScenarioController.UpdateTag(this);
         }
 
         
         // === UseMultiMode ===
-        [ShowIfGroup("Multi")]
         [PropertySpace(SpaceAfter = 12)]
         [HorizontalGroup("Multi/Row", Width = 0.55f)]
         [SerializeField, ToggleLeft, LabelText("UseScenario")]
-        [OnValueChanged("OnUseMultiModeChanged")]
+        [OnValueChanged(nameof(OnUseMultiModeChanged))]
         private bool useMultiMode = false;
 
         private void OnUseMultiModeChanged()
@@ -276,11 +281,10 @@ namespace CustomEditor
             ScenarioController.SetUseMultiMode(useMultiMode,this);
         }
         
-        [ShowIfGroup("Multi")]
         [PropertySpace(SpaceAfter = 12)]
         [HorizontalGroup("Multi/Row")]
         [SerializeField, ToggleLeft, LabelText("UseSerializeVersion")]
-        [OnValueChanged("OnUseSerializeVersion")]
+        [OnValueChanged(nameof(OnUseSerializeVersion))]
         private bool useSerializeVersion = false;
 
         private void OnUseSerializeVersion()
@@ -310,10 +314,12 @@ namespace CustomEditor
         {
             if (_playSceneSenario == null)
             {
-                Debug.Log("GetPlayScenarioSO is null");
+                UtilDebug.Log("GetPlayScenarioSO is null");
                 return null;
             }
             return _playSceneSenario;
         }
     }
 }
+#endif
+

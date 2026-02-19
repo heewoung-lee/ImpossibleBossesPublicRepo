@@ -56,13 +56,13 @@ namespace GameManagers
 
             if (_inputActionMapDict[controllerTypeString] == null)
             {
-                Debug.Log($"Not Found ActionMap: {controllerType}");
+                UtilDebug.Log($"Not Found ActionMap: {controllerType}");
                 return null;
             }
 
             if (_inputActionMapDict[controllerTypeString][actionName] == null)
             {
-                Debug.Log($"Not Found Action: {actionName}");
+                UtilDebug.Log($"Not Found Action: {actionName}");
                 return null;
             }
 

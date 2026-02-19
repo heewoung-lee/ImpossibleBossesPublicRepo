@@ -73,5 +73,6 @@ namespace Scene.GamePlayScene
             serializedObject.ApplyModifiedProperties();
         }
     }
-#endif
 }
+#endif
+

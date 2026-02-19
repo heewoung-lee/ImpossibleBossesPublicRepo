@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEditor;
-using UnityEngine;
-
+using Util;
+#if UNITY_EDITOR
 namespace CustomEditor
 {
     public class CreateInterfaceTemplate
@@ -13,9 +13,10 @@ namespace CustomEditor
             string defaultName = "NewInterface.cs";
         
             if (!File.Exists(templatePath))
-                Debug.LogError("Template NOT found!");
+                UtilDebug.LogError("Template NOT found!");
         
             ProjectWindowUtil.CreateScriptAssetFromTemplateFile(templatePath, defaultName);
         }
     }
 }
+#endif

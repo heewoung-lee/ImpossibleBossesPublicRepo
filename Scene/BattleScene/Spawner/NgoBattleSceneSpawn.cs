@@ -60,7 +60,7 @@ namespace Scene.BattleScene.Spawner
             BossGolemController bossGolemController = _resourcesServices
                 .InstantiateByKey("Prefabs/Enemy/Boss/Character/StoneGolem").GetComponent<BossGolemController>();
             _relayManager.SpawnNetworkObj(bossGolemController.gameObject, _relayManager.NgoRoot.transform,
-                new Vector3(10f, 0f, 10f));
+                new Vector3(40f, 0f, 30f));
         }
 
         protected override void StartInit()

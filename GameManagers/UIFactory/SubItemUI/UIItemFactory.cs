@@ -2,6 +2,7 @@
 using DataType.Item;
 using UI.SubItem;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace GameManagers.UIFactory.SubItemUI
@@ -50,7 +51,7 @@ namespace GameManagers.UIFactory.SubItemUI
                     break;
 
                 case ItemType.ETC:
-                    Debug.LogWarning("[UIItemFactory] ETC 아이템은 아직 구현되지 않았습니다.");
+                    UtilDebug.LogWarning("[UIItemFactory] ETC 아이템은 아직 구현되지 않았습니다.");
                     break;
             }
 

@@ -6,6 +6,7 @@ using GameManagers.Interface.ResourcesManager;
 using GameManagers.ItamDataManager.Interface;
 using GameManagers.ResourcesEx;
 using UnityEngine;
+using Util;
 using Zenject;
 
 namespace GameManagers
@@ -26,7 +27,7 @@ namespace GameManagers
             if (_itemGradeBorder != null && _itemGradeBorder.TryGetValue(gradeType, out var sprite))
                 return sprite;
 
-            Debug.LogWarning($"[GetGradeBorder] 해당 gradeType({gradeType})이 존재하지 않습니다.");
+            UtilDebug.LogWarning($"[GetGradeBorder] 해당 gradeType({gradeType})이 존재하지 않습니다.");
             return null;
         }
         public void Initialize()
