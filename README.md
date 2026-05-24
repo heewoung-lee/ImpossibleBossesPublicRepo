@@ -1,5 +1,6 @@
 
 
+
 <img width="3840" height="1240" alt="1titleImage" src="https://github.com/user-attachments/assets/8cd51111-1847-4074-87e5-e91aede2d712" />
 
 
@@ -99,32 +100,14 @@
   
 <br/>
 
-<table style="width:100%; border:0;">
-  <tr>
-    <td align="center" valign="top" style="width:50%;">
-      <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/fb894553-6fd5-42c1-bb28-56304c32567f" alt="중복 닉네임" height="300">
-        <figcaption>
-          <br/>
-          <strong>&lt;중복 닉네임&gt;</strong><br>
-        </figcaption>
-      </figure>
-    </td>
-    <td align="center" valign="top" style="width:50%;">
-      <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/0cf5fc9e-3f29-4c95-a0f2-cbecd03b1551" alt="닉네임 저장 성공" height="300">
-        <figcaption>
-          <br/>
-          <strong>&lt;닉네임 저장 성공&gt;</strong><br>
-        </figcaption>
-      </figure>
-    </td>
-  </tr>
-</table>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/40fceb85-0f1a-4013-a23f-fd7f9052b938" alt="닉네임 생성 과정" width="80%">
+  <br/>
+  <sub><strong>&lt;닉네임 생성 과정&gt;</strong></sub>
+</p>
 
 <br/>
-
-
 
 3.  **로그인 시**:
     * Steam 인증 티켓을 Firebase Cloud Functions의 `getSteamProfile` 엔드포인트로 전달합니다.
@@ -135,7 +118,7 @@
 
 <br/>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/331d4e07-1ed3-4bfa-9e96-e09b0e97b034" alt="로그인 흐름" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/24496593-d73c-45d1-b088-72c17c31a5f9" alt="로그인 흐름" width="70%"/>
   <br/>
   <sub><strong>&lt;Steam 로그인 및 닉네임 설정 처리 흐름도&gt;</strong></sub>
 </p>
