@@ -4,8 +4,6 @@
 <img width="3840" height="1240" alt="1titleImage" src="https://github.com/user-attachments/assets/8cd51111-1847-4074-87e5-e91aede2d712" />
 
 
-
-
 ## 📘 목차
 - **[프로젝트 소개](#-프로젝트-소개)**
 - **[사용 기술](#-사용-기술)**
