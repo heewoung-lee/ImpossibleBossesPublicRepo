@@ -343,7 +343,6 @@ sequenceDiagram
   <br/>
   <sub>
     <strong>&lt;Zenject 기반 의존성 등록 및 주입 구조&gt;</strong><br/>
-    Installer에서 필요한 의존성을 Container에 등록하고, MonoBehaviour와 일반 Class는 Container를 통해 의존성을 주입받습니다.
   </sub>
 </p>
 
