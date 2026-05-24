@@ -41,19 +41,17 @@
 ## 🔧 사용 기술
 | 구분 | 기술명 |
 | :-- | :-- |
-| **Engine** | `Unity 6 (6000.0.67f1)` |
-| **Rendering / UI** | `Universal Render Pipeline 17.0.4`, `UGUI 2.0.0`, `Cinemachine 3.1.5`, `Input System 1.18.0` |
-| **Networking** | `Netcode for GameObjects 2.7.0`, `Unity Transport 2.6.0`, `Unity Lobby`, `Unity Relay`, `Unity Multiplayer Services 1.1.8`, `Unity Multiplayer Tools 2.2.7` |
-| **Voice & Chat** | `Unity Vivox 16.8.0` |
-| **Auth / Security** | `Steamworks.NET`, `Steam Web API Auth Ticket`, `Firebase HTTPS Functions` |
-| **Backend / DB** | `Firebase Cloud Functions`, `Cloud Firestore`, `Node.js 24`, `Firebase Admin SDK 13.8.0`, `Firebase Functions SDK 7.2.5` |
-| **Game Data** | `Published Google Sheets CSV`, `Newtonsoft.Json 13.0.3` |
-| **AI Behavior** | `Behavior Designer`, `Unity AI Navigation 2.0.10` |
-| **Async / Utility** | `UniTask`, `UnityWebRequest` |
-| **Test / Development Tool** | `Unity Multiplayer Play Mode 1.6.3`, `Unity Play Mode Scenarios`, `Hot Reload 1.13.17`, `Unity Test Framework 1.6.0` |
-| **Framework** | `Zenject / Extenject 9.2.0` |
-| **Inspector Customization** | `Odin Inspector` |
-
+| **엔진** | `유니티 6` |
+| **네트워킹** | `Netcode for GameObjects`, `Unity Relay`, `Unity Lobby` |
+| **음성 / 채팅** | `Unity Vivox` |
+| **인증 / 보안** | `Steamworks.NET`, `Steam Web API Auth Ticket`, `Firebase HTTPS Functions` |
+| **백엔드 / DB** | `Firebase`, `Node.js` |
+| **게임 데이터** | `Published Google Sheets CSV`, `Newtonsoft.Json` |
+| **AI 행동 제어** | `Behavior Designer` |
+| **비동기 / 유틸리티** | `UniTask` |
+| **테스트 / 개발 도구** | `Unity Multiplayer Play Mode`, `Unity Play Mode Scenarios`, `Hot Reload` |
+| **프레임워크** | `Zenject / Extenject` |
+| **인스펙터 커스터마이징** | `Odin Inspector` |
 <br/>
 
 ---
