@@ -338,6 +338,15 @@ sequenceDiagram
     * 작업속도 개선: 테스트에서는 Installer만 바꿔 끼우면 되므로 세팅 시간이 단축되고, 기능 개발과 디버깅 사이클이 빨라졌습니다.
     * 초기 학습곡선을 넘기기 어려웠지만 이후 생산성과 안정성이 눈에 띄게 향상되었습니다.
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/26de135e-1dbb-4a75-8ab4-7aff291453b9" alt="Zenject 의존성 주입 구조" width="80%"/>
+  <br/>
+  <sub>
+    <strong>&lt;Zenject 기반 의존성 등록 및 주입 구조&gt;</strong><br/>
+    Installer에서 필요한 의존성을 Container에 등록하고, MonoBehaviour와 일반 Class는 Container를 통해 의존성을 주입받습니다.
+  </sub>
+</p>
+
 ---
 
 ### 3. 확장성과 재사용성을 위한 스킬 시스템 구조 개선: 타겟+뷰+로직 조합 → 파이프라인 기반 모듈 조합(Trigger/Targeting/Sequence/Decorator/Effect)
