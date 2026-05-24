@@ -1,6 +1,4 @@
 
-
-
 <img width="3840" height="1240" alt="1titleImage" src="https://github.com/user-attachments/assets/8cd51111-1847-4074-87e5-e91aede2d712" />
 
 
@@ -188,7 +186,7 @@
 <br/>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/efe05ffa-fa0c-42ff-b05d-7f6aebfa46e8" alt="캐릭터 선택" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/a116754e-fb80-4b2d-84de-46651bb8b7d3" alt="캐릭터 선택" width="80%"/>
   <br/>
   <sub><strong>&lt;캐릭터 선택 및 준비 완료&gt;</strong><br/>방 참가자의 캐릭터 선택과 준비 상태를 Lobby 데이터로 동기화합니다.</sub>
 </p>
@@ -200,6 +198,7 @@
 * 방 생성부터 게임 접속까지의 멀티플레이 진입 흐름을 하나의 로비 시스템으로 연결했습니다.
 * Lobby 이벤트와 Heartbeat를 활용해 로비 상태를 안정적으로 유지했습니다.
 * Vivox 채팅과 캐릭터 선택/준비 상태를 로비 화면에 통합해 게임 시작 전 협업 흐름을 개선했습니다.
+
 
 ---
 
@@ -214,9 +213,9 @@
 * **호스트 마이그레이션 (Host Migration)**:
     * 로비 시스템과 연동하여, 기존 호스트가 게임에서 나가면 새로운 호스트가 릴레이 서버의 할당정보를 이어받아 게임 세션을 계속 유지할 수 있도록 설계되었습니다.
     * 이는 로비 매니저에서 호스트 변경 이벤트를 감지하고, 새로운 호스트에게 릴레이 서버 재설정 권한을 부여하는 방식으로 처리됩니다.
-      
+
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/5cd90617-aae4-4045-84e2-939418a27c05" alt="캐릭터 선택" width="80%"/>
+  <img src="https://github.com/user-attachments/assets/36829bf4-08b1-48a3-95b9-dee60b5ccf7c" alt="캐릭터 선택" width="80%"/>
   <br/>
   <sub><strong>&lt;호스트 이전(호스트 마이그레이션)&gt;</strong><br/>호스트가 방을 떠나면 다른 플레이어가 호스트를 위임 받습니다.</sub>
 </p>
