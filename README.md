@@ -297,7 +297,30 @@
     * Firebase Cloud Functions와 Firestore를 통해 로그인 검증과 프로필 저장 흐름을 서버 중심으로 구성했습니다.
     * Steam 계정 기반 로그인으로 전환하면서 사용자 입장에서는 별도 회원가입 없이 게임에 진입할 수 있게 되었습니다.
 
+<p align="center">
+  <strong>&lt;Steam 인증 티켓 기반 로그인 구조&gt;</strong>
+</p>
 
+```mermaid
+sequenceDiagram
+    participant Client as Unity Client
+    participant Steam as Steamworks.NET
+    participant Firebase as Firebase HTTPS Functions
+    participant SteamAPI as Steam Web API
+    participant DB as Cloud Firestore
+
+    Client->>Steam: Steam Auth Ticket 요청
+    Steam-->>Client: Auth Ticket 반환
+    Client->>Firebase: Auth Ticket 전송
+    Firebase->>SteamAPI: Ticket 검증 요청
+    SteamAPI-->>Firebase: 검증된 SteamID64 반환
+    Firebase->>DB: SteamID64 기준 프로필 조회/저장
+    DB-->>Firebase: 프로필 데이터 반환
+    Firebase-->>Client: 로그인 결과 반환
+```
+
+
+---
 
 #### 2. 유지보수 및 작업속도 향상을 위한 프레임워크 변경: 싱글톤 패턴 ->컴포넌트 패턴,일반 DI → 젠젝트(Zenject) DI 프레임워크로 전환
 
@@ -314,7 +337,6 @@
     * 유지보수성 향상: 결합도가 낮아져 수정·확장이 수월해졌고, 도미노 이슈가 크게 감소했습니다.
     * 작업속도 개선: 테스트에서는 Installer만 바꿔 끼우면 되므로 세팅 시간이 단축되고, 기능 개발과 디버깅 사이클이 빨라졌습니다.
     * 초기 학습곡선을 넘기기 어려웠지만 이후 생산성과 안정성이 눈에 띄게 향상되었습니다.
-
 
 ---
 
