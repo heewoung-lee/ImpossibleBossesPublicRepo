@@ -24,11 +24,10 @@
 </p>
 
 
-
 ## 📺 플레이  영상
 <p align="center">
   <a href="https://www.youtube.com/watch?v=Iwu4k6hjyPU">
-    <img src="https://github.com/user-attachments/assets/98562878-d43b-4385-8c11-2433d0b62f58" alt="ImpossibleBosses 플레이 영상" width="80%">
+    <img src="https://github.com/user-attachments/assets/d6a043e1-2401-4f85-ae09-dd2414b9dd96" alt="ImpossibleBosses 플레이 영상" width="80%">
   </a>
 </p>
 
