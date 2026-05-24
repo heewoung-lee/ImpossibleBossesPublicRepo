@@ -41,13 +41,17 @@
 ## 🔧 사용 기술
 | 구분 | 기술명 |
 | :-- | :-- |
-| **Engine** | `Unity 6` |
-| **Networking** | `Unity Netcode` |
-| **Voice & Chat** | `Vivox Service` |
-| **Auth / DB** | `Google OAuth 2`, `Google Spreadsheet` |
-| **AI Behavior** | `Behaviour Tree Designer` |
-| **Test Tool** | `Unity Play Mode Scenarios`,`HotReload` |
-| **Frame work** | `Zenject` |
+| **Engine** | `Unity 6 (6000.0.67f1)` |
+| **Rendering / UI** | `Universal Render Pipeline 17.0.4`, `UGUI 2.0.0`, `Cinemachine 3.1.5`, `Input System 1.18.0` |
+| **Networking** | `Netcode for GameObjects 2.7.0`, `Unity Transport 2.6.0`, `Unity Lobby`, `Unity Relay`, `Unity Multiplayer Services 1.1.8`, `Unity Multiplayer Tools 2.2.7` |
+| **Voice & Chat** | `Unity Vivox 16.8.0` |
+| **Auth / Security** | `Steamworks.NET`, `Steam Web API Auth Ticket`, `Firebase HTTPS Functions` |
+| **Backend / DB** | `Firebase Cloud Functions`, `Cloud Firestore`, `Node.js 24`, `Firebase Admin SDK 13.8.0`, `Firebase Functions SDK 7.2.5` |
+| **Game Data** | `Published Google Sheets CSV`, `Newtonsoft.Json 13.0.3` |
+| **AI Behavior** | `Behavior Designer`, `Unity AI Navigation 2.0.10` |
+| **Async / Utility** | `UniTask`, `UnityWebRequest` |
+| **Test / Development Tool** | `Unity Multiplayer Play Mode 1.6.3`, `Unity Play Mode Scenarios`, `Hot Reload 1.13.17`, `Unity Test Framework 1.6.0` |
+| **Framework** | `Zenject / Extenject 9.2.0` |
 | **Inspector Customization** | `Odin Inspector` |
 
 <br/>
@@ -67,8 +71,8 @@
 1.  **Installer를 통한 의존성 설정**:
     * `ProjectContext`, `SceneContext`, `GameObjectContext` 등 계층별로 어떤 의존성을 주입할지 정의합니다. 이를 통해 의존성 주입 설정이 한곳에 모여있어 전체적인 구조 파악이 용이합니다.
     
-2.  **Unity Netcode 호환성을 위한 커스텀 팩토리 및 핸들러 구현**:
-    * 프로젝트 초기, 젠젝트의 기본 객체 생성(스폰) 방식은 유니티 넷코드(Unity Netcode)의 동작 방식과 충돌을 일으켰습니다.
+2.  **Netcode for GameObjects 호환성을 위한 커스텀 팩토리 및 핸들러 구현**:
+    * 프로젝트 초기, 젠젝트의 기본 객체 생성(스폰) 방식은 Netcode for GameObjects의 동작 방식과 충돌을 일으켰습니다.
     * 젠젝트는 의존성 주입 과정에서 객체의 부모 트랜스폼을 네트워크 스폰이 완료되기 전에 변경하여, 넷코드의 '스폰 전까지 부모를 수정하면 안 된다'는 규칙을 위반하는 문제가 있었습니다.
     * 이 문제를 해결하기 위해, 젠젝트의 커스텀 팩토리(Custom Factory)와 유니티 네트워크 오브젝트의 `INetworkPrefabInstanceHandler`를 함께 사용하는 방식을 구현했습니다.
 
@@ -82,14 +86,15 @@
 <br/>
 <br/>
 
-### 🔐 로그인
+### 🔐 로그인 (Steam + Firebase 연동)
 
-> 간편한 회원가입 그리고 게임 데이터를 데이터시트로 관리합니다.
+> Steam 계정 인증 티켓으로 계정을 확인하고, Firebase Cloud Functions와 Cloud Firestore를 통해 플레이어 프로필을 관리합니다.
 
-1.  **로그인 화면 로드**: 게임 시작 시 로그인 또는 회원가입을 할 수 있는 화면이 표시됩니다.
-2.  **회원가입 시**:
-    * 사용자로부터 희망 ID와 비밀번호를 입력받습니다.
-    * 이후 닉네임 설정 화면을 통해 플레이어가 사용할 고유한 닉네임을 입력받아 저장합니다.
+1.  **로그인 화면 로드**: 게임 시작 시 Steam 로그인 또는 닉네임 설정을 할 수 있는 화면이 표시됩니다.
+2.  **최초 로그인 및 닉네임 설정 시**:
+    * 클라이언트는 Steamworks.NET을 통해 Steam Web API 인증 티켓을 발급받고, 티켓을 Firebase HTTPS Functions로 전달합니다.
+    * Firebase Cloud Functions는 전달받은 티켓을 Steam Web API로 검증하며, 클라이언트가 보낸 계정 정보 대신 검증된 SteamID64만 신뢰합니다.
+    * 닉네임 설정 시 Cloud Firestore의 `profiles` 컬렉션에서 중복 닉네임을 확인한 뒤, 사용 가능한 경우 SteamID64와 닉네임을 저장합니다.
   
 <br/>
 
@@ -97,19 +102,19 @@
   <tr>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/fb894553-6fd5-42c1-bb28-56304c32567f" alt="이미 가입된 ID" height="300">
+        <img src="https://github.com/user-attachments/assets/fb894553-6fd5-42c1-bb28-56304c32567f" alt="중복 닉네임" height="300">
         <figcaption>
           <br/>
-          <strong>&lt;이미 가입된 ID&gt;</strong><br>
+          <strong>&lt;중복 닉네임&gt;</strong><br>
         </figcaption>
       </figure>
     </td>
     <td align="center" valign="top" style="width:50%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/0cf5fc9e-3f29-4c95-a0f2-cbecd03b1551" alt="회원가입 성공" height="300">
+        <img src="https://github.com/user-attachments/assets/0cf5fc9e-3f29-4c95-a0f2-cbecd03b1551" alt="닉네임 저장 성공" height="300">
         <figcaption>
           <br/>
-          <strong>&lt;회원가입 성공&gt;</strong><br>
+          <strong>&lt;닉네임 저장 성공&gt;</strong><br>
         </figcaption>
       </figure>
     </td>
@@ -121,16 +126,17 @@
 
 
 3.  **로그인 시**:
-    * 입력된 ID와 비밀번호를 데이터베이스에 저장된 정보와 비교하여 인증을 시도합니다.
+    * Steam 인증 티켓을 Firebase Cloud Functions의 `getSteamProfile` 엔드포인트로 전달합니다.
+    * 서버는 Steam Web API 검증 결과로 얻은 SteamID64를 기준으로 Cloud Firestore에서 프로필을 조회합니다.
 4.  **인증 결과에 따른 처리**:
-    * **성공**: 플레이어의 계정 정보가 게임 내에 임시 저장됩니다. 만약 해당 계정에 닉네임이 설정되어 있지 않다면, 닉네임 설정 화면으로 안내합니다. 모든 정보가 확인되면 로비 화면으로 이동합니다.
-    * **실패**: ID 또는 비밀번호 불일치, 인터넷 연결 문제 등의 오류 발생 시 알림창을 통해 유저에게 안내합니다.
+    * **성공**: SteamID64와 닉네임이 게임 내에 임시 저장됩니다. 닉네임이 아직 없다면 닉네임 설정 화면으로 안내하고, 모든 정보가 확인되면 로비 화면으로 이동합니다.
+    * **실패**: Steam 미실행, Steam 인증 실패, 서버 오류, 네트워크 오류 등의 상황을 알림창으로 안내합니다.
 
 <br/>
 <p align="center">
   <img src="https://github.com/user-attachments/assets/331d4e07-1ed3-4bfa-9e96-e09b0e97b034" alt="로그인 흐름" width="70%"/>
   <br/>
-  <sub><strong>&lt;로그인 및 회원가입 처리 흐름도&gt;</strong></sub>
+  <sub><strong>&lt;Steam 로그인 및 닉네임 설정 처리 흐름도&gt;</strong></sub>
 </p>
 <br/>
 
@@ -468,7 +474,7 @@
 #### 5. Unity Lobby 서비스 버그 식별 및 해결
 
 * 🤔 문제점:
-    * Unity Netcode 기반 멀티플레이 게임 개발 중, Unity Lobby 서비스에서 특정 시나리오(호스트 이전 후 이전 호스트 재접속)에서 플레이어의 로비 참가 및 행동 변화에 따른 이벤트 콜백이 정상적으로 호출되지 않는 오류가 발생했습니다.
+    * Netcode for GameObjects 기반 멀티플레이 게임 개발 중, Unity Lobby 서비스에서 특정 시나리오(호스트 이전 후 이전 호스트 재접속)에서 플레이어의 로비 참가 및 행동 변화에 따른 이벤트 콜백이 정상적으로 호출되지 않는 오류가 발생했습니다.
     * 이로 인해 다른 플레이어의 로비 내 활동이 실시간으로 반영되지 않고 로비 데이터가 불일치하는 등, 로비 시스템의 핵심 기능에 문제가 발생하였습니다.
 
 * 💡 해결 과정:
@@ -542,16 +548,16 @@
 * **💡 해결 과정:**
     * **네트워크 오브젝트 재활용 시스템 직접 구축:**
         * 성능 저하 및 끊김 현상을 해결하고자, 자주 사용되는 네트워크 효과(파티클 등)를 미리 만들어두고 재활용하는 '네트워크 오브젝트 풀링' 시스템을 구현했습니다.
-    * **Unity Netcode 기본 동작의 한계 인식 및 극복:**
-        * Unity Netcode의 기본 네트워크 오브젝트 생성(Spawn) 및 소멸(Despawn) 방식은 내부적으로 실제 게임 오브젝트를 만들고 파괴합니다. 이는 파티클처럼 자주 반복되는 효과에 적용 시 불필요한 메모리 할당/해제로 이어져 성능에 부정적인 영향을 미쳤습니다.
+    * **Netcode for GameObjects 기본 동작의 한계 인식 및 극복:**
+        * Netcode for GameObjects의 기본 네트워크 오브젝트 생성(Spawn) 및 소멸(Despawn) 방식은 내부적으로 실제 게임 오브젝트를 만들고 파괴합니다. 이는 파티클처럼 자주 반복되는 효과에 적용 시 불필요한 메모리 할당/해제로 이어져 성능에 부정적인 영향을 미쳤습니다.
     * **Netcode 기능 확장: 오브젝트 생성/소멸 방식 직접 제어:**
-        * 이러한 한계를 극복하기 위해, Unity Netcode가 제공하는 네트워크 오브젝트의 생성 및 소멸 방식을 개발자가 직접 제어할 수 있는 확장 기능(`INetworkPrefabInstanceHandler`)을 적극 활용했습니다.
+        * 이러한 한계를 극복하기 위해, Netcode for GameObjects가 제공하는 네트워크 오브젝트의 생성 및 소멸 방식을 개발자가 직접 제어할 수 있는 확장 기능(`INetworkPrefabInstanceHandler`)을 적극 활용했습니다.
         * **맞춤형 관리 로직 구현:** '재활용 관리자를 자체 제작하여, 네트워크를 통해 특정 효과 생성 요청 시 새 오브젝트를 만드는 대신 미리 준비된 오브젝트 풀에서 가져와 사용하도록 변경했습니다.
         * **효율적인 반납 처리:** 사용이 끝나 소멸 요청이 오면, 오브젝트를 실제로 파괴하는 대신 재활용 관리자가 풀에 반납하여 다음 사용을 위해 대기시키는 방식으로 최적화했습니다.
           
 * **✨ 개선 결과:**
     * 파티클과 같은 네트워크 오브젝트의 빈번한 생성/소멸로 인한 GC 발생 빈도가 현저히 감소하여 게임의 전반적인 프레임 안정성이 향상되었습니다.
-    * Unity Netcode의 기본 메커니즘을 프로젝트 특성에 맞게 커스터마이징하여 네트워크 부하를 줄이고, 오브젝트 재사용을 통해 반응 속도 또한 개선되었습니다.
+    * Netcode for GameObjects의 기본 메커니즘을 프로젝트 특성에 맞게 커스터마이징하여 네트워크 부하를 줄이고, 오브젝트 재사용을 통해 반응 속도 또한 개선되었습니다.
 <br/>
 </p>
 <p align="center">
