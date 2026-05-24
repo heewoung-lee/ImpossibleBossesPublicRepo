@@ -133,7 +133,7 @@
   <strong>&lt;로비 화면&gt;</strong>
 </p>
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/cb47f1e7-d994-4a03-8962-1257cdcb8bc7" alt="로비 화면" width="70%"/>
+  <img src="https://github.com/user-attachments/assets/bf032067-331f-4217-a8a6-22404bfe8691" alt="로비 화면" width="70%"/>
 </div>
 
 <br/>
@@ -158,11 +158,12 @@
 
 <br/>
 
+
 <table style="width:100%; border:0;">
   <tr>
-    <td align="center" valign="top" style="width:50%;">
+    <td align="center" valign="top" style="width:33%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/6c405fff-d585-4e5c-9c8e-433363d4fe30" alt="방 목록" height="300">
+        <img src="https://github.com/user-attachments/assets/c8c237ee-cf3a-4f85-81fb-e831e167270d" alt="방 목록" height="300">
         <figcaption>
           <br/>
           <strong>&lt;게임 방 목록&gt;</strong><br>
@@ -170,13 +171,23 @@
         </figcaption>
       </figure>
     </td>
-    <td align="center" valign="top" style="width:50%;">
+    <td align="center" valign="top" style="width:33%;">
       <figure style="margin:0;">
-        <img src="https://github.com/user-attachments/assets/0322b79d-21ea-40c1-b096-1965cb316663" alt="비밀번호 입력" height="300">
+        <img src="https://github.com/user-attachments/assets/c9e00936-a7c4-42fa-a29a-ead27f223a76" alt="비밀번호 입력" height="300">
         <figcaption>
           <br/>
           <strong>&lt;비밀번호 입력&gt;</strong><br>
           비공개 방 참가 시 비밀번호를 검증합니다.
+        </figcaption>
+      </figure>
+    </td>
+    <td align="center" valign="top" style="width:33%;">
+      <figure style="margin:0;">
+        <img src="https://github.com/user-attachments/assets/8fe761ed-0db2-4f68-9037-42fd7a4188d8" alt="방 만들기" height="300">
+        <figcaption>
+          <br/>
+          <strong>&lt;방 만들기&gt;</strong><br>
+          방 이름, 최대 인원, 비밀번호를 설정합니다.
         </figcaption>
       </figure>
     </td>
