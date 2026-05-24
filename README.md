@@ -16,23 +16,23 @@
 ---
 
 ## 🔍 프로젝트 소개
-**ImpossibleBosses**는 **Unity 6** 기반으로 개발된 **멀티플레이 PvE 보스 레이드 게임**입니다.  
-플레이어는 최대 **8명**까지 팀을 이루어 거대한 보스 몬스터에 도전하며,  
-**아처(Archer)**, **파이터(Fighter)**, **메이지(Mage)**, **프리스트(Priest)**, **시프(Thief)** 중  
-총 **5개 클래스** 중 하나를 선택할 수 있습니다.
 
-보스의 다양한 공격 패턴을 팀원 간 **협동과 전략**으로 공략하며,  
-전투를 통해 **아이템을 획득**하고, **장비를 교체**하면서  
-플레이어는 점차 강해져 **최종 보스를 처치하는 것**이 목표입니다.
+<p align="center">
+  <a href="https://store.steampowered.com/app/4711050/ImpossibleBosses/?beta=0">
+    <img src="https://github.com/user-attachments/assets/096aebf8-a7c6-4594-a15f-e2595289f498" alt="ImpossibleBosses Steam panel">
+  </a>
+</p>
 
 
 
+## 📺 플레이  영상
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=Iwu4k6hjyPU">
+    <img src="https://github.com/user-attachments/assets/98562878-d43b-4385-8c11-2433d0b62f58" alt="ImpossibleBosses 플레이 영상" width="80%">
+  </a>
+</p>
 
 
-### 📺 플레이  영상
-<a href="https://www.youtube.com/watch?v=https://youtu.be/Iwu4k6hjyPU">
-  <img src="https://img.youtube.com/vi/abc123/maxresdefault.jpg" alt="ImpossibleBosses 플레이 시연 영상" width="80%">
-</a>
 
 
 
