@@ -85,6 +85,8 @@
 * **확장 및 교체 용이성**: 인터페이스 기반 주입 구조를 통해 구현체 변경이나 기능 확장이 쉬워졌습니다.
 <br/>
 
+---
+
 ### 🔐 로그인 (Steam + Firebase 연동)
 
 > Steam 계정 인증 티켓으로 계정을 확인하고, Firebase Cloud Functions와 Cloud Firestore를 통해 플레이어 프로필을 관리합니다.
