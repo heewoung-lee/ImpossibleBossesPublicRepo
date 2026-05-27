@@ -388,7 +388,6 @@ sequenceDiagram
 <br>
 
 | Part | 주제 | 링크 |
-| :---: | :--- | :---: |
 | 1 | **개요** | [보러가기](https://blog.naver.com/hiwoong12/224167895583) |
 | 2 | **스킬 데이터 보관함 만들기** | [보러가기](https://blog.naver.com/hiwoong12/224170411314) |
 | 3 | **스킬 실행** | [보러가기](https://blog.naver.com/hiwoong12/224170589821) |
