@@ -1,6 +1,6 @@
 # Resource Lifecycle Facade
 
-## Background
+## 배경
 
 이 프로젝트에서 가장 핵심이 되는 샘플입니다.
 
@@ -8,14 +8,14 @@
 
 이 문제를 해결하기 위해 외부에는 단순한 `IResourcesServices` API만 제공하고, 내부 구현은 역할별로 분리했습니다. 이 구조를 만들면서 Facade 패턴이 단순히 클래스를 감싸는 방식이 아니라, 소비자와 내부 복잡도를 분리하는 경계라는 점을 배웠습니다.
 
-## Goal
+## 목표
 
 - 소비자는 `IResourcesServices`만 의존한다.
 - 로드, 생성, 파괴 책임은 내부 구현체로 분리한다.
 - Zenject factory, pooling, network despawn 같은 세부 정책은 소비자 코드 밖에 둔다.
 - 나중에 로딩 방식이나 생성 정책을 바꾸더라도 영향 범위를 줄인다.
 
-## Design
+## 설계
 
 - `ResourceManager`
   - Facade 역할만 담당합니다.
@@ -40,7 +40,7 @@
 - `ResourcesLoaderInstaller`
   - Facade와 내부 구현체를 Zenject로 바인딩합니다.
 
-## Review Entry Points
+## 검토 진입점
 
 1. `Source/Assets/Scripts/GameManagers/ResourcesExManagement/IResourcesServices.cs`
 2. `Source/Assets/Scripts/GameManagers/ResourcesExManagement/ResourceManager.cs`
@@ -48,7 +48,7 @@
 4. `Source/Assets/Scripts/GameManagers/ResourcesExManagement/implementation/ObjectReleaser.cs`
 5. `Source/Assets/Scripts/ZenjectContext/ProjectContextInstaller/ResourcesLoaderInstaller.cs`
 
-## Included Scripts
+## 포함된 스크립트
 
 - `ResourceManager.cs`
 - `IResourcesServices.cs`
