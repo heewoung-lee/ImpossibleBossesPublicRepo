@@ -1,15 +1,18 @@
+﻿using Character.Skill.AllofSkills.BossMonster.DarkWizard;
 using Cysharp.Threading.Tasks;
 using DataType;
 using DataType.Item;
-using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.VFXManager;
-using GameManagers.ItamData.Interface;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
-using GameManagers.Scene;
-using GameManagers.UIFactory.SceneUI;
-using Scene;
+using DataType.Strategies.Item;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.LobbyManagement;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SceneManagement;
+using GameManagers.UIFactoryManagement.SceneUI;
+using GameManagers.UIManagement;
+using GameManagers.VFXManagement;
+using ScenesScripts;
 using Stats;
 using TMPro;
 using UI.Popup.PopupUI;
@@ -20,13 +23,17 @@ using Zenject;
 
 namespace UI.Scene.SceneUI
 {
+    
     public class UICreateItemAndGoldButton : UIScene
     {
+        public const int TestDamage = 10;
+        
+        
         public class UICreateItemAndGoldButtonFactory : SceneUIFactory<UICreateItemAndGoldButton>{}
         
         [Inject] private IUIManagerServices _uiManagerServices;
         [Inject] private IItemDataManager _itemDataManager;
-        [Inject] private IPlayerSpawnManager _gameManagerEx;
+        [Inject] private GameManagerEx _gameManagerEx;
         [Inject] private LobbyManager _lobbyManager;
         [Inject] private SceneManagerEx _sceneManagerEx;
         [Inject] private RelayManager _relayManager;
@@ -36,6 +43,8 @@ namespace UI.Scene.SceneUI
         
         private Button _scoreButton;
         private Button _moveSceneButton;
+        private Button _testButton;
+        
         private TMP_Text _scoreText;
 
         private PlayerStats _playerStats;
@@ -58,7 +67,8 @@ namespace UI.Scene.SceneUI
         enum Buttons
         {
             ScoreButton,
-            MoveDownTownScene
+            MoveDownTownScene,
+            TestButton
         }
         enum Texts
         {
@@ -67,9 +77,9 @@ namespace UI.Scene.SceneUI
 
         public enum ItemGeneratingType
         {
-            EquipMent,
-            Consumable,
-            All
+            EquipMent = 0,
+            Consumable = 1,
+            All = 2,
         }
         
         protected override void AwakeInit()
@@ -81,13 +91,14 @@ namespace UI.Scene.SceneUI
 
             _scoreButton = GetButton((int)Buttons.ScoreButton);
             _moveSceneButton = GetButton((int)Buttons.MoveDownTownScene);
+            _testButton = GetButton((int)Buttons.TestButton);
+            
             _scoreText = GetText((int)Texts.ScoreText);
         }
         
         protected override void StartInit()
         {
             InitalizeUI_Button();
-            //HideButton();
         }
 
         public void IninitalizePlayerStats(GameObject player)
@@ -105,17 +116,22 @@ namespace UI.Scene.SceneUI
         {
             _scoreButton.onClick.AddListener(TestButtonClick);
             _moveSceneButton.onClick.AddListener(MoveScene);
+            _testButton.onClick.AddListener(SpawnBossProjectile);
 
             void TestButtonClick()
             {
                 TestIteminInventort();
                 TestGetGold();
-                TestGetExp();
-                //TestGetDamaged(10000000);
+                TestGetExp(0);
+                TestGetDamaged(TestDamage);
             }
             void MoveScene()
             {
                 (_baseScene as IHasSceneMover).SceneMover.MoveScene();
+            }
+
+            void SpawnBossProjectile()
+            {
             }
         }
     
@@ -127,28 +143,29 @@ namespace UI.Scene.SceneUI
         {
             if (PlayerStats != null) PlayerStats.OnAttacked(_playerStats, damage);
         }
-        public void TestGetExp() 
+        public void TestGetExp(int exp) 
         {
-            if (PlayerStats != null) PlayerStats.Exp += 5;
+            if (PlayerStats != null) PlayerStats.Exp += exp;
         }
 
         public void TestGenerateBossSkill1()
         {
             if (_gameManagerEx.GetPlayer() == null) return;
-            
-            GameObject stone = _resourceManager.InstantiateByKey("Prefabs/Enemy/Boss/AttackPattern/BossSkill1");
-            stone.transform.SetParent(_vfxManager.VFXRootNgo, false);
-            stone.transform.position = _gameManagerEx.GetPlayer().transform.position + Vector3.up * 5f;
+
+            _vfxManager.InstantiateParticleInArea(
+                "Prefabs/Enemy/Boss/AttackPattern/StoneGolem/NgoBossSkill1AttackHit",
+                _gameManagerEx.GetPlayer().transform.position + Vector3.up * 5f);
         }
 
         public void TestIteminInventort()
         {
+
             var inventory = _uiManagerServices.GetImportant_Popup_UI<UIPlayerInventory>();
             if (inventory == null || inventory.gameObject.activeSelf == false)
                 return;
 
             ItemDataSO targetItem = null;
-            int maxRetry = 50; 
+            int maxRetry = 50;
 
             for (int i = 0; i < maxRetry; i++)
             {
@@ -159,7 +176,8 @@ namespace UI.Scene.SceneUI
                 switch (itemGeneratingType)
                 {
                     case ItemGeneratingType.All:
-                        isMatch = true;
+                        if (randomItem.ItemType == ItemType.Equipment || randomItem.ItemType == ItemType.Consumable)
+                            isMatch = true;
                         break;
                     case ItemGeneratingType.EquipMent:
                         if (randomItem.ItemType == ItemType.Equipment) isMatch = true;
@@ -175,25 +193,24 @@ namespace UI.Scene.SceneUI
                     break;
                 }
             }
-
             if (targetItem != null)
             {
                 inventory.AddItem(targetItem);
-                UtilDebug.Log($"[TestUI] 아이템 생성됨: {targetItem.dataName}");
+                UtilDebug.Log($"[TestUI] 아이템 생성: {targetItem.dataName}");
             }
             else
             {
-                UtilDebug.LogWarning("[TestUI] 조건에 맞는 아이템을 찾지 못했습니다.");
+                UtilDebug.LogWarning("[TestUI] 조건에 맞는 아이템을 찾지 못했습니다");
             }
         }
 
         private async UniTask FindMyJoinCodeAsync()
         {
-            UtilDebug.Log($"내 조인코드는 {_relayManager.JoinCode}");
+            UtilDebug.Log($"내 조인코드: {_relayManager.JoinCode}");
             var lobby = await _lobbyManager.GetCurrentLobby();
             if (lobby != null)
             {
-                UtilDebug.Log($"로비의 조인코드는{lobby.Data["RelayCode"].Value}");
+                UtilDebug.Log($"로비 조인코드: {lobby.Data["RelayCode"].Value}");
             }
         }
     }

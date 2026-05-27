@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Archer;
+using NetWork;
 using NetWork.BaseNGO;
 using NetWork.NGO;
 using UnityEngine;
@@ -15,6 +12,9 @@ namespace Character.Skill.AllofSkills.Acher
 {
     public class NgoArcherSkillArrowRainInitialize : NgoPoolingInitializeBase
     {
+        private const string ArrowRainSoundCueId = "ArrowRainSFX";
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class NgoArcherSkillArrowRainFactory : NgoZenjectFactory<NgoArcherSkillArrowRainInitialize>,IArcherFactoryMarker
         {
             [Inject]
@@ -24,6 +24,17 @@ namespace Character.Skill.AllofSkills.Acher
             {
                 _requestGO = loadService.Load<GameObject>("Prefabs/Player/VFX/Archer/Skill/ArrowRain");
             }
+        }
+
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+    
+        public override void StartParticleOption(float duration, NetworkParams networkParams)
+        {
+            base.StartParticleOption(duration, networkParams);
+            _soundPlayerBinder.PlayDetached(ArrowRainSoundCueId);
         }
     
         public override string PoolingNgoPath => "Prefabs/Player/VFX/Archer/Skill/ArrowRain";

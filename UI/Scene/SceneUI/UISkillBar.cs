@@ -1,5 +1,5 @@
 using System;
-using GameManagers.Interface.InputManager;
+using GameManagers.InputManagement;
 using Skill;
 using UnityEngine;
 using UnityEngine.InputSystem;

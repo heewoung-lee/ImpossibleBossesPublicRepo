@@ -6,12 +6,13 @@ using DataType.Item.Equipment;
 using DataType.Skill.Factory;
 using DataType.Skill.Factory.Effect;
 using DataType.Strategies; // EquipmentSlotType
-using GameManagers; // SceneDataSaveAndLoader
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ItamData.Interface;
-using GameManagers.Scene;
-using GameManagers.UIFactory.SubItemUI;
+using GameManagers;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.SceneManagement;
+using GameManagers.UIFactoryManagement.SubItemUI;
+using GameManagers.UIManagement;
+// SceneDataSaveAndLoader
 using Skill;
 using Stats.BaseStats;
 using UI.Popup.PopupUI;
@@ -127,10 +128,18 @@ namespace UI.SubItem
         {
             if (IsEquipped && _equipedItem != null)
             {
-                ProcessStrategy(_equipedItem.ItemNumber, false); 
                 UIItemComponentInventory oldItem = _equipedItem;
-                oldItem.transform.SetParent(_contentofInventoryTr, false); 
-                oldItem.SetItemEquipedState(false);
+
+                if (oldItem is UIItemComponentEquipment oldEquipmentItem)
+                {
+                    oldEquipmentItem.MoveToInventoryAfterUnEquip(_contentofInventoryTr, false);
+                }
+                else
+                {
+                    ProcessStrategy(_equipedItem.ItemNumber, false); 
+                    oldItem.transform.SetParent(_contentofInventoryTr, false); 
+                    oldItem.SetItemEquipedState(false);
+                }
             }
 
             _equipedItem = itemComponent;

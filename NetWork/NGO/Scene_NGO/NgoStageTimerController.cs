@@ -1,8 +1,7 @@
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.UIManager;
-using GameManagers.ResourcesEx;
-using GameManagers.Scene;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SceneManagement;
+using GameManagers.UIManagement;
 using NetWork.NGO.UI;
 using Unity.Netcode;
 using UnityEngine;
@@ -25,7 +24,6 @@ namespace NetWork.NGO.Scene_NGO
             AllPlayerInPortalStayTime = allPlayerInPortalCount;
         }
     }
-
 
     public class NgoStageTimerController : NetworkBehaviour
     {
@@ -80,8 +78,8 @@ namespace NetWork.NGO.Scene_NGO
             {
                 if (Mathf.Approximately(_totalTime, default))
                 {
-                    Define.Scene currentScene = _sceneManagerEx.CurrentScene;
-                    _totalTime = currentScene == Define.Scene.GamePlayScene
+                    Define.SceneName currentSceneName = _sceneManagerEx.CurrentSceneName;
+                    _totalTime = currentSceneName == Define.SceneName.GamePlayScene
                         ? _timeValue.VillageStayTime
                         : _timeValue.BossRoomStayTime;
                 }

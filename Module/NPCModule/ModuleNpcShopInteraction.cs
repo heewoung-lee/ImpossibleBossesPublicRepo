@@ -1,5 +1,5 @@
 using GameManagers;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIManagement;
 using Module.CommonModule;
 using Module.PlayerModule;
 using UI.Popup.PopupUI;

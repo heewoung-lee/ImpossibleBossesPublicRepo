@@ -1,4 +1,4 @@
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using Module.PlayerModule.PlayerClassModule.Fighter;
 using NetWork.BaseNGO;
 using NetWork.NGO;

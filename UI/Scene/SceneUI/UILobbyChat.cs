@@ -1,7 +1,8 @@
 using System;
 using Cysharp.Threading.Tasks;
 using GameManagers;
-using GameManagers.Interface.VivoxManager;
+using GameManagers.SoundManagement;
+using GameManagers.VivoxManagement;
 using TMPro;
 using Unity.Services.Vivox;
 using UnityEngine;
@@ -15,19 +16,22 @@ namespace UI.Scene.SceneUI
     {
         [Inject] private ISendMessage _sendMessage;
         [Inject] private IVivoxSession _vivoxSession;
-    
+
         enum Buttons
         {
             SendButton
         }
+
         enum InputFields
         {
             ChattingInputField
         }
+
         enum Texts
         {
             ChattingLog
         }
+
         enum ScrollRects
         {
             ChatScrollRect
@@ -37,6 +41,7 @@ namespace UI.Scene.SceneUI
         private TMP_InputField _chattingInputField;
         private TMP_Text _chatLog;
         private ScrollRect _chattingScrollRect;
+
         protected override void AwakeInit()
         {
             base.AwakeInit();
@@ -52,15 +57,15 @@ namespace UI.Scene.SceneUI
             {
                 SendChatingMessage(_chattingInputField.text).Forget();
             });
-            _chattingInputField.onSubmit.AddListener((text)=>SendChatingMessage(text).Forget());
+            _chattingInputField.onSubmit.AddListener(HandleSubmitChatting);
             _sendButton.interactable = false;
         }
+
         public void SendText(string text)
         {
             _chatLog.text += text;
             _chatLog.text += "\n";
         }
-
 
         protected override void StartInit()
         {
@@ -80,6 +85,7 @@ namespace UI.Scene.SceneUI
                 ButtonInteractable();
             }
         }
+
         private void OnDestroy()
         {
             if (VivoxService.Instance != null)
@@ -92,6 +98,7 @@ namespace UI.Scene.SceneUI
                 _vivoxSession.VivoxDoneLoginEvent -= ButtonInteractable;
             }
         }
+
         public async UniTaskVoid SendChatingMessage(string message)
         {
             if (string.IsNullOrEmpty(_chattingInputField.text) || _sendButton.interactable == false)
@@ -99,20 +106,47 @@ namespace UI.Scene.SceneUI
 
             try
             {
-                await _sendMessage.SendMessageAsync(message);
+                string tempmessage = message;
+                InitializeChattingField();
+
+                await _sendMessage.SendMessageAsync(tempmessage);
             }
             catch (Exception ex)
             {
                 UtilDebug.LogError($"Error sending message: {ex.Message}");
             }
-            _chattingScrollRect.verticalNormalizedPosition = 0f;
-            _chattingInputField.text = "";
-            _chattingInputField.Select();
-            _chattingInputField.ActivateInputField();
+            finally
+            {
+                InitializeChattingField();
+            }
+
+
+            void InitializeChattingField()
+            {
+                _chattingScrollRect.verticalNormalizedPosition = 0f;
+                _chattingInputField.text = "";
+                _chattingInputField.Select();
+                _chattingInputField.ActivateInputField();
+            }
+           
+        }
+
+        private void HandleSubmitChatting(string text)
+        {
+            if (string.IsNullOrEmpty(_chattingInputField.text) || _sendButton.interactable == false)
+            {
+                return;
+            }
+
+            _soundManagerServices.PlayUiSfx(gameObject, UICommonSoundCueId.Click);
+            SendChatingMessage(text).Forget();
         }
 
         private void ChannelMessageReceived(VivoxMessage message)
         {
+            if (message.ChannelName != _vivoxSession.CurrentChannel)
+                return;
+
             string messageText = message.MessageText;
             _chatLog.text += $"{messageText} \n";
         }
@@ -121,6 +155,5 @@ namespace UI.Scene.SceneUI
         {
             _sendButton.interactable = true;
         }
-
     }
 }

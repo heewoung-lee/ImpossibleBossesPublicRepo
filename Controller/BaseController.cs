@@ -26,18 +26,13 @@ namespace Controller
         private float _transitionDie = DefalutTransitionDie;
         private int _animLayer;
 
-        private GameObject _targetObject;
-
-        public virtual GameObject TargetObject
-        {
-            get => _targetObject;
-            set => _targetObject = value;
-        }
 
 
         private StateAnimationDict _stateAnimDict = new StateAnimationDict(); //스테이터스가 바뀌면 애니메이션을 호출하는 딕셔너리
         public StateAnimationDict StateAnimDict => _stateAnimDict;
 
+        
+        
         protected abstract int HashIdle { get; }
         protected abstract int HashMove { get; }
         protected abstract int HashAttack { get; }
@@ -112,18 +107,55 @@ namespace Controller
                 if (_currentStateType.LockAnimationChange && value != BaseDieState && value != _currentStateType)
                     return;
 
+                // if (_currentStateType == value)
+                //     return; //3.10일 주석처리 절대 이내용 풀지말것 이 주석을 풀면 캐스팅 시에 다른 스킬을 쓸 수 있고
+                //그 스킬을 쓴상태로 캐릭터가 락이 걸려 못움직이게 됨
+                
                 _currentStateType = value;
                 _stateAnimDict.CallState(_currentStateType); // 현재 상태의 루프문 실행
+                OnStateChanged(_currentStateType);
+          
             }
         }
+
+        protected virtual void OnStateChanged(IState newState)
+        {
+            // 상태가 변환되었을때 해야 하는 동작이 있다면 오버라이드 해서 쓸 것
+        }
+        
 
         //1.29일 부활 때문에 만들었다.
         public void ForceChangeState(IState newState)
         {
             _currentStateType = newState;
-            _stateAnimDict.CallState(_currentStateType); 
+            _stateAnimDict.CallState(_currentStateType);
+            OnStateChanged(_currentStateType);
         }
 
+        public int GetCurrentOrNextAnimHash()
+        {
+            if (Anim.IsInTransition(AnimLayer))
+            {
+                return Anim.GetNextAnimatorStateInfo(AnimLayer).shortNameHash;
+            }
+            return Anim.GetCurrentAnimatorStateInfo(AnimLayer).shortNameHash;
+        }
+
+        public bool TryGetCurrentOrNextAnimatorStateInfo(int animHash, out AnimatorStateInfo stateInfo)
+        {
+            if (Anim.IsInTransition(AnimLayer))
+            {
+                AnimatorStateInfo nextStateInfo = Anim.GetNextAnimatorStateInfo(AnimLayer);
+                if (nextStateInfo.shortNameHash == animHash)
+                {
+                    stateInfo = nextStateInfo;
+                    return true;
+                }
+            }
+
+            stateInfo = Anim.GetCurrentAnimatorStateInfo(AnimLayer);
+            return stateInfo.shortNameHash == animHash;
+        }
 
         public void ChangeAnimIfCurrentIsDone(int currentAnimHash, IState changeState)
         {
@@ -141,7 +173,7 @@ namespace Controller
                 CurrentStateType = changeState;
             }
         }
-
+    //현재 돌고있는 애니메이션이 끝났는지 검사. 
         public bool IsAnimationDone(int animHash)
         {
             AnimatorStateInfo stateInfo = Anim.GetCurrentAnimatorStateInfo(AnimLayer);

@@ -1,6 +1,6 @@
 using Buffer;
 using GameManagers;
-using GameManagers.Interface.BufferManager;
+using GameManagers.BufferManagement;
 using UnityEngine;
 using Zenject;
 

@@ -17,5 +17,7 @@ namespace DataType.Skill.Factory.Effect.Def
         public DurationRefDef skillduration = new DurationRefDef();
         public string buffIconPath;
         public StatType buffType;
+        public bool useCasterAttack = false;
+        public float attackMultiplier = 1f;
     }
 }

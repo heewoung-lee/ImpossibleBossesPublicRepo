@@ -1,7 +1,6 @@
-using GameManagers;
-using GameManagers.Interface.RelayManagerInterface.Implementation;
-using GameManagers.RelayManager;
-using Scene.CommonInstaller;
+using GameManagers.RelayManagement;
+using GameManagers.RelayManagement.Implementation;
+using ScenesScripts.CommonInstaller;
 using UnityEngine;
 using Zenject;
 

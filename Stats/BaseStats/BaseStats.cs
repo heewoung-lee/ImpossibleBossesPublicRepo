@@ -1,6 +1,5 @@
 using System;
 using Module.CommonModule;
-using Scene.CommonInstaller.InGameInstaller;
 using Sirenix.OdinInspector;
 using Unity.Netcode;
 using UnityEngine;
@@ -18,8 +17,10 @@ namespace Stats.BaseStats
         Special
     }
 
-    //1.31일 추가된 인터페이스 버퍼에서 특수한 효과를 쓰고 싶을때
-    //스크립트에서 해당 인터페이스를 상속받고 구현하면 된다.
+    // Special 버프는 BufferManager에서 float value 하나로만 전달된다.
+    // value의 절대값은 어떤 Special 효과인지 구분하는 code로 쓰고,
+    // value의 부호는 버프 시작/종료를 나타낸다. (+면 적용, -면 해제)
+    // 예: +1 = Root 적용, -1 = Root 해제, +2 = Stealth 적용, -2 = Stealth 해제
     public interface ISpecialModifier
     {
         public void ApplyModified(float value);
@@ -306,27 +307,88 @@ namespace Stats.BaseStats
 
         public void Plus_Current_Hp_Abillity(int value)
         {
-            Hp += value;
+            RequestModifyStatDelta(StatType.CurrentHp, value);
         }
         public void Plus_Defence_Abillity(int value)
         {
-            Defence += value;
+            RequestModifyStatDelta(StatType.Defence, value);
         }
         public void Plus_Attack_Ability(int value)
         {
-            Attack += value;
+            RequestModifyStatDelta(StatType.Attack, value);
         }
         public void Plus_MaxHp_Abillity(int value)
         {
-            MaxHp += value;
+            RequestModifyStatDelta(StatType.MaxHP, value);
         }
         public void Plus_MoveSpeed_Abillity(float value)
         {
-            MoveSpeed += value;
+            RequestModifyStatDelta(StatType.MoveSpeed, value);
+        }
+
+        // 2026-05-14: 클라이언트가 아직 동기화되지 않은 NetworkVariable 값을 기준으로
+        // 최종 스탯 값을 계산해 서버에 보내면, 장비 교체/버프 반복 요청 시 스탯이 누적되는 문제가 있었다.
+        // 숫자 스탯 변경은 최종값 대신 변화량만 서버에 요청하고, 서버가 최신 NetworkVariable 기준으로 적용한다.
+        private void RequestModifyStatDelta(StatType statType, float value)
+        {
+            if (IsServer)
+            {
+                ApplyStatDeltaOnServer(statType, value);
+                return;
+            }
+
+            ModifyStatDeltaRpc(statType, value);
+        }
+
+        [Rpc(SendTo.Server)]
+        private void ModifyStatDeltaRpc(StatType statType, float value, RpcParams rpcParams = default)
+        {
+            if (rpcParams.Receive.SenderClientId != OwnerClientId)
+                return;
+
+            ApplyStatDeltaOnServer(statType, value);
+        }
+
+        private void ApplyStatDeltaOnServer(StatType statType, float value)
+        {
+            int intValue = (int)value;
+
+            switch (statType)
+            {
+                case StatType.Attack:
+                    _characterAttackValue.Value = Mathf.Clamp(_characterAttackValue.Value + intValue, 0, int.MaxValue);
+                    break;
+                case StatType.Defence:
+                    _characterDefenceValue.Value += intValue;
+                    break;
+                case StatType.CurrentHp:
+                    _characterHpValue.Value = Mathf.Clamp(_characterHpValue.Value + intValue, 0, MaxHp);
+                    break;
+                case StatType.MaxHP:
+                    _characterMaxHpValue.Value = Mathf.Clamp(_characterMaxHpValue.Value + intValue, 0, int.MaxValue);
+                    break;
+                case StatType.MoveSpeed:
+                    _characterMoveSpeedValue.Value = Mathf.Clamp(_characterMoveSpeedValue.Value + value, 0, float.MaxValue);
+                    break;
+            }
         }
 
         protected abstract void SetStats();
         protected abstract void StartInit();
+        protected void ResetStatsForPool(CharacterBaseStat baseStat, bool isDeadValue = false)
+        {
+            if (IsHost == false)
+                return;
+
+            _characterBaseStatValue.Value = baseStat;
+            _characterMaxHpValue.Value = baseStat.MaxHp;
+            _characterHpValue.Value = Mathf.Clamp(baseStat.Hp, 0, baseStat.MaxHp);
+            _characterAttackValue.Value = baseStat.Attack;
+            _characterDefenceValue.Value = baseStat.Defence;
+            _characterMoveSpeedValue.Value = baseStat.Speed;
+            _isDeadValue.Value = isDeadValue;
+        }
+
         protected void UpdateStat()
         {
             if (IsOwner == false)
@@ -415,16 +477,24 @@ namespace Stats.BaseStats
         {
             if (_isDeadValue.Value == true) return;
 
-            LastDamagedTime= Time.time;
+            MarkDamagedTime();
             NetworkObjectReference netWorkRef = TryGetOnAttackedOwner(attacker);
             OnAttackedRpc(netWorkRef, spacialDamage);
         }
 
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        public void OnAttackedRpc(NetworkObjectReference attackerRef, int spacialDamage = -1)
+        public void OnAttackedRpc(NetworkObjectReference attackerRef, int spacialDamage = -1, RpcParams rpcParams = default)
         {
             ulong ownetClientId = OwnerClientId;
+
+            MarkDamagedTime();
+            // 2026-05-22 수정: 서버 판정 피격에서는 서버의 LastDamagedTime만 갱신되고,
+            // 피격 대상 클라이언트의 채널링 루프가 로컬 LastDamagedTime 변화를 못 봐 캐스팅이 끊기지 않았다.
+            if (rpcParams.Receive.SenderClientId != ownetClientId)
+            {
+                MarkDamagedTimeOwnerRpc();
+            }
 
             int damage = 0;
             if (spacialDamage > 0)
@@ -462,6 +532,21 @@ namespace Stats.BaseStats
         public void OnAttackedClientRpc(int damage, int currentHp)
         {
             _eventAttacked?.Invoke(damage, currentHp);
+        }
+
+        // 피격 발생 시점을 로컬 인스턴스에 기록한다.
+        // 채널링 스킬은 이 시간이 캐스팅 시작 시간보다 늦은지 검사해 피격 취소 여부를 판단한다.
+        private void MarkDamagedTime()
+        {
+            LastDamagedTime = Time.time;
+        }
+
+        // 서버에서 확정된 피격 사실을 피격 대상 owner client에 전달한다.
+        // HP 동기화와 별개로 로컬 LastDamagedTime을 갱신해 클라이언트 채널링 취소 판정을 맞춘다.
+        [Rpc(SendTo.Owner)]
+        private void MarkDamagedTimeOwnerRpc()
+        {
+            MarkDamagedTime();
         }
 
 
@@ -508,7 +593,6 @@ namespace Stats.BaseStats
                     //확장성은 떨어지지만, 우선 개발을 빨리해야하니 최소한으로 확장하고 나중에 확장이 필요하면 그때 고칠 것
                     if (TryGetComponent(out ISpecialModifier specialModifier) == true)
                     {
-                        
                         specialModifier.ApplyModified(value);
                     }
                     else

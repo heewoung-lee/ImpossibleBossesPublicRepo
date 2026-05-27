@@ -1,12 +1,9 @@
 using CoreScripts;
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.VFXManager;
-using GameManagers.UIFactory.UIController;
+using GameManagers.GameManagerExManagement;
+using GameManagers.UIFactoryManagement.UIController;
+using GameManagers.VFXManagement;
 using NetWork.NGO;
-using Player;
-using Scene.CommonInstaller.Interfaces;
 using UnityEngine;
 using Zenject;
 using ZenjectContext.GameObjectContext;

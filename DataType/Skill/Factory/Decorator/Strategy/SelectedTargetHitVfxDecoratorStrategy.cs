@@ -2,7 +2,7 @@
 using Controller;
 using DataType.Skill.Factory.Decorator.Def;
 using DataType.Skill.Factory.Decorator.Def.Tick;
-using GameManagers.Interface.VFXManager;
+using GameManagers.VFXManagement;
 using Skill;
 using UnityEngine;
 using UnityEngine.Assertions;

@@ -1,5 +1,5 @@
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using NetWork.BaseNGO;
 using UnityEngine;
 using Zenject;
@@ -9,6 +9,8 @@ namespace NetWork.NGO.InitializeNGO.EffectVFX
 {
     public class NgoLevelUpInitialize : NgoPoolingInitializeBase
     {
+        private const string LevelUpSoundCueId = "LevelUpSFX";
+
         public class NgoLevelUpFactory : NgoZenjectFactory<NgoLevelUpInitialize>
         {
             public NgoLevelUpFactory(DiContainer container, IFactoryManager factoryManager,
@@ -20,11 +22,15 @@ namespace NetWork.NGO.InitializeNGO.EffectVFX
         }
 
         public override string PoolingNgoPath => "Prefabs/Player/VFX/Common/Level_up";
-        public override int PoolingCapacity => 5;
+        public override int PoolingCapacity => 8;
         
         public override void StartParticleOption(GameObject targetGo, float duration)
         {
             base.StartParticleOption(targetGo, duration);
+            if (TryGetComponent(out SoundPlayerBinder soundPlayerBinder))
+            {
+                soundPlayerBinder.PlayDetached(LevelUpSoundCueId);
+            }
             _vfxManager.FollowParticleRoutine(targetGo.transform,gameObject);
         }
     }

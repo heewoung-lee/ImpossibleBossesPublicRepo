@@ -4,11 +4,10 @@ using System;
 using System.Collections.Generic;
 using CustomEditor.Interfaces;
 using CustomEditor.Multiplay;
-using Scene;
-using Scene.CommonInstaller;
-using Scene.CommonInstaller.Interfaces;
-using Scene.GamePlayScene.Installer;
+using ScenesScripts;
+using ScenesScripts.CommonInstaller.Interfaces;
 using Sirenix.OdinInspector;
+using Test;
 using UnityEngine;
 using Util;
 
@@ -47,7 +46,7 @@ namespace CustomEditor
     }
 
     [RequireComponent(typeof(TestNetworkConnector))]
-    public class TestSceneEditor : MonoBehaviour, ISceneMultiMode, ISceneSelectCharacter, IMultiTestScene
+    public class TestSceneEditor : MonoBehaviour, ISceneMultiMode, ISceneSelectCharacter, IMultiTestScene, IExcludeFromPlayerBuild
     {
         [SerializeField] private ScriptableObject _playSceneSenario;
         private ScenarioSerializeController _scenarioSerializeController;

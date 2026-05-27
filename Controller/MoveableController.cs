@@ -1,4 +1,3 @@
-using Player;
 using Stats.BaseStats;
 using UnityEngine;
 

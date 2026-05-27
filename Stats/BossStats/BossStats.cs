@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Data.DataType.StatType;
 using GameManagers;
-using GameManagers.Interface.DataManager;
+using GameManagers.DataManagement;
 using Stats.BaseStats;
 using UnityEngine;
 using Util;

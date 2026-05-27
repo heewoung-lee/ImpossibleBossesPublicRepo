@@ -1,7 +1,7 @@
 using System;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using ProjectContextInstaller;
-using Scene.CommonInstaller;
+using ScenesScripts.CommonInstaller.Interfaces;
 using UnityEngine;
 using Zenject;
 using ZenjectContext.ProjectContextInstaller;

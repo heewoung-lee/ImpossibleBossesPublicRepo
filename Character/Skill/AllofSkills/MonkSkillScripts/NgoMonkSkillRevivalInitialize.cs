@@ -1,5 +1,6 @@
 using Character.Skill.AllofSkills.Mage;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Mage;
 using Module.PlayerModule.PlayerClassModule.Monk;
 using NetWork.BaseNGO;
@@ -12,6 +13,10 @@ namespace Character.Skill.AllofSkills.MonkSkillScripts
 {
     public class NgoMonkSkillRevivalInitialize : NgoPoolingInitializeBase
     {
+        private const string RevivalSoundCueId = "RevivalSFX";
+
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class NgoMonkSkillRevivalFactory : NgoZenjectFactory<NgoMonkSkillRevivalInitialize>,
             IMonkFactoryMarker
         {
@@ -24,11 +29,17 @@ namespace Character.Skill.AllofSkills.MonkSkillScripts
             }
         }
 
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+
         public override void StartParticleOption(GameObject targetGo, float duration)
         {
             base.StartParticleOption(targetGo, duration);
             transform.position = targetGo.transform.position + Vector3.up;
             _vfxManager.FollowParticleRoutine(targetGo.transform,gameObject);
+            _soundPlayerBinder.PlayDetached(RevivalSoundCueId);
         }
         public override string PoolingNgoPath => "Prefabs/Player/VFX/MonkSkillPrefab/Revival";
         public override int PoolingCapacity => 5;

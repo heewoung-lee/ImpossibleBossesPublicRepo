@@ -1,14 +1,13 @@
 using System;
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.VFXManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.VFXManagement;
 using NetWork;
 using NetWork.NGO.Interface;
-using Scene.CommonInstaller.Interfaces;
 using Stats.BaseStats;
 using UnityEngine;
 using Util;
+using VFX;
 using Zenject;
 using ZenjectContext.GameObjectContext;
 
@@ -44,12 +43,30 @@ namespace Skill.AllofSkills.BossMonster.StoneGolem
             transform.SetParent(_vfxManagerServices.VFXRoot,false);
         
             IIndicatorBahaviour projector = GetComponent<IIndicatorBahaviour>();
-            IAttackRange attacker = (projector as Component).GetComponent<IAttackRange>();
-            int attackDamage = spawnparam.ArgInt;
+            switch (projector)
+            {
+                case IndicatorController indicatorController:
+                    indicatorController.SetSpawnerBossNetworkObjectId(spawnparam.ArgUlong);
+                    break;
+                case NgoIndicatorController ngoIndicatorController:
+                    ngoIndicatorController.SetSpawnerBossNetworkObjectId(spawnparam.ArgUlong);
+                    break;
+                case NgoArrowIndicatorController ngoArrowIndicatorController:
+                    ngoArrowIndicatorController.SetSpawnerBossNetworkObjectId(spawnparam.ArgUlong);
+                    break;
+            }
+            bool shouldAttackOnDone = spawnparam.ArgBoolean;
             float durationTime = spawnparam.ArgFloat;
+            int attackDamage = spawnparam.ArgInt;
+            IAttackRange attacker = GetComponent<IAttackRange>();
             projector.SetValue(Skill1Radius, Skill1Arc, spawnparam.ArgPosVector3, durationTime, Attack);
             void Attack()
             {
+                if (shouldAttackOnDone == false)
+                {
+                    return;
+                }
+
                 TargetInSight.AttackTargetInCircle(attacker, projector.Radius, attackDamage);
             }
         }

@@ -3,7 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DataType.Skill.Factory.Sequence.Def;
 using DataType.Skill.Factory.Sequence.GetLength.Def;
-using GameManagers.Interface.VFXManager;
+using GameManagers.VFXManagement;
 using Skill;
 using UnityEngine;
 

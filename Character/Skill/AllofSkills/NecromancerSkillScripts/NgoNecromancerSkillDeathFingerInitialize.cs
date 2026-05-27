@@ -1,5 +1,5 @@
 using Character.Skill.AllofSkills.Mage;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using Module.PlayerModule.PlayerClassModule;
 using Module.PlayerModule.PlayerClassModule.Mage;
 using Module.PlayerModule.PlayerClassModule.Necromancer;

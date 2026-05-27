@@ -1,4 +1,5 @@
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Monk;
 using NetWork.BaseNGO;
 using NetWork.NGO;
@@ -10,6 +11,10 @@ namespace Character.Skill.AllofSkills.MonkSkillScripts
 {
     public class NgoMonkSkillHealingWaveHitInitialize : NgoPoolingInitializeBase
     {
+        private const string HealingWaveSoundCueId = "HealingWaveSFX";
+
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class NgoMonkSkillHealingWaveHitFactory : NgoZenjectFactory<NgoMonkSkillHealingWaveHitInitialize>,
             IMonkFactoryMarker
         {
@@ -22,7 +27,19 @@ namespace Character.Skill.AllofSkills.MonkSkillScripts
             }
         }
 
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+
+        public override void StartParticleOption(GameObject targetGo, float duration)
+        {
+            base.StartParticleOption(targetGo, duration);
+            _soundPlayerBinder.PlayDetached(HealingWaveSoundCueId);
+        }
+
         public override string PoolingNgoPath => "Prefabs/Player/VFX/MonkSkillPrefab/HealingWaveHit";
         public override int PoolingCapacity => 5;
+        
     }
 }

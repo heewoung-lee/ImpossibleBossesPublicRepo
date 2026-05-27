@@ -1,29 +1,46 @@
 using GameManagers;
-using GameManagers.Interface.UIManager;
-using UnityEngine;
+using GameManagers.SoundManagement;
+using GameManagers.UIManagement;
 using UnityEngine.UI;
+using UI;
 using Util;
 using Zenject;
 
 namespace UI.Popup.PopupUI
 {
-    public class ClosePopupUIButton : MonoBehaviour
+    public class ClosePopupUIButton : UIBase
     {
         private Button _windowCloseButton;
-        private UIPopup _parentPopup;
         
         [Inject] private IUIManagerServices _uiManagerServices;
 
-        void Start()
+        protected override void AwakeInit()
         {
-            _parentPopup = transform.FindParantComponent<UIPopup>();
-
-            _windowCloseButton = _windowCloseButton = Utill.FindChild(gameObject, "Button_Close", true).GetComponent<Button>();
-            _windowCloseButton.onClick.AddListener(() =>
-            {
-                _uiManagerServices.ClosePopupUI(_parentPopup);
-            });
+            _windowCloseButton = GetComponent<Button>();
         }
 
+        protected override void StartInit()
+        {
+            if (_windowCloseButton == null)
+            {
+                UtilDebug.LogError($"[{nameof(ClosePopupUIButton)}] {nameof(Button)} is missing on {gameObject.name}.");
+                return;
+            }
+
+            _windowCloseButton.onClick.AddListener(CloseParentPopup);
+        }
+
+        private void CloseParentPopup()
+        {
+            UIPopup parentPopup = transform.FindParantComponent<UIPopup>();
+            if (parentPopup == null)
+            {
+                UtilDebug.LogError($"[{nameof(ClosePopupUIButton)}] Failed to find parent {nameof(UIPopup)} on {gameObject.name}.");
+                return;
+            }
+
+            _soundManagerServices.PlayUiSfx(parentPopup.gameObject, UICommonSoundCueId.Close);
+            _uiManagerServices.ClosePopupUI(parentPopup);
+        }
     }
 }

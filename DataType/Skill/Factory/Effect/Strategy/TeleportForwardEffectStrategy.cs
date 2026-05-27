@@ -26,6 +26,8 @@ namespace DataType.Skill.Factory.Effect.Strategy
 
         private sealed class Module : IEffectModule
         {
+            private const float NavMeshSampleDistance = 2f;
+
             private readonly TelePortDef _def;
             private readonly NavMeshAgent _agent;
 
@@ -73,10 +75,42 @@ namespace DataType.Skill.Factory.Effect.Strategy
 
                 targetPos.y = startPos.y; // y 고정 (중요)
 
+                if (TryResolveNavMeshTarget(startPos, targetPos, out Vector3 navMeshTargetPos) == false)
+                {
+                    onCancel?.Invoke();
+                    return;
+                }
+
+                targetPos = navMeshTargetPos;
+
                 MoveTo(targetPos);
                 ResetVelocity(controller);
 
                 onComplete?.Invoke();
+            }
+
+            private bool TryResolveNavMeshTarget(Vector3 startPos, Vector3 targetPos, out Vector3 resolvedPos)
+            {
+                if (NavMesh.SamplePosition(startPos, out NavMeshHit startHit, NavMeshSampleDistance, NavMesh.AllAreas) == false)
+                {
+                    resolvedPos = startPos;
+                    return false;
+                }
+
+                if (NavMesh.Raycast(startHit.position, targetPos, out NavMeshHit edgeHit, NavMesh.AllAreas))
+                {
+                    resolvedPos = edgeHit.position;
+                    return true;
+                }
+
+                if (NavMesh.SamplePosition(targetPos, out NavMeshHit targetHit, NavMeshSampleDistance, NavMesh.AllAreas))
+                {
+                    resolvedPos = targetHit.position;
+                    return true;
+                }
+
+                resolvedPos = startHit.position;
+                return true;
             }
 
             private void MoveTo(Vector3 targetPos)

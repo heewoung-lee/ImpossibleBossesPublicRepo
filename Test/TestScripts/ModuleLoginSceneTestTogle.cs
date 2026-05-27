@@ -1,4 +1,6 @@
 using GameManagers;
+using GameManagers.UIManagement;
+using Test;
 using Test.TestUI;
 using UnityEngine;
 using Zenject;
@@ -7,7 +9,7 @@ using Zenject;
 #if UNITY_EDITOR
 namespace Test.TestScripts
 {
-    public class ModuleLoginSceneTestTogle : MonoBehaviour
+    public class ModuleLoginSceneTestTogle : MonoBehaviour, IExcludeFromPlayerBuild
     {
         [Inject] private IUIManagerServices _uiManager;
 

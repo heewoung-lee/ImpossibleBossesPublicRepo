@@ -7,14 +7,15 @@ using DataType.Skill;
 using DataType.Skill.Factory;
 using DataType.Skill.Factory.Effect;
 using DataType.Strategies;
+using DataType.Strategies.Item;
 using GameManagers;
-using GameManagers.Interface.BufferManager;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.InputManager;
-using GameManagers.ItamData.Interface;
-using GameManagers.Scene;
-using GameManagers.UIFactory.SceneUI;
-using GameManagers.UIFactory.SubItemUI;
+using GameManagers.GameManagerExManagement;
+using GameManagers.InputManagement;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.SceneManagement;
+using GameManagers.UIFactoryManagement.SceneUI;
+using GameManagers.UIFactoryManagement.SubItemUI;
+using GameManagers.UIManagement;
 using Skill;
 using Stats;
 using UI.SubItem;
@@ -29,6 +30,8 @@ namespace UI.Scene.SceneUI
 {
     public class UIConsumableBar : UIScene
     {
+        private const string DrinkingSoundCueId = "DrinkingSFX";
+
         public class UIConsumableBarFactory : SceneUIFactory<UIConsumableBar>
         {
         }
@@ -172,7 +175,7 @@ namespace UI.Scene.SceneUI
                         {
                             ItemExecutionContext executionContext = new ItemExecutionContext(controller,data);
                             strategy.Execute(executionContext);
-                          
+                            _soundManagerServices.PlayUiSfx(gameObject, DrinkingSoundCueId);
                         }
                     }
                 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Data.DataType.ItemType.Interface;
 using DataType.Skill.Factory.Effect;
 using Sirenix.OdinInspector;
@@ -27,7 +27,9 @@ namespace DataType.Item
         [LabelWidth(100)]
         [ShowInInspector, DisplayAsString] // 에디터에서 값은 보여주되, 수정은 못하게(어차피 코드니까)
         public abstract ItemType ItemType { get; }
+        public virtual bool UseLootGradeEffect => true;
         public abstract Type GetStrategyType();
         public abstract string GetItemEffectText();
     }
+
 }

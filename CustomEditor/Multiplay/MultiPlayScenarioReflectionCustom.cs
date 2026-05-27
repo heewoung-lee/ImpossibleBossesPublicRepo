@@ -7,7 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CustomEditor.Interfaces;
-using Scene;
+
+using ScenesScripts;
 using UnityEditor;
 using UnityEngine;
 using Util;

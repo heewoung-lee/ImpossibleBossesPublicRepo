@@ -1,5 +1,4 @@
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using Module.PlayerModule.PlayerClassModule.Archer;
 using NetWork.BaseNGO;
 using NetWork.NGO;

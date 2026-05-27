@@ -62,4 +62,20 @@ namespace Controller.ControllerStats.BaseStates
         }
     }
 
+    public class VictoryState : IState
+    {
+        public bool LockAnimationChange => true;
+
+        public VictoryState(Action victoryMethod)
+        {
+            UpdateStateEvent += victoryMethod;
+        }
+
+        public event Action UpdateStateEvent;
+        public void UpdateState()
+        {
+            UpdateStateEvent?.Invoke();
+        }
+    }
+
 }

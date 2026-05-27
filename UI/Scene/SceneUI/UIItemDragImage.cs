@@ -1,4 +1,4 @@
-using GameManagers.UIFactory.SceneUI;
+using GameManagers.UIFactoryManagement.SceneUI;
 using UnityEngine;
 using UnityEngine.UI;
 using Util;
@@ -33,6 +33,13 @@ namespace UI.Scene.SceneUI
             SetSortingOrder((int)Define.SpecialSortingOrder.DragImage);
             _itemDragImage.gameObject.SetActive(false);
         }
+
+        protected override void InitAfterInject()
+        {
+            base.InitAfterInject();
+            SetSortingOrder((int)Define.SpecialSortingOrder.DragImage);
+        }
+
         public void SetImageSprite(Sprite sprite)
         {
             _itemDragImage.sprite = sprite;

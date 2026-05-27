@@ -1,5 +1,6 @@
 using Character.Skill.AllofSkills.Mage;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule;
 using Module.PlayerModule.PlayerClassModule.Mage;
 using Module.PlayerModule.PlayerClassModule.Necromancer;
@@ -13,6 +14,10 @@ namespace Character.Skill.AllofSkills.NecromancerSkillScripts
 {
     public class NgoNecromancerSkillDeathFingerHitInitialize : NgoPoolingInitializeBase
     {
+        private const string DeathFingerHitSoundCueId = "DeathfinkgerSFX";
+
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class NgoDeathFingerHitFactory : NgoZenjectFactory<NgoNecromancerSkillDeathFingerHitInitialize>, INecromancerFactoryMarker
         {
             [Inject]
@@ -24,10 +29,16 @@ namespace Character.Skill.AllofSkills.NecromancerSkillScripts
             }
         }
 
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+
         public override void StartParticleOption(GameObject targetGo, float duration)
         {
             base.StartParticleOption(targetGo, duration);
             _vfxManager.FollowParticleRoutine(targetGo.transform,gameObject);
+            _soundPlayerBinder.PlayDetached(DeathFingerHitSoundCueId);
         }
 
         public override string PoolingNgoPath => "Prefabs/Player/VFX/NecromancerSkillPrefab/DeathFingerHit";

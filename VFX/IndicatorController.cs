@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using Zenject;
@@ -10,6 +9,8 @@ namespace VFX
 {
     public class IndicatorController : MonoBehaviour, IIndicatorBahaviour
     {
+        public const ulong InvalidSpawnerBossNetworkObjectId = ulong.MaxValue;
+
         private IResourcesServices _resourcesServices;
         
         [Inject] 
@@ -37,6 +38,7 @@ namespace VFX
         [Header("Colors")]
         [SerializeField] private Color _color = Color.white;
         [SerializeField] private Color _fillColor = new Color(1, 1, 1, 0.5f);
+        [SerializeField] private Color _borderColor = Color.white;
         // -----------------------------
 
         private float _radius;
@@ -48,6 +50,9 @@ namespace VFX
         private DecalProjector _decalCircleBorderProjector;
 
         private Action _doneIndicatorEvent;
+
+        public ulong SpawnerBossNetworkObjectId { get; private set; } = InvalidSpawnerBossNetworkObjectId;
+        public bool HasValidSpawnerBossNetworkObjectId => SpawnerBossNetworkObjectId != InvalidSpawnerBossNetworkObjectId;
 
         // Shader Property IDs
         private static readonly int ColorShaderID = Shader.PropertyToID("_Color");
@@ -86,7 +91,7 @@ namespace VFX
             }
         }
 
-        public Vector3 CallerPosition
+        public Vector3 Position
         {
             get => _callerPosition;
             private set
@@ -146,12 +151,43 @@ namespace VFX
             // Arc
             float arcAngleNormalized = 1f - _arc / 360;
 
-            ApplyMaterialFloat(AngleShaderID, normalizedAngle);
-            ApplyMaterialFloat(ArcShaderID, arcAngleNormalized);
+            if (_decalCircleProjector.material != null)
+            {
+                _decalCircleProjector.material.SetFloat(AngleShaderID, normalizedAngle);
+                _decalCircleProjector.material.SetFloat(ArcShaderID, arcAngleNormalized);
+            }
+
+            if (_decalCircleBorderProjector.material != null)
+            {
+                if (_decalCircleBorderProjector.material.HasProperty(AngleShaderID))
+                {
+                    _decalCircleBorderProjector.material.SetFloat(AngleShaderID, normalizedAngle);
+                }
+
+                if (_decalCircleBorderProjector.material.HasProperty(ArcShaderID))
+                {
+                    _decalCircleBorderProjector.material.SetFloat(ArcShaderID, arcAngleNormalized);
+                }
+            }
             
             // Editor나 초기화 시 색상 적용을 위해 추가
-            ApplyMaterialColor(ColorShaderID, _color);
-            ApplyMaterialColor(FillColorShaderID, _fillColor);
+            if (_decalCircleProjector.material != null)
+            {
+                _decalCircleProjector.material.SetColor(ColorShaderID, _color);
+                if (_decalCircleProjector.material.HasProperty(FillColorShaderID))
+                {
+                    _decalCircleProjector.material.SetColor(FillColorShaderID, _fillColor);
+                }
+            }
+
+            if (_decalCircleBorderProjector.material != null)
+            {
+                _decalCircleBorderProjector.material.SetColor(ColorShaderID, _borderColor);
+                if (_decalCircleBorderProjector.material.HasProperty(FillColorShaderID))
+                {
+                    _decalCircleBorderProjector.material.SetColor(FillColorShaderID, _borderColor);
+                }
+            }
         }
         public void SetTargetingPreview(float radius, float arc = 360f)
         {
@@ -166,23 +202,25 @@ namespace VFX
 
         public void SetTargetingPosition(Vector3 pos)
         {
-            CallerPosition = pos;     // transform.position 반영됨
-        }
-        private void ApplyMaterialFloat(int propID, float value)
-        {
-            if (_decalCircleProjector.material != null) _decalCircleProjector.material.SetFloat(propID, value);
-            if (_decalCircleBorderProjector.material != null) _decalCircleBorderProjector.material.SetFloat(propID, value);
+            Position = pos;     // transform.position 반영됨
         }
 
-        private void ApplyMaterialColor(int propID, Color color)
+        public void SetSpawnerBossNetworkObjectId(ulong spawnerBossNetworkObjectId)
         {
-            if (_decalCircleProjector.material != null) _decalCircleProjector.material.SetColor(propID, color);
-            if (_decalCircleBorderProjector.material != null) _decalCircleBorderProjector.material.SetColor(propID, color);
+            SpawnerBossNetworkObjectId = spawnerBossNetworkObjectId;
         }
 
         private void UpdateDecalFillProgressProjector(float fillAmount)
         {
-            ApplyMaterialFloat(FillProgressShaderID, fillAmount);
+            if (_decalCircleProjector.material != null && _decalCircleProjector.material.HasProperty(FillProgressShaderID))
+            {
+                _decalCircleProjector.material.SetFloat(FillProgressShaderID, fillAmount);
+            }
+
+            if (_decalCircleBorderProjector.material != null && _decalCircleBorderProjector.material.HasProperty(FillProgressShaderID))
+            {
+                _decalCircleBorderProjector.material.SetFloat(FillProgressShaderID, fillAmount);
+            }
         }
 
         public void SetValue(float radius, float arc, Transform targetTr, float duration, Action indicatorDoneEvent = null)
@@ -190,7 +228,7 @@ namespace VFX
             // 실제 데이터 설정
             Radius = radius;
             Arc = arc;
-            CallerPosition = targetTr.position;
+            Position = targetTr.position;
             Angle = targetTr.eulerAngles.y;
             
             // 에디터 변수 동기화 (인스펙터에서도 보이게)
@@ -206,7 +244,7 @@ namespace VFX
         {
             Radius = radius;
             Arc = arc;
-            CallerPosition = targetPos;
+            Position = targetPos;
 
             _editorRadius = radius;
             _editorArc = arc;
@@ -231,6 +269,7 @@ namespace VFX
             }
             _doneIndicatorEvent?.Invoke();
             _doneIndicatorEvent = null;
+            SpawnerBossNetworkObjectId = InvalidSpawnerBossNetworkObjectId;
             
             UpdateDecalFillProgressProjector(0f);
             _editorFillProgress = 0f;

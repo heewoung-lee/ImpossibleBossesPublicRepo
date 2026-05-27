@@ -1,6 +1,6 @@
 using System;
 using GameManagers;
-using GameManagers.Interface.VFXManager;
+using GameManagers.VFXManagement;
 using Unity.Netcode;
 using UnityEngine;
 using Zenject;

@@ -1,5 +1,4 @@
-using GameManagers;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIManagement;
 using UI.Scene.SceneUI;
 using UnityEngine;
 using Zenject;
@@ -15,10 +14,9 @@ namespace Module.EnemyModule
             _uiManagerServices = uiManagerServices;
         }
 
-        private void Start()
+        public void ShowBossHpUI()
         {
-            UIBossHp bossHpUI = _uiManagerServices.GetSceneUIFromResource<UIBossHp>();
+            _uiManagerServices.GetOrCreateSceneUI<UIBossHp>();
         }
-
     }
 }

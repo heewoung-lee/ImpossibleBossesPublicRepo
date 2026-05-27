@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-using Controller;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Mage;
 using NetWork;
 using NetWork.BaseNGO;
@@ -17,16 +15,30 @@ namespace Character.Skill.AllofSkills.Mage
 {
     public class NgoMageSkillMeteorInitialize : NgoPoolingInitializeBase
     {
+        private const string MeteorSoundCueId = "MeteorSFX";
+
         private int _totalDamage = 0;
         private BaseStats _caster;
         private IAttackRange _attackRange;
         private RelayManager _relayManager;
+        private SoundPlayerBinder _soundPlayerBinder;
+
+        [SerializeField, Range(0f, 1f)]
+        private float _cameraShakeIntensity = 0.6f;
+
+        [SerializeField, Min(0f)]
+        private float _cameraShakeDuration = 0.25f;
 
 
         [Inject]
         public void Construct(RelayManager relayManager)
         {
             _relayManager = relayManager;   
+        }
+
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
         }
         
         public class NgoMeteorSkillFactory : NgoZenjectFactory<NgoMageSkillMeteorInitialize>, IMageFactoryMarker
@@ -45,12 +57,21 @@ namespace Character.Skill.AllofSkills.Mage
         {
             col.GetComponent<IDamageable>().OnAttacked(_attackRange,_totalDamage);
         }
+
+        public void RequestMeteorImpactCameraShake()
+        {
+            if (_relayManager.NetworkManagerEx.IsHost)
+            {
+                _relayManager.NgoRPCCaller.RequestCameraShakeRpc(_cameraShakeIntensity, _cameraShakeDuration);
+            }
+        }
         
         
 
         public override void StartParticleOption(float duration,NetworkParams networkParams)
         {
             base.StartParticleOption(duration,networkParams);
+            _soundPlayerBinder.PlayDetached(MeteorSoundCueId);
 
             ulong networkObjID = networkParams.ArgUlong;
             float damageMultiple = networkParams.ArgFloat;

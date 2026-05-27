@@ -1,5 +1,5 @@
 using System;
-using GameManagers.Data;
+using GameManagers.DataManagement;
 
 namespace Data.DataType.StatType
 {

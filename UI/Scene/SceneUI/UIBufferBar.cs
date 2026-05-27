@@ -1,9 +1,9 @@
 using System;
 using Buffer;
 using GameManagers;
-using GameManagers.Interface.BufferManager;
-using GameManagers.Scene;
-using GameManagers.UIFactory.SceneUI;
+using GameManagers.BufferManagement;
+using GameManagers.SceneManagement;
+using GameManagers.UIFactoryManagement.SceneUI;
 using UI.Scene.Interface;
 using UnityEngine;
 using Zenject;

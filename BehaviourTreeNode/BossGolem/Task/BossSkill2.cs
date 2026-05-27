@@ -2,21 +2,23 @@ using System.Collections.Generic;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
 using Controller.BossState;
+using Controller.BossState.BossGolem;
 using Controller.ControllerStats;
-using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
+using GameManagers.PoolManagement;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
 using NetWork;
-using NetWork.Boss_NGO;
+using NetWork.BossGolem_NGO;
 using Stats.BossStats;
+using Unity.Netcode;
 using UnityEngine;
 using Util;
 using VFX;
 
 namespace BehaviourTreeNode.BossGolem.Task
 {
-    public class BossSkill2 : Action, IBossAnimationChanged
+    [TaskCategory("CustomNode/StoneGolem")]
+    public class BossSkill2 : Action
     {
         private IResourcesServices _resourcesServices;
         private RelayManager _relayManager;
@@ -51,8 +53,7 @@ namespace BehaviourTreeNode.BossGolem.Task
         private readonly float _attackAnimStopThreshold = 0.05f;
 
         private BossGolemController _controller;
-        private BossGolemNetworkController _networkController;
-        private BossGolemAnimationNetworkController _bossGolemAnimationNetworkController;
+        private NGOBossNetworkController _networkController;
 
         private float _animLength = 0f;
         private List<Vector3> _attackRangeCirclePos;
@@ -63,19 +64,19 @@ namespace BehaviourTreeNode.BossGolem.Task
         [SerializeField] private float _attackRange;
         [SerializeField] private int _radiusStep;
         [SerializeField] private int _angleStep;
+        [SerializeField, Range(0f, 1f)] private float _cameraShakeIntensity = 0.8f;
+        [SerializeField, Min(0f)] private float _cameraShakeDuration = 0.25f;
 
         [SerializeField] private SharedProjector _attackIndicator;
         private NgoIndicatorController _indicatorController;
 
-        public BossGolemAnimationNetworkController BossAnimNetworkController => _bossGolemAnimationNetworkController;
 
         public override void OnAwake()
         {
             base.OnAwake();
             _controller = Owner.GetComponent<BossGolemController>();
             _stats = _controller.GetComponent<BossStats>();
-            _networkController = Owner.GetComponent<BossGolemNetworkController>();
-            _bossGolemAnimationNetworkController = Owner.GetComponent<BossGolemAnimationNetworkController>();
+            _networkController = Owner.GetComponent<NGOBossNetworkController>();
         }
 
         public override void OnStart()
@@ -102,9 +103,13 @@ namespace BehaviourTreeNode.BossGolem.Task
                 _attackIndicator.Value = _indicatorController;
                 _attackIndicator.Value.GetComponent<Poolable>().WorldPositionStays = false;
                 _indicatorController = RelayManager.SpawnNetworkObj(_indicatorController.gameObject).GetComponent<NgoIndicatorController>();
+                if (Owner.TryGetComponent(out NetworkObject ownerNetworkObject))
+                {
+                    _indicatorController.SetSpawnerBossNetworkObjectId(ownerNetworkObject.NetworkObjectId);
+                }
                 float totalIndicatorDurationTime = _addAttackDurationTime + _animLength;
                 _indicatorController.SetValue(_attackRange, 360, _controller.transform, totalIndicatorDurationTime, IndicatorDoneEvent);
-                OnBossGolemAnimationChanged(_bossGolemAnimationNetworkController, _controller.BossSkill2State);
+                _controller.CurrentStateType = _controller.BossSkill2State;
                 void IndicatorDoneEvent()
                 {
                     if (_hasSpawnedParticles == true) return;
@@ -112,6 +117,10 @@ namespace BehaviourTreeNode.BossGolem.Task
                     NetworkParams param = new NetworkParams(argFloat: 1f);
                     RelayManager.NgoRPCCaller.SpawnNonNetworkObject(_attackRangeCirclePos, dustPath, param);
                     TargetInSight.AttackTargetInCircle(_stats, _attackRange, _damage.Value);
+                    if (RelayManager.NetworkManagerEx.IsHost)
+                    {
+                        RelayManager.NgoRPCCaller.RequestCameraShakeRpc(_cameraShakeIntensity, _cameraShakeDuration);
+                    }
                     _hasSpawnedParticles = true;
                 }
             }
@@ -125,8 +134,8 @@ namespace BehaviourTreeNode.BossGolem.Task
                     return;
 
 
-                CurrentAnimInfo animInfo = new CurrentAnimInfo(_animLength, decelerationRatio, _attackAnimStopThreshold, _addAttackDurationTime, RelayManager.NetworkManagerEx.ServerTime.Time);
-                _networkController.StartAnimChagnedRpc(animInfo, RelayManager.GetNetworkObject(_indicatorController.gameObject));
+                NetworkAnimationInfo animInfo = new NetworkAnimationInfo(_animLength, decelerationRatio, _attackAnimStopThreshold, _addAttackDurationTime, RelayManager.NetworkManagerEx.ServerTime.Time);
+                _networkController.StartAnimChangedRpc(animInfo, RelayManager.GetNetworkObject(_indicatorController.gameObject));
                 //호스트가 pretime 뽑아서 모든 클라이언트 들에게 던져야함.
 
             }
@@ -142,12 +151,7 @@ namespace BehaviourTreeNode.BossGolem.Task
             base.OnEnd();
             _attackRangeCirclePos = null;
             _hasSpawnedParticles = false;
+            _controller.CurrentStateType = _controller.BaseIDleState; //애니메이션 실행이 완료되었으므로 대기 상태로 돌아감
         }
-        public void OnBossGolemAnimationChanged(BossGolemAnimationNetworkController bossAnimController, IState state)
-        {
-            bossAnimController.SyncBossStateToClients(state);
-        }
-
-
     }
 }

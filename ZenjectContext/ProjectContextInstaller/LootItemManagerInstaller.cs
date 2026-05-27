@@ -1,4 +1,5 @@
 using GameManagers;
+using GameManagers.ItemDataManagement;
 using Zenject;
 
 namespace ProjectContextInstaller

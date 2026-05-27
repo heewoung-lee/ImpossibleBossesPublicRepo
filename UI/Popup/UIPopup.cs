@@ -1,8 +1,8 @@
 using System;
 using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.InputManager;
-using GameManagers.Interface.UIManager;
+using GameManagers.InputManagement;
+using GameManagers.SoundManagement;
+using GameManagers.UIManagement;
 using UnityEngine.InputSystem;
 using Util;
 using Zenject;
@@ -40,6 +40,7 @@ namespace UI.Popup
         {
             if (_uiManagerServices.IsTopPopupUI(this))
             {
+                _soundManagerServices.PlayUiSfx(gameObject, UICommonSoundCueId.Close);
                 _uiManagerServices.ClosePopupUI();
             }
         }

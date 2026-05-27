@@ -1,12 +1,13 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Data.Item;
 using DataType;
 using DataType.Item;
+using DataType.Item.Consumable;
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ItamDataManager.Interface;
-using GameManagers.ResourcesEx;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.ResourcesExManagement;
+using GameManagers.UIManagement;
 using Stats;
 using TMPro;
 using UI.Popup.PopupUI;
@@ -20,6 +21,8 @@ namespace UI.SubItem
 {
     public class UIShopItemComponent : UIItemComponent
     {
+        private const string BuyItemCueId = "BuyItem";
+
         [Inject] private IResourcesServices _destroyer;
         [Inject] private IItemGradeBorder _itemGradeBorder;
         [Inject] private IPlayerSpawnManager _gameManagerEx;
@@ -53,6 +56,8 @@ namespace UI.SubItem
 
         protected GraphicRaycaster _uiRaycaster;
         protected EventSystem _eventSystem;
+
+        private bool HasLimitedStock => _itemData != null && _itemData.ItemType == ItemType.Equipment;
 
         public int ItemCount
         {
@@ -128,14 +133,7 @@ namespace UI.SubItem
             ItemPrice = price;
 
             // 장비는 1개, 소비는 여러 개
-            if (data.ItemType == ItemType.Equipment)
-            {
-                ItemCount = 1;
-            }
-            else
-            {
-                ItemCount = count;
-            }
+            ItemCount = HasLimitedStock ? count : 1;
         }
 
         public override void ItemRightClick(PointerEventData eventdata)
@@ -149,24 +147,36 @@ namespace UI.SubItem
             if (_playerStats == null)
                 return;
 
+            if (_itemData is ExperienceBookItemSO && _playerStats.IsMaxLevel)
+            {
+                _uiManagerServices.GetMessageErrorToast().Show("이미 최대 레벨입니다");
+                return;
+            }
+
             if (_playerStats.TrySpendMoney(_itemPrice) == true)
-            { //살 돈이 있다면  
-                if (_uiPlayerInventory != null)
+            { //살 돈이 있다면
+                if (_itemData is ExperienceBookItemSO experienceBookItem) // 경험치책은 즉시 적용
+                {
+                    _playerStats.Exp += experienceBookItem.experienceAmount;
+                }
+                else if (_uiPlayerInventory != null)
                 {
                     _uiPlayerInventory.AddItem(_itemData);
                 }
-                ItemCount--;
-                if (_itemCount <= 0)
-                    _destroyer.DestroyObject(gameObject);
+
+                if (HasLimitedStock)
+                {
+                    ItemCount--;
+                    if (_itemCount <= 0)
+                        _destroyer.DestroyObject(gameObject);
+                }
+
+                _soundManagerServices.PlayUiSfx(gameObject, BuyItemCueId);
             }
             else
             {
-                //살돈이 없다면
-                //이 부분은 아직 뭘쓸지 몰라서 남겨둠
-                //나중에 UI로 "돈이 부족합니다 이런거 남겨도 좋을듯"
+                _uiManagerServices.GetMessageErrorToast().Show("돈이 부족합니다");
             }
-     
-            
         }
 
         public override void GetDragEnd(PointerEventData eventData)

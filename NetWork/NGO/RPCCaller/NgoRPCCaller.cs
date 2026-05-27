@@ -1,30 +1,39 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using Controller;
 using Cysharp.Threading.Tasks;
 using Data.DataType.ItemType.Interface;
 using GameManagers;
-using GameManagers.Interface.BufferManager;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.VFXManager;
-using GameManagers.Interface.VivoxManager;
-using GameManagers.ItamData.Interface;
-using GameManagers.ItamDataManager;
-using GameManagers.Pool;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
-using GameManagers.Scene;
+using GameManagers.BufferManagement;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ItemDataManagement;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.LobbyManagement;
+using GameManagers.NGOPoolManagement;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SceneManagement;
+using GameManagers.UIManagement;
+using GameManagers.VFXManagement;
+using GameManagers.VivoxManagement;
 using NetWork.BaseNGO;
 using NetWork.Item;
 using NetWork.NGO.Interface;
-using Scene.CommonInstaller;
-using Scene.GamePlayScene;
+using NetWork.NGO.Scene_NGO;
+using ScenesScripts.CommonInstaller.Interfaces;
+using ScenesScripts.GamePlayScene;
 using Stats.BaseStats;
+using UI.Popup.PopupUI;
+using UI.Scene;
 using UI.Scene.Interface;
 using UI.Scene.SceneUI;
 using UI.SubItem;
 using Unity.Collections;
 using Unity.Netcode;
+using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using Util;
@@ -74,7 +83,7 @@ namespace NetWork.NGO
             IUIManagerServices uiManagerServices,
             IResourcesServices resourcesServices,
             IItemDataManager itemDataManager,
-              LootItemFactory lootItemFactory,
+            LootItemFactory lootItemFactory,
             IBufferManager bufferManager,
             IPlayerSpawnManager gameManagerEx,
             LobbyManager lobbyManager,
@@ -148,10 +157,13 @@ namespace NetWork.NGO
 
 
         [Rpc(SendTo.Server)]
-        public void GetPlayerChoiceCharacterRpc(ulong clientId, RpcParams rpcParams = default)
+        public void GetPlayerChoiceCharacterRpc(ulong clientId, bool hasSpawnPosition = false,
+            SpawnPosition spawnPosition = default, RpcParams rpcParams = default)
         {
             string choiceCharacterName = _relayManager.ChoicePlayerCharactersDict[clientId].ToString();
-            Vector3 targetPosition = new Vector3(1 * clientId, 0, 1);
+            Vector3 targetPosition = hasSpawnPosition
+                ? spawnPosition.PlayerSpawnPosition + new Vector3(clientId, 0f, 0f)
+                : new Vector3(clientId, 0f, 1f);
 
             _relayManager.SpawnNetworkObjInjectionOwner(clientId,
                 $"Prefabs/Player/SpawnCharacter/{choiceCharacterName}Base",
@@ -350,13 +362,22 @@ namespace NetWork.NGO
                 }
             }
             
-            NetworkObject vfxObj = SpawnVFXObjectToResources(path,Vector3.zero,rotation,localScale);
+            // 2026-05-19: 클라이언트별 현재 위치 재계산을 막기 위해 서버가 VFX 시작 위치를 확정한다.
+            Vector3 spawnPosition = Vector3.zero;
+            if (_relayManager.NetworkManagerEx.SpawnManager.SpawnedObjects.TryGetValue(
+                    targerObjectID,
+                    out NetworkObject targetObject))
+            {
+                spawnPosition = targetObject.transform.position;
+            }
+
+            NetworkObject vfxObj = SpawnVFXObjectToResources(path,spawnPosition,rotation,localScale);
             
             //매니저가 RPC를 쏘는 게 아니라, 스폰된 객체의 컴포넌트를 가져와서 그 객체의 RPC를 호출
             if (vfxObj.TryGetComponent(out NgoPoolingInitializeBase vfxScript))
             {
                 
-                vfxScript.InitializeVfxClientRpc(targerObjectID, duration);
+                vfxScript.InitializeVfxClientRpc(targerObjectID, duration, spawnPosition);
             }
         }
 
@@ -413,17 +434,42 @@ namespace NetWork.NGO
             {
                 Lobby currentLobby = await _lobbyManager.GetCurrentLobby();
 
-                if (currentLobby == null)
+                if (currentLobby != null)
                 {
-                    return;
+                    await _lobbyManager.RemoveLobbyAsync(currentLobby);
                 }
+            }
+            catch (LobbyServiceException e) when (e.Reason == LobbyExceptionReason.LobbyNotFound)
+            {
+                UtilDebug.Log("로비가 이미 삭제되어 로비 정리를 건너뜁니다.");
+            }
+            catch (Exception e)
+            {
+                UtilDebug.LogError($"[Disconneted NetWorkError] Lobby cleanup error: {e}");
+            }
 
-                await _lobbyManager.RemoveLobbyAsync(currentLobby);
+            try
+            {
                 await _vivoxSession.LogoutOfVivoxAsync();
             }
             catch (Exception e)
             {
-                UtilDebug.LogError($"[Disconneted NetWorkError] Error: {e}");
+                UtilDebug.LogError($"[Disconneted NetWorkError] Vivox logout error: {e}");
+            }
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        public void SetGameStartLoadingRpc(bool isShow)
+        {
+            UILoadingProgress loadingProgress = _uiManagerServices.GetOrCreateSceneUI<UILoadingProgress>();
+
+            if (isShow)
+            {
+                loadingProgress.ShowLoading("여정을 떠날 준비중", "플레이어들이 짐을 챙기고 있습니다.");
+            }
+            else
+            {
+                loadingProgress.HideLoading();
             }
         }
 
@@ -589,6 +635,77 @@ namespace NetWork.NGO
         {
             //Managers.Clear();
             UtilDebug.Log("Call RPCCaller in ResetManagersRpc");
+        }
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        public void RequestCameraShakeRpc(float intensity, float duration)
+        {
+            float clampedIntensity = Mathf.Clamp01(intensity);
+            float clampedDuration = Mathf.Max(0f, duration);
+            if (clampedIntensity <= 0f || clampedDuration <= 0f)
+            {
+                return;
+            }
+
+            BroadcastCameraShakeRpc(clampedIntensity, clampedDuration);
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        private void BroadcastCameraShakeRpc(float intensity, float duration)
+        {
+            Camera mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                return;
+            }
+
+            if (mainCamera.TryGetComponent(out CameraShaker shaker))
+            {
+                shaker.Shake(intensity, duration);
+            }
+        }
+
+        [Rpc(SendTo.ClientsAndHost)]
+        public void StartThirdBossFrontCameraRpc(float uiEndingDelay)
+        {
+            //4.2 하이어라키에서 카메라 찾는방식이 맘에 안들지만,
+            //기존에 카메라를 바인딩 하는걸 못씀. 왜냐하면 RPCCaller는 projectContext로 씬 보다 먼저 바인딩이 되기떄문
+            GameObject[] mainCameras = GameObject.FindGameObjectsWithTag("MainCamera");
+            for (int i = 0; i < mainCameras.Length; i++)
+            {
+                if (mainCameras[i].TryGetComponent(out PlayerFollowingCamera followingCamera))
+                {
+                    followingCamera.MoveCameraToPlayerFront();
+                    break;
+                }
+            }
+
+            GameObject localPlayer = _gameManagerEx.GetPlayer();
+            if (localPlayer != null && localPlayer.TryGetComponent(out PlayerController playerController))
+            {
+                playerController.PlayVictory();
+            }
+
+            ShowUIEndingAfterDelayAsync(uiEndingDelay, this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTaskVoid ShowUIEndingAfterDelayAsync(float delaySeconds, CancellationToken cancellationToken)
+        {
+            try
+            {
+                int delayMilliseconds = Mathf.Max(0, Mathf.CeilToInt(delaySeconds * 1000f));
+                if (delayMilliseconds > 0)
+                {
+                    await UniTask.Delay(delayMilliseconds, ignoreTimeScale: true, cancellationToken: cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            UIEnding endingUI = _uiManagerServices.GetOrCreateSceneUI<UIEnding>();
+            endingUI.gameObject.SetActive(true);
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]

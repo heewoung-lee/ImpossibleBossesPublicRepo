@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections;
-using GameManagers;
-using GameManagers.Interface.LoginManager;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.UIManager;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
-using Module.UI_Module;
+﻿using GameManagers.LoginManagement;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
+using GameManagers.UIManagement;
 using NetWork.BaseNGO;
-using Scene.CommonInstaller.Interfaces;
-using TMPro;
 using UI.Scene.SceneUI;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
 using Util;
 using Zenject;
 using ZenjectContext.GameObjectContext;
@@ -34,16 +26,18 @@ namespace NetWork.NGO
             }
         }
 
-        private IUIManagerServices _uiManagerServices;
         private IPlayerIngameLogininfo _playerIngameLogininfo;
+        private IUIManagerServices _uiManagerServices;
         private RelayManager _relayManager;
+        private UICharacterSelectRect _uiCharacterSelectRect;
 
         [Inject]
-        public void Construct(IUIManagerServices uiManagerServices, IPlayerIngameLogininfo playerIngameLogininfo,
+        public void Construct(IPlayerIngameLogininfo playerIngameLogininfo,
+            IUIManagerServices uiManagerServices,
             RelayManager relayManager)
         {
-            _uiManagerServices = uiManagerServices;
             _playerIngameLogininfo = playerIngameLogininfo;
+            _uiManagerServices = uiManagerServices;
             _relayManager = relayManager;
         }
 
@@ -59,304 +53,199 @@ namespace NetWork.NGO
         private NetworkVariable<Vector3> _characterSeletorCamera = new NetworkVariable<Vector3>(
             Vector3.zero, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
-        public enum CameraOperation
+        private NetworkVariable<int> _playerIndex = new NetworkVariable<int>(
+            -1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        
+        private NetworkVariable<int> _choiceChracter = new NetworkVariable<int>(
+            0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+        
+        public event NetworkVariable<FixedString64Bytes>.OnValueChangedDelegate OnPlayerNicknameChanged
         {
-            Set,
-            Add
+            add { _playerNickname.OnValueChanged += value; }
+            remove { _playerNickname.OnValueChanged -= value; }
         }
 
-        enum RawImages
+        public event NetworkVariable<bool>.OnValueChangedDelegate OnIsReadyChanged
         {
-            SelectPlayerRawImage
+            add { _isReady.OnValueChanged += value; }
+            remove { _isReady.OnValueChanged -= value; }
         }
 
-        enum Cameras
+        public event NetworkVariable<Vector3>.OnValueChangedDelegate OnCharacterSelectorCameraChanged
         {
-            SelectCamara
+            add { _characterSeletorCamera.OnValueChanged += value; }
+            remove { _characterSeletorCamera.OnValueChanged -= value; }
         }
 
-        enum Images
+        public event NetworkVariable<int>.OnValueChangedDelegate OnPlayerIndexChanged
         {
-            Bg,
-            HostIMage
+            add { _playerIndex.OnValueChanged += value; }
+            remove { _playerIndex.OnValueChanged -= value; }
         }
 
-        enum GameObjects
+        public event NetworkVariable<int>.OnValueChangedDelegate OnChoiceChracterChanged
         {
-            NickNamePanel,
-            ReadyPanel,
+            add { _choiceChracter.OnValueChanged += value; }
+            remove { _choiceChracter.OnValueChanged -= value; }
         }
+        
+        public string PlayerNickname => _playerNickname.Value.Value;
 
-        enum Buttons
+        public Vector3 CharacterSeletorCamera => _characterSeletorCamera.Value;
+        public bool IsReady => _isReady.Value;
+        
+        public int ChoiceCharacter => _choiceChracter.Value;
+
+        public bool IsHostPlayer => IsOwnedByServer;
+
+        public int PlayerIndex
         {
-            PreviousPlayerBtn,
-            NextPlayerBtn,
+            get { return _playerIndex.Value; }
+            // 서버 전용 값 쓰기 함수로만 사용. UI 로직은 여기서 호출하지 않음.
+            set { _playerIndex.Value = value; } 
         }
-
-
-        private Image _bg;
-        private Image _hostIMage;
-        private Button _previousButton;
-        private Button _nextButton;
-        private GameObject _playerNickNameObject;
-        private GameObject _readyPanel;
-        private TMP_Text _playerNickNameText;
-        private UIRoomCharacterSelect _uiRoomCharacterSelect;
-        private Camera _playerChooseCamera;
-        private RawImage _selectPlayerRawImage;
-        private bool _isRunnningCoroutine = false;
-        private Coroutine _cameraMoveCoroutine;
-        private bool _isInitCameraPosition = false;
-        private ModuleChooseCharacterMove _moduleChooseCharacterMove;
+        
 
 
         private PlayerIngameLoginInfo PlayerIngameLoginInfo => _playerIngameLogininfo.GetPlayerIngameLoginInfo();
 
-        public Button PreViousButton
-        {
-            get => _previousButton;
-        }
-
-        public Button NextButton
-        {
-            get => _nextButton;
-        }
-
-        public bool IsReady
-        {
-            get => _isReady.Value;
-        }
-
-        public RawImage SelectPlayerRawImage
-        {
-            get
-            {
-                if (_selectPlayerRawImage == null)
-                {
-                    _selectPlayerRawImage = Get<RawImage>((int)RawImages.SelectPlayerRawImage);
-                }
-
-                return _selectPlayerRawImage;
-            }
-        }
-
-        public ModuleChooseCharacterMove ModuleChooseCharacterMove
-        {
-            get
-            {
-                if (_moduleChooseCharacterMove == null)
-                {
-                    _moduleChooseCharacterMove = GetComponent<ModuleChooseCharacterMove>();
-                }
-
-                return _moduleChooseCharacterMove;
-            }
-        }
-
-        protected override void AwakeInit()
-        {
-            Bind<Image>(typeof(Images));
-            Bind<Button>(typeof(Buttons));
-            Bind<GameObject>(typeof(GameObjects));
-            Bind<Camera>(typeof(Cameras));
-            Bind<RawImage>(typeof(RawImages));
-
-            _bg = Get<Image>((int)Images.Bg);
-            _hostIMage = Get<Image>((int)Images.HostIMage);
-            _previousButton = Get<Button>((int)Buttons.PreviousPlayerBtn);
-            _nextButton = Get<Button>((int)Buttons.NextPlayerBtn);
-            _playerNickNameObject = Get<GameObject>((int)GameObjects.NickNamePanel);
-            _readyPanel = Get<GameObject>((int)GameObjects.ReadyPanel);
-            _playerChooseCamera = Get<Camera>((int)Cameras.SelectCamara);
-
-            _hostIMage.gameObject.SetActive(false);
-            SetActiveCharacterSelectionArrow(false);
-            _readyPanel.gameObject.SetActive(false);
-
-            _playerNickNameText = _playerNickNameObject.GetComponentInChildren<TMP_Text>();
-        }
-
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            _bg.color = _playerFrameColor;
-            _uiRoomCharacterSelect = _uiManagerServices.Get_Scene_UI<UIRoomCharacterSelect>();
+            //이쪽에 생긴 애랑 바인드해야함.
+            AllocatedSlot(_playerIndex.Value);
+            
+            _characterSeletorCamera.OnValueChanged += OnCameraPositionChanged;
+            _isReady.OnValueChanged += OnReadyStateChanged;
+        }
+        
+        
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+    
+            //네트워크 변수 이벤트 해제
+            _characterSeletorCamera.OnValueChanged -= OnCameraPositionChanged;
+            _isReady.OnValueChanged -= OnReadyStateChanged;
+    
+            //연결된 UI 슬롯 및 카메라 초기화 지시
+            if (_uiCharacterSelectRect != null)
+            {
+                _uiCharacterSelectRect.ResetAndDisableSlot();
+                _uiCharacterSelectRect = null;
+            }
+        }
+        
+        
+        private void OnCameraPositionChanged(Vector3 previousValue, Vector3 newValue)
+        {
+            if (_uiCharacterSelectRect != null)
+            {
+                _uiCharacterSelectRect.SelecterCameraOnValueChanged(previousValue, newValue);
+            }
+        }
+
+        private void AllocatedSlot(int idx)
+        {
+            if (idx == -1) //슬롯에 대한 동기화 처리가 아직 안되었다면.
+            {
+                _playerIndex.OnValueChanged += (oldValue, newValue) =>
+                {
+                    FindSlot(newValue);
+                };//동기화 값이 바뀌면 할당
+            }
+            else // 아직 동기화가 안되었다면,
+            {
+                FindSlot(idx);
+            }
+            void FindSlot(int playerIdx)
+            {
+                UIRoomCharacterSelect uiRoomCharacterSelect =  _uiManagerServices.Get_Scene_UI<UIRoomCharacterSelect>();
+                _uiCharacterSelectRect = uiRoomCharacterSelect.GetPlayerFrameTransform(playerIdx).GetComponentInChildren<UICharacterSelectRect>(true);
+                _uiCharacterSelectRect.gameObject.SetActive(true);
+                _uiCharacterSelectRect.SetCharacterSelect(this);//연결
+                OwnerInitialize(_uiCharacterSelectRect,uiRoomCharacterSelect);
+            }
+        }
+
+
+        private void OwnerInitialize(UICharacterSelectRect uiCharacterSelectRect, UIRoomCharacterSelect uiRoomCharacterSelect)
+        {
             if (IsOwner)
             {
-                _previousButton.gameObject.SetActive(true);
-                _nextButton.gameObject.SetActive(true);
-                _uiRoomCharacterSelect.ButtonState(false);
+                uiCharacterSelectRect.PreviousButton.gameObject.SetActive(true);
+                uiCharacterSelectRect.NextButton.gameObject.SetActive(true);
+                uiRoomCharacterSelect.ButtonState(false);
                 SetNicknameServerRpc(PlayerIngameLoginInfo.PlayerNickName);
-                _uiRoomCharacterSelect.SetButtonEvent(() => PlayerReadyServerRpc());
-                _uiRoomCharacterSelect.SetCharacterSelectorNgo(this);
-                SetPositionCharacterChooseCamera();
-            }
-
-            if (IsHost && IsOwner) //호스트 최초 1번 호출부
-            {
-                _uiRoomCharacterSelect.SetHostButton();
-
-                _relayManager.NetworkManagerEx.OnClientDisconnectCallback -= CheckHostIsAlone;
-                _relayManager.NetworkManagerEx.OnClientDisconnectCallback += CheckHostIsAlone;
-                _uiRoomCharacterSelect.SetHostStartButton(true);
-            }
-
-            DisPlayHostMarker();
-            _playerChooseCamera.transform.localPosition = _characterSeletorCamera.Value;
-            _characterSeletorCamera.OnValueChanged += SelecterCameraOnValueChanged;
-            _playerNickname.OnValueChanged += (oldValue, newValue) =>
-            {
-                _playerNickNameText.text = newValue.ToString();
-            };
-            _isReady.OnValueChanged += (oldValue, newValue) =>
-            {
-                _readyPanel.SetActive(newValue);
-                if (IsOwner)
+                
+                uiRoomCharacterSelect.SetButtonEvent(() => PlayerReadyServerRpc());
+                uiRoomCharacterSelect.SetCharacterSelectorNgo(this);
+                
+                if (IsHost) 
                 {
-                    SetActiveCharacterSelectionArrow(!newValue);
-                    Define.PlayerClass selectCharacter =
-                        (Define.PlayerClass)ModuleChooseCharacterMove.PlayerChooseIndex;
-                    _relayManager.RegisterSelectedCharacter(_relayManager.NetworkManagerEx.LocalClientId,
-                        selectCharacter);
+                    uiRoomCharacterSelect.SetHostButton(); // 레디 버튼을 스타트 버튼으로 교체
+                    uiRoomCharacterSelect.SetHostStartButton(true); // 방장 혼자 켜졌을 때 즉시 활성화
                 }
-            };
-            // UI 초기화
-            _playerNickNameText.text = _playerNickname.Value.ToString();
-            _readyPanel.SetActive(_isReady.Value);
+            }
+            
         }
-
-        private void CheckHostIsAlone(ulong clientId)
+                    
+   
+        
+        protected override void StartInit()
         {
-            if (IsHost == false)
-                return;
-
-            if (_relayManager.NetworkManagerEx.ConnectedClientsIds.Count == 1)
-            {
-                _uiRoomCharacterSelect.SetHostStartButton(true);
-            }
-            else
-            {
-                _uiRoomCharacterSelect.SetHostStartButton(false);
-            }
         }
-
-
-        public void SelecterCameraOnValueChanged(Vector3 oldValue, Vector3 newValue)
+        
+        protected override void AwakeInit()
         {
-            if (_isInitCameraPosition == false)
-            {
-                _playerChooseCamera.transform.localPosition = newValue;
-                _isInitCameraPosition = true;
-                return;
-            }
-
-            if (IsOwner)
-            {
-                if (_isRunnningCoroutine == true)
-                {
-                    StopCoroutine(_cameraMoveCoroutine);
-                    _playerChooseCamera.transform.localPosition = oldValue;
-                }
-
-                _cameraMoveCoroutine = StartCoroutine(MoveCameraLinear(newValue));
-            }
-            else
-            {
-                _playerChooseCamera.transform.localPosition = newValue;
-            }
         }
-
-        private void SetActiveCharacterSelectionArrow(bool state)
-        {
-            _previousButton.gameObject.SetActive(state);
-            _nextButton.gameObject.SetActive(state);
-        }
-
-        private void SetPositionCharacterChooseCamera()
-        {
-            Vector3 targetWorldPosition = _uiRoomCharacterSelect.ChooseCameraTr.position;
-            Vector3 targetLocalPosition = transform.InverseTransformPoint(targetWorldPosition);
-            SetCameraPositionServerRpc(targetLocalPosition, CameraOperation.Set);
-        }
-
         [Rpc(SendTo.Server)]
-        public void SetCameraPositionServerRpc(Vector3 position, CameraOperation cameraOperation,
-            RpcParams rpcParams = default)
+        public void SetCameraPositionServerRpc(Vector3 position,int currentIndex,RpcParams rpcParams = default)
         {
-            switch (cameraOperation)
-            {
-                case CameraOperation.Set:
-                    _characterSeletorCamera.Value = position;
-                    break;
-                case CameraOperation.Add:
-                    _characterSeletorCamera.Value += position;
-                    break;
-            }
+            _characterSeletorCamera.Value += position;
+            _choiceChracter.Value = currentIndex;
         }
-
         [Rpc(SendTo.Server)]
         private void SetNicknameServerRpc(string newNickname, RpcParams rpcParams = default)
         {
             _playerNickname.Value = new FixedString64Bytes(newNickname);
         }
-
         [Rpc(SendTo.Server)]
         public void PlayerReadyServerRpc(RpcParams rpcParams = default)
         {
             _isReady.Value = !_isReady.Value;
-            _readyPanel.SetActive(_isReady.Value);
-            _uiRoomCharacterSelect.IsCheckAllReadyToPlayers();
-            NotifyButtonStateClientRpc(_isReady.Value, rpcParams.Receive.SenderClientId);
+            _uiManagerServices.Get_Scene_UI<UIRoomCharacterSelect>().IsCheckAllReadyToPlayers();
         }
-
-        [Rpc(SendTo.NotMe)]
-        private void NotifyButtonStateClientRpc(bool state, ulong targetClientId)
+        private void OnReadyStateChanged(bool previousValue, bool newValue)
         {
-            if (_relayManager.NetworkManagerEx.LocalClientId == targetClientId)
+            //공통 처리: 모든 플레이어의 화면에서 이 캐릭터 슬롯의 레디 패널을 켜거나 끔
+            if (_uiCharacterSelectRect != null)
             {
-                _uiRoomCharacterSelect.ButtonState(state); // 본인의 클라이언트에서만 실행
+                _uiCharacterSelectRect.ReadyPanel.SetActive(newValue);
+            }
+
+            //주인 전용 처리 (버튼을 누른 본인 화면에서만 작동)
+            if (IsOwner)
+            {
+                //우측 하단 메인 레디 버튼의 이미지 및 텍스트 상태 변경 (이전 ClientRpc 역할)
+                UIRoomCharacterSelect uiRoomCharacterSelect = _uiManagerServices.Get_Scene_UI<UIRoomCharacterSelect>();
+                uiRoomCharacterSelect.ButtonState(newValue);
+
+                //슬롯의 좌우 이동 화살표 숨기기/보이기
+                if (_uiCharacterSelectRect != null)
+                {
+                    _uiCharacterSelectRect.PreviousButton.gameObject.SetActive(!newValue);
+                    _uiCharacterSelectRect.NextButton.gameObject.SetActive(!newValue);
+                }
+                if (newValue)
+                {
+                    Define.PlayerClass selectCharacter = (Define.PlayerClass)ChoiceCharacter; 
+                    _relayManager.RegisterSelectedCharacter(_relayManager.NetworkManagerEx.LocalClientId, selectCharacter);
+                }
             }
         }
 
-
-        private void DisPlayHostMarker()
-        {
-            if (IsOwnedByServer)
-            {
-                _hostIMage.gameObject.SetActive(true);
-            }
-        }
-
-        protected override void StartInit()
-        {
-        }
-
-        public override void OnNetworkDespawn()
-        {
-            base.OnNetworkDespawn();
-            _relayManager.NetworkManagerEx.OnClientDisconnectCallback -= CheckHostIsAlone;
-        }
-
-        public void SetSelectPlayerRawImage(Texture texture)
-        {
-            SelectPlayerRawImage.texture = texture;
-        }
-
-        IEnumerator MoveCameraLinear(Vector3 moveDirection)
-        {
-            float elapseTime = 0f;
-            float durationTime = 1f;
-            _isRunnningCoroutine = true;
-            while (elapseTime < durationTime)
-            {
-                elapseTime += Time.deltaTime;
-                _playerChooseCamera.transform.localPosition = Vector3.Lerp(_playerChooseCamera.transform.localPosition,
-                    moveDirection, elapseTime);
-                yield return null;
-            }
-
-            _isRunnningCoroutine = false;
-            _playerChooseCamera.transform.localPosition = moveDirection;
-        }
+        
     }
 }

@@ -1,6 +1,5 @@
 using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIManagement;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -62,14 +61,12 @@ namespace UI.Popup.PopupUI
         protected override void ZenjectDisable()
         {
             base.ZenjectDisable();
-            
             _customCloseAction = null; 
         }
 
         private void OnClickConfirmButton()
         {
             _customCloseAction?.Invoke();
-            
             _uiManagerServices.ClosePopupUI(this);
         }
 

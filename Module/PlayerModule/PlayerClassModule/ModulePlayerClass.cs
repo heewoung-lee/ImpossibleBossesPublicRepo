@@ -5,15 +5,13 @@ using Controller;
 using DataType.Skill;
 using DataType.Skill.Factory;
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.SkillManager;
-using GameManagers.ResourcesEx;
-using GameManagers.Scene;
-using Player;
-using Scene;
-using Scene.CommonInstaller;
-using Scene.CommonInstaller.Interfaces;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SceneManagement;
+using GameManagers.SkillManagement;
+using GameManagers.UIManagement;
+
+using ScenesScripts;
 using Skill;
 using Stats;
 using UI.Scene.SceneUI;
@@ -70,6 +68,7 @@ namespace Module.PlayerModule.PlayerClassModule
         public CommonSkillState CommonSkillState => _commonSkillState;
 
         public abstract Define.PlayerClass PlayerClass { get; }
+        public abstract int VictoryAnimHash { get; }
         private Dictionary<string, RuntimeSkill> _playerSkill;
         private string _initializedSceneName = null;
         private Dictionary<int, IUnitStat> _cachedStatTable;
@@ -173,9 +172,18 @@ namespace Module.PlayerModule.PlayerClassModule
         public override void OnNetworkDespawn()
         {
             base.OnNetworkDespawn();
+            
+           
+            
             SceneManager.sceneLoaded -= OnSceneLoaded;
             _signalBus.TryUnsubscribe<RuntimeSkillFactoryReadySignal>(InitializeSkillsFromManager);
             _signalBus.TryUnsubscribe<UISkillBarReadySignal>(AssignSkillsToUISlots);
+            _runtimeSkillFactory = null;
+        }
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
         }
 
         public override void OnNetworkSpawn()
@@ -183,7 +191,6 @@ namespace Module.PlayerModule.PlayerClassModule
             base.OnNetworkSpawn();
             if (_sceneManagerEx.GetCurrentScene is ISkillInit)
             {
-                
                 if (_runtimeSkillFactory.CheckInitDone) //팩토리의 초기화 완료시점이 더 빠르면 바로 실행
                 {
                     InitializeSkillsFromManager();
@@ -259,13 +266,14 @@ namespace Module.PlayerModule.PlayerClassModule
 
         private void InitializeSkillsFromManager()
         {
-            string currentSceneName = _sceneManagerEx.CurrentScene.ToString();
+            if (IsOwner == false) return;
+            
+            string currentSceneName = _sceneManagerEx.CurrentSceneName.ToString();
             if (_initializedSceneName == currentSceneName)
                 return;
 
             _initializedSceneName = currentSceneName;
 
-            if (IsOwner == false) return;
             List<SkillDataSO> skillDatas = _skillManager.GetSkillDataList(PlayerClass);
             BaseController controller = GetComponent<BaseController>();
             _playerSkill.Clear();

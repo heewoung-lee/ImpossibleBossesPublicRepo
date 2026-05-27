@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Controller;
 using DataType.Skill.Factory.Effect.Def;
-using GameManagers.Interface.VFXManager;
+using GameManagers.VFXManagement;
 using NetWork;
 using Skill;
 using Unity.Netcode;

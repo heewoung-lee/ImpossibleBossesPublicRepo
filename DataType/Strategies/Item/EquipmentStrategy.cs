@@ -2,7 +2,7 @@
 using Controller;
 using DataType.Item.Equipment;
 using DataType.Skill;
-using GameManagers.Interface.BufferManager;
+using GameManagers.BufferManagement;
 using Skill;
 using Stats.BaseStats;
 using UnityEngine;

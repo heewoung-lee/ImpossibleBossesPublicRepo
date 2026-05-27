@@ -4,9 +4,13 @@ using Data.Item;
 using Data.Item.EquipSlot;
 using DataType.Item;
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.ItamDataManager.Interface;
-using GameManagers.RelayManager;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.RelayManagement;
+using GameManagers.SoundManagement;
+using GameManagers.UIManagement;
+
+
 using UI.Popup.PopupUI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -18,6 +22,8 @@ namespace UI.SubItem
 {
     public abstract class UIItemComponentInventory : UIItemComponent
     {
+        private const string ThrowItemSoundCueId = "ThrowItemSFX";
+
         [Inject] protected IUIManagerServices _uiManagerServices;
         [Inject] protected IItemGradeBorder _itemGradeBorderManager;
         [Inject] protected IPlayerSpawnManager _gameManagerEx;
@@ -139,8 +145,14 @@ namespace UI.SubItem
             if (_relayManager != null && _itemData != null)
             {
                 IteminfoStruct itemStruct = new IteminfoStruct(_itemData.itemNumber);
-                Vector3 dropPos = _gameManagerEx.GetPlayer().transform.position;
+                GameObject player = _gameManagerEx.GetPlayer();
+                Vector3 dropPos = player.transform.position;
                 _relayManager.NgoRPCCaller.Spawn_Loot_ItemRpc(itemStruct, dropPos);
+
+                if (player.transform.TryGetComponentInParents(out SoundPlayerBinder soundPlayerBinder))
+                {
+                    soundPlayerBinder.PlayDetached(ThrowItemSoundCueId, dropPos);
+                }
             }
         }
 

@@ -39,16 +39,19 @@ namespace Util
             Monster,
             Boss
         }
-        public enum Scene
+        public enum SceneName
         {
             Unknown,
             LoginScene,
             LobbyScene,
             RoomScene,
             GamePlayScene,
-            BattleScene,
+            FirstBossScene,
+            SecondBossScene,
+            ThirdBossScene,
             LoadingScene,
-            NetworkLoadingScene
+            NetworkLoadingScene,
+            PreLoadingScene
         }
         public enum Layer
         {
@@ -79,14 +82,8 @@ namespace Util
         public enum BossID
         {
             Golem = 101,
-            Unknown1,
-            Unknown2,
-        }
-        public enum MonsterID
-        {
-            Slime = 1,
-            Unknown1,
-            Unknown2,
+            DarkWizard = 102,
+            RedDragon = 103,
         }
         public enum ControllerType
         {

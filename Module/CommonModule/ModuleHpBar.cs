@@ -1,6 +1,5 @@
 using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIManagement;
 using UI.WorldSpace;
 using UnityEngine;
 using Zenject;

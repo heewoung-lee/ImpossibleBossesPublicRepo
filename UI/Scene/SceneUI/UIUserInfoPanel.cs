@@ -1,8 +1,12 @@
 using System;
 using Cysharp.Threading.Tasks;
 using GameManagers;
-using GameManagers.Interface.LoginManager;
-using GameManagers.Scene;
+using GameManagers.LobbyManagement;
+using GameManagers.LoginManagement;
+using GameManagers.RelayManagement;
+using GameManagers.SceneManagement;
+using GameManagers.SocketManagement;
+using GameManagers.UIManagement;
 using TMPro;
 using UI.Popup.PopupUI;
 using Unity.Services.Vivox;
@@ -48,12 +52,26 @@ namespace UI.Scene.SceneUI
         Button _refreshLobbyButton;
         Button _loginSceneBackButton;
         UICreateRoom _createRoomUI;
+        private UILoadingProgress _uiLoadingProgress;
 
         TMP_Text _userNickNamaText;
 
         
 
         private PlayerIngameLoginInfo PlayerIngameLoginInfo => _playerIngameLogininfo.GetPlayerIngameLoginInfo();
+
+        private UILoadingProgress UILoadingProgress
+        {
+            get
+            {
+                if (_uiLoadingProgress == null)
+                {
+                    _uiLoadingProgress = _uiManagerServices.GetOrCreateSceneUI<UILoadingProgress>();
+                }
+
+                return _uiLoadingProgress;
+            }
+        }
         
         protected override void AwakeInit()
         {
@@ -170,10 +188,11 @@ namespace UI.Scene.SceneUI
 
         public async UniTaskVoid MoveLoginScene()
         {
+            UILoadingProgress.ShowLoading("로그아웃 중입니다", "연결 정보를 정리하고 로그인 화면으로 이동하고 있습니다.");
             try
             {
                 await _socketEventManager.InvokeLogoutAllLeaveLobbyEvent();
-                await _socketEventManager.InvokeDisconnectRelayEvent();
+                await _socketEventManager.InvokeDisconnectRelayEvent(RelayDisconnectCause.IntentionalLeaveToLobby);
                 await _socketEventManager.InvokeLogoutVivoxEvent();
             }
             catch (Exception e)
@@ -181,7 +200,12 @@ namespace UI.Scene.SceneUI
                 UtilDebug.Log($"에러가 발생했습니다.{e}");
                 return;
             }
-            _sceneManagerEx.LoadScene(Define.Scene.LoginScene);
+            finally
+            {
+                UILoadingProgress.HideLoading();
+            }
+
+            _sceneManagerEx.LoadScene(Define.SceneName.LoginScene);
         }
 
         private void ButtonInteractable()

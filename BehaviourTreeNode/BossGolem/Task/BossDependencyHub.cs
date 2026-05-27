@@ -1,8 +1,8 @@
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ItamData.Interface;
-using GameManagers.ItamDataManager.Interface;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.NGOPoolManagement;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
+using GameManagers.VFXManagement;
 using UnityEngine;
 using Zenject;
 
@@ -12,17 +12,23 @@ namespace BehaviourTreeNode.BossGolem.Task
     {
         public IResourcesServices ResourcesServices { get; private set; }
         public RelayManager RelayManager { get; private set; }
+        public NgoPoolManager NgoPoolManager { get; private set; }
         public IItemDataManager ItemDataManager { get; private set; }
+        public IVFXManagerServices VfxManagerServices { get; private set; }
 
         [Inject]
         public void Construct(
             IResourcesServices resourcesServices,
             RelayManager relayManager,
-            IItemDataManager itemDataManager)
+            NgoPoolManager ngoPoolManager,
+            IItemDataManager itemDataManager,
+            IVFXManagerServices vfxManagerServices)
         {
             ResourcesServices = resourcesServices;
             RelayManager = relayManager;
+            NgoPoolManager = ngoPoolManager;
             ItemDataManager = itemDataManager;
+            VfxManagerServices = vfxManagerServices;
         }
     }
 }

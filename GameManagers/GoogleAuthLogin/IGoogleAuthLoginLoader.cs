@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameManagers.Interface.GoogleAuthLogin
+namespace GameManagers.GoogleAuthLogin
 {
     [System.Serializable]
     public struct InstalledData

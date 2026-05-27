@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CoreScripts;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.SoundManagement;
+using GameManagers.ResourcesExManagement;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -16,8 +16,10 @@ namespace UI
 {
     public abstract class UIBase : ZenjectMonoBehaviour
     {
-        protected IResourcesServices _resourcesServices;
+        [Inject] protected IResourcesServices _resourcesServices;
+        [Inject] protected ISoundManagerServices _soundManagerServices;
         private Canvas _canvas;
+        private readonly HashSet<Button> _defaultClickSoundButtons = new HashSet<Button>();
 
         public Canvas Canvas
         {
@@ -35,11 +37,6 @@ namespace UI
             }
         }
         
-        [Inject]
-        public void Construct(IResourcesServices resourcesServices)
-        {
-            _resourcesServices = resourcesServices;
-        }
         Dictionary<Type, Object[]> _bindDictionary = new Dictionary<Type,Object[]>();
         
         protected abstract void StartInit();
@@ -65,6 +62,7 @@ namespace UI
             objects = FindObjects<T>(objects, 0, names.Length, names,targetTr);
 
             _bindDictionary.Add(typeof(T), objects);
+            BindDefaultButtonClickSound(typeof(T), objects, 0, objects.Length);
         }
 
         public void SetSortingOrder(int soringOrder)
@@ -81,7 +79,7 @@ namespace UI
         /// <typeparam name="T">바인딩할 컴포넌트 타입 (예: Button, Image, GameObject)</typeparam>
         /// <param name="type">추가할 오브젝트들의 이름이 정의된 Enum 타입</param>
         /// <param name="indexString">결과로 반환되는 모든 바인딩 객체(기존 + 신규)의 이름 목록</param>
-        /// <param name="targetTr">어디서 부터 계층을 탐색해서 바인드된 </param>
+        /// <param name="targetTr">어디서 부터 계층을 탐색할지 </param>
         protected void AddBind<T>(Type type,out string[] indexString,Transform targetTr = null) where T: Object
         {
         
@@ -103,6 +101,7 @@ namespace UI
                 Array.Copy(objects, newObjects, objects.Length);
                 newObjects = FindObjects<T>(newObjects, objects.Length, newObjects.Length, nameList.ToArray(),targetTr);
                 _bindDictionary[typeof(T)] = newObjects;
+                BindDefaultButtonClickSound(typeof(T), newObjects, objects.Length, newObjects.Length);
                 indexString = nameList.ToArray();
             }
             else//최초 바인딩인 경우 (신규 모드)
@@ -140,6 +139,30 @@ namespace UI
                 }
             }
             return newObjects;
+        }
+
+        private void BindDefaultButtonClickSound(Type bindType, Object[] objects, int startIndex, int endIndex)
+        {
+            if (bindType != typeof(Button))
+            {
+                return;
+            }
+
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                Button button = objects[i] as Button;
+                if (button == null || _defaultClickSoundButtons.Add(button) == false)
+                {
+                    continue;
+                }
+
+                button.onClick.AddListener(PlayDefaultButtonClickSound);
+            }
+        }
+
+        private void PlayDefaultButtonClickSound()
+        {
+            _soundManagerServices.PlayUiSfx(gameObject, UICommonSoundCueId.Click);
         }
 
 
@@ -228,27 +251,6 @@ namespace UI
                     evt.OnPointerExitEvent -= action;
                     break;
             }
-        }
-        protected Vector2 GetUISize(GameObject uiObject)
-        {
-            RectTransform rectTransform = uiObject.GetComponent<RectTransform>();
-            RectTransform parentRect = rectTransform.parent as RectTransform;
-
-            if (parentRect != null)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
-            }
-
-            Vector2 size = rectTransform.rect.size;
-            float width = rectTransform.rect.width;
-            float height = rectTransform.rect.height;
-            return size;
-        }
-
-        protected Vector2 GetUIScreenPosition(RectTransform rectTr)
-        {
-            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, rectTr.position);
-            return screenPos;
         }
 
     }

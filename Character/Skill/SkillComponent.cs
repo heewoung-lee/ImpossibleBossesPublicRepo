@@ -1,6 +1,8 @@
 using System.Collections;
+using Controller.CrowdControl;
 using GameManagers;
-using GameManagers.Interface.UIManager;
+using GameManagers.GameManagerExManagement;
+using GameManagers.UIManagement;
 using UI;
 using UI.Scene.SceneUI;
 using UnityEngine;
@@ -14,10 +16,12 @@ namespace Skill
     public class SkillComponent : UIBase
     {
         private IUIManagerServices _uiManagerServices;
+        private IPlayerSpawnManager _playerSpawnManager;
         [Inject]
-        public void Construct(IUIManagerServices uiManagerServices)
+        public void Construct(IUIManagerServices uiManagerServices, IPlayerSpawnManager playerSpawnManager)
         {
             _uiManagerServices = uiManagerServices;
+            _playerSpawnManager = playerSpawnManager;
             Initialize();
         }
 
@@ -104,7 +108,15 @@ namespace Skill
         public void SkillStart()
         {
             if (_connectSkill == null) return;
-            
+
+            GameObject player = _playerSpawnManager.GetPlayer();
+            if (player != null &&
+                player.TryGetComponent(out PlayerCrowdControlNetworkReceiver crowdControlReceiver) &&
+                crowdControlReceiver.IsActionLocked)
+            {
+                return;
+            }
+
             if (_connectSkill.IsReady)
             {
                 _connectSkill.Use();//사용하기만 하고 쿨타임이라든지 사용에 대한 결정은 오직 스킬의 전략에서만 
@@ -134,7 +146,7 @@ namespace Skill
 
         public void AttachItemToSlot(GameObject go, Transform slot)
         {
-            go.transform.SetParent(slot);
+            go.transform.SetParent(slot,false);
             go.GetComponent<RectTransform>().anchorMin = Vector2.zero; // 좌측 하단 (0, 0)
             go.GetComponent<RectTransform>().anchorMax = Vector2.one;  // 우측 상단 (1, 1)
             go.GetComponent<RectTransform>().offsetMin = Vector2.zero; // 오프셋 제거

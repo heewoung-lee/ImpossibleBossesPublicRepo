@@ -10,5 +10,5 @@ public interface IIndicatorBahaviour
     public float Radius { get; }
     public float Angle { get; }
     public float Arc { get;  }
-    public Vector3 CallerPosition { get;}
+    public Vector3 Position { get;}
 }

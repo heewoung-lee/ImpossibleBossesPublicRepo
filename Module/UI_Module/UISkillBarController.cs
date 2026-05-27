@@ -1,8 +1,6 @@
 using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.SkillManager;
-using GameManagers.Interface.UIManager;
-using GameManagers.UIFactory.UIController;
+using GameManagers.UIFactoryManagement.UIController;
+using GameManagers.UIManagement;
 using UI.Scene.SceneUI;
 using UnityEngine;
 using Zenject;

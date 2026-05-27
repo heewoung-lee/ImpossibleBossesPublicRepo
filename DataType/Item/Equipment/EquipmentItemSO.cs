@@ -21,7 +21,7 @@ namespace DataType.Item.Equipment
     }
     
     [CreateAssetMenu(fileName = "Equip_", menuName = "DataSO/Item/Equipment")]
-    public class EquipmentItemSO : ItemDataSO
+    public class EquipmentItemSO : ItemDataSO, ICanDrop
     {
         [Title("Equipment Data")]
         [EnumToggleButtons]

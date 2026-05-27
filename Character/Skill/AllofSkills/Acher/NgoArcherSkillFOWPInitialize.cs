@@ -1,5 +1,5 @@
-
-using GameManagers.ResourcesEx;
+using GameManagers.SoundManagement;
+using GameManagers.ResourcesExManagement;
 using Module.PlayerModule.PlayerClassModule.Archer;
 using NetWork.BaseNGO;
 using NetWork.NGO;
@@ -11,6 +11,10 @@ namespace Character.Skill.AllofSkills.Acher
 {
     public class NgoArcherSkillFOWPInitialize: NgoPoolingInitializeBase
     {
+        private const string FocusOnWeakPointSoundCueId = "FocusOnWeakPointSFX";
+
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class ArcherFOWPFactory : NgoZenjectFactory<NgoArcherSkillFOWPInitialize>,IArcherFactoryMarker
         {
             [Inject]
@@ -21,10 +25,17 @@ namespace Character.Skill.AllofSkills.Acher
                 _requestGO = loadService.Load<GameObject>("Prefabs/Player/VFX/Archer/Skill/FocusOnWeakPoint");
             }
         }
+
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+
         public override void StartParticleOption(GameObject targetGo, float duration)
         {
             base.StartParticleOption(targetGo, duration);
             _vfxManager.FollowParticleRoutine(targetGo.transform,gameObject);
+            _soundPlayerBinder.PlayDetached(FocusOnWeakPointSoundCueId);
         }
         public override string PoolingNgoPath => "Prefabs/Player/VFX/Archer/Skill/FocusOnWeakPoint";
         public override int PoolingCapacity => 5;

@@ -3,8 +3,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 using CustomEditor.Interfaces;
-using Scene;
-using Scene.GamePlayScene;
+
+
+using ScenesScripts;
 using Unity.Multiplayer;
 using UnityEditor;
 using UnityEngine;

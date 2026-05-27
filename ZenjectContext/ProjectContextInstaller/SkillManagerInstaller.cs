@@ -1,6 +1,6 @@
 using GameManagers;
-using GameManagers.Skill;
-using GameManagers.Target;
+using GameManagers.SkillManagement;
+using GameManagers.TargetManagement;
 using Zenject;
 
 namespace ZenjectContext.ProjectContextInstaller

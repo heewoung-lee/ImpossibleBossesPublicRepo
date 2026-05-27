@@ -1,19 +1,22 @@
 using BehaviorDesigner.Runtime.Tasks;
+using Controller;
 using Controller.BossState;
+using Controller.BossState.BossGolem;
 using Controller.ControllerStats;
-using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
-using NetWork.Boss_NGO;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
+using System.Collections.Generic;
+using NetWork;
+using NetWork.BossGolem_NGO;
 using Unity.Netcode;
 using UnityEngine;
 using Util;
-using Zenject;
+using VFX;
 
 namespace BehaviourTreeNode.BossGolem.Task
 {
-    public class BossDead : Action, IBossAnimationChanged
+    [TaskCategory("CustomNode")]
+    public class BossDead : Action
     {
         
         private IResourcesServices _resourcesServices;
@@ -43,39 +46,31 @@ namespace BehaviourTreeNode.BossGolem.Task
             }
         }
         
-        
-        
-        [SerializeField] private SharedProjector _projector;
-
-        
-        
-        
-        BossGolemController _controller;
-        private BossGolemNetworkController _networkController;
+        BossController _controller;
+        private NGOBossNetworkController _networkController;
+        private NetworkObject _ownerNetworkObject;
         private Animator _anim;
-        private BossGolemAnimationNetworkController _bossGolemAnimationNetworkController;
         private float _animLength;
+        private bool _hasClearedOwnedIndicators;
 
-
-
-        public BossGolemAnimationNetworkController BossAnimNetworkController => _bossGolemAnimationNetworkController;
 
         public override void OnAwake()
         {
             base.OnAwake();
-            _controller = Owner.GetComponent<BossGolemController>();
-            _networkController = Owner.GetComponent<BossGolemNetworkController>();
+            _controller = Owner.GetComponent<BossController>();
+            _networkController = Owner.GetComponent<NGOBossNetworkController>();
+            _ownerNetworkObject = Owner.GetComponent<NetworkObject>();
             _anim = Owner.GetComponent<Animator>();
-            _bossGolemAnimationNetworkController = Owner.GetComponent <BossGolemAnimationNetworkController>();
             _animLength = Utill.GetAnimationLength("Anim_Death", _controller.Anim);
         }
 
         public override void OnStart()
         {
             base.OnStart();
-            OnBossGolemAnimationChanged(BossAnimNetworkController, _controller.BaseDieState);
-            CurrentAnimInfo animInfo = new CurrentAnimInfo(_animLength, 0f, 0f, 0f, RelayManager.NetworkManagerEx.ServerTime.Time);
-            _networkController.StartAnimChagnedRpc(animInfo);
+            _controller.CurrentStateType = _controller.BaseDieState;
+            _hasClearedOwnedIndicators = false;
+            NetworkAnimationInfo animInfo = new NetworkAnimationInfo(_animLength, 0f, 0f, 0f, RelayManager.NetworkManagerEx.ServerTime.Time);
+            _networkController.StartAnimChangedRpc(animInfo);
         }
 
 
@@ -83,10 +78,10 @@ namespace BehaviourTreeNode.BossGolem.Task
         {
             if (_controller.CurrentStateType == _controller.BaseDieState)
             {
-                if (_projector.Value != null && _projector.Value.GetComponent<NetworkObject>().IsSpawned)
+                if (_hasClearedOwnedIndicators == false)
                 {
-                    ResourcesServices.DestroyObject(_projector.Value.gameObject);
-                    _projector.Value = null;
+                    ClearOwnedIndicators();
+                    _hasClearedOwnedIndicators = true;
                 }
                 AnimatorStateInfo info = _anim.GetCurrentAnimatorStateInfo(0);
                 bool isFinished = info.normalizedTime >= 1f && _anim.IsInTransition(0) == false;
@@ -99,9 +94,44 @@ namespace BehaviourTreeNode.BossGolem.Task
             return TaskStatus.Failure;
 
         }
-        public void OnBossGolemAnimationChanged(BossGolemAnimationNetworkController bossAnimController, IState state)
+
+        private void ClearOwnedIndicators()
         {
-            bossAnimController.SyncBossStateToClients(state);
+            if (_ownerNetworkObject == null || RelayManager.NetworkManagerEx.IsHost == false)
+            {
+                return;
+            }
+
+            ulong ownerNetworkObjectId = _ownerNetworkObject.NetworkObjectId;
+            DestroyOwnedNgoIndicators(ownerNetworkObjectId);
+        }
+
+        private void DestroyOwnedNgoIndicators(ulong ownerNetworkObjectId)
+        {
+            List<NetworkObject> spawnedObjects = new List<NetworkObject>(RelayManager.NetworkManagerEx.SpawnManager.SpawnedObjectsList);
+            for (int i = 0; i < spawnedObjects.Count; i++)
+            {
+                NetworkObject spawnedObject = spawnedObjects[i];
+                if (spawnedObject == null || spawnedObject.IsSpawned == false)
+                {
+                    continue;
+                }
+
+                if (spawnedObject.TryGetComponent(out NgoIndicatorController circleIndicator) &&
+                    circleIndicator.HasValidSpawnerBossNetworkObjectId &&
+                    circleIndicator.SpawnerBossNetworkObjectId == ownerNetworkObjectId)
+                {
+                    ResourcesServices.DestroyObject(circleIndicator.gameObject);
+                    continue;
+                }
+
+                if (spawnedObject.TryGetComponent(out NgoArrowIndicatorController arrowIndicator) &&
+                    arrowIndicator.HasValidSpawnerBossNetworkObjectId &&
+                    arrowIndicator.SpawnerBossNetworkObjectId == ownerNetworkObjectId)
+                {
+                    ResourcesServices.DestroyObject(arrowIndicator.gameObject);
+                }
+            }
         }
     }
 }

@@ -1,7 +1,5 @@
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
-using Scene.CommonInstaller.Interfaces;
+using GameManagers.UIManagement;
 using UnityEngine;
 using Zenject;
 

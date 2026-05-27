@@ -1,5 +1,5 @@
+using Controller;
 using GameManagers;
-using Player;
 using UnityEngine;
 using Zenject;
 

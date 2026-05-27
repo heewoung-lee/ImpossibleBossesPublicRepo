@@ -1,18 +1,18 @@
 using System.Collections;
+using Controller;
 using Data.DataType.ItemType.Interface;
 using DataType;
 using DataType.Item;
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.VFXManager;
-using GameManagers.ItamData.Interface;
-using GameManagers.ItamDataManager.Interface;
-using GameManagers.ResourcesEx;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
+using GameManagers.UIManagement;
+using GameManagers.VFXManagement;
 using Module.CommonModule;
 using Module.PlayerModule;
 using NetWork.NGO;
-using Player;
 using UI.Popup.PopupUI;
 using Unity.Netcode;
 using UnityEngine;
@@ -25,6 +25,9 @@ namespace NetWork.Item
 {
     public class LootItem : NetworkBehaviour, IInteraction
     {
+        private const string ItemDropSoundCueId = "ItemDropSFX";
+        private const string PickupSoundCueId = "PickupSFX";
+
         public class LootItemFactory : NgoZenjectFactory<LootItem>
         {
             [Inject]
@@ -65,12 +68,20 @@ namespace NetWork.Item
 
         private const float AddforceOffset = 5f;
         private const float TorqueForceOffset = 30f;
-        private const float DropitemVerticalOffset = 0.2f;
+        private const float MinimumDropitemVerticalOffset = 0.2f;
         private const float DropitemRotationOffset = 40f;
-        
+        private const float GroundRayExtraHeight = 1f;
+        private const float GroundRayDistance = 10f;
+        private const float GroundSnapPadding = 0.02f;
+        private const float LootEffectVerticalOffset = 0.2f;
+
         private UIPlayerInventory _uiPlayerInventory;
         private Vector3 _dropPosition;
         private Rigidbody _rigidBody;
+        private Collider _lootCollider;
+        private SoundPlayerBinder _soundPlayerBinder;
+        private bool _hasLanded;
+        private bool _isPickupRequested;
         
         
         public bool CanInteraction => _canInteraction;
@@ -82,6 +93,8 @@ namespace NetWork.Item
         private void Awake()
         {
             _rigidBody = GetComponent<Rigidbody>();
+            _lootCollider = GetComponent<Collider>();
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
         }
 
         public void Initialize(ItemDataSO data)
@@ -93,6 +106,8 @@ namespace NetWork.Item
         {
             base.OnNetworkSpawn();
             _itemNumberNetVar.OnValueChanged += OnItemNumberChanged;
+            _hasLanded = false;
+            _isPickupRequested = false;
             
             if (IsServer && _itemData != null)
             {
@@ -101,6 +116,7 @@ namespace NetWork.Item
             }
             LoadItemData(_itemNumberNetVar.Value);
             SpawnBehaviour();
+            _soundPlayerBinder.PlayDetached(ItemDropSoundCueId);
         }
 
         public override void OnNetworkDespawn()
@@ -135,7 +151,7 @@ namespace NetWork.Item
 
             if (gameObject.TryGetComponent(out ILootItemBehaviour behaviour) == true)
             {
-                behaviour.SpawnBahaviour(_rigidBody);
+                behaviour.SpawnBehaviour(_rigidBody);
                 return;
             }
 
@@ -151,26 +167,78 @@ namespace NetWork.Item
         private void OnTriggerEnter(Collider other)
         {
             if (!IsServer) return; 
-            if (other.gameObject.layer == LayerMask.NameToLayer("Ground") == false || _rigidBody.isKinematic) return;
-            
-            LandedLogicRpc();
+            if (_hasLanded || other.gameObject.layer == LayerMask.NameToLayer("Ground") == false || _rigidBody.isKinematic) return;
+
+            ResolveLanding(other.gameObject.layer);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
-        private void LandedLogicRpc()
+        private void LandedLogicRpc(Vector3 landedPosition)
+        {
+            if (IsHost)
+                return;
+
+            if (_hasLanded)
+                return;
+
+            _hasLanded = true;
+            ApplyLandedState(landedPosition);
+        }
+
+        public bool TryResolveLandingFromTrajectory(int groundLayer)
+        {
+            if (!IsServer || _hasLanded)
+            {
+                return false;
+            }
+
+            ResolveLanding(groundLayer);
+            return true;
+        }
+
+        private void ResolveLanding(int groundLayer)
+        {
+            _hasLanded = true;
+            Vector3 landedPosition = GetLandedPosition(groundLayer);
+            ApplyLandedState(landedPosition);
+            LandedLogicRpc(landedPosition);
+        }
+
+        private void ApplyLandedState(Vector3 landedPosition)
         {
             _rigidBody.isKinematic = true;
-            transform.position += Vector3.up * DropitemVerticalOffset;
+            transform.position = landedPosition;
             transform.rotation = Quaternion.identity;
             StartCoroutine(RotationDropItem());
-            CreateLootingItemEffect();
+            CreateLootingItemEffect(landedPosition);
             _canInteraction = true;
         }
 
-        public void CreateLootingItemEffect()
+        private Vector3 GetLandedPosition(int groundLayer)
         {
+            float halfHeight = _lootCollider != null ? _lootCollider.bounds.extents.y : 0f;
+            float verticalOffset = Mathf.Max(halfHeight + GroundSnapPadding, MinimumDropitemVerticalOffset);
+
+            Vector3 rayOrigin = transform.position + Vector3.up * (halfHeight + GroundRayExtraHeight);
+            int groundMask = 1 << groundLayer;
+
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, halfHeight + GroundRayDistance, groundMask))
+            {
+                return hit.point + Vector3.up * verticalOffset;
+            }
+
+            return transform.position + Vector3.up * verticalOffset;
+        }
+
+        public void CreateLootingItemEffect(Vector3 landedPosition)
+        {
+            if (_itemData.UseLootGradeEffect  == false)
+            {
+                return;
+            }
+
             if(_itemData != null)
-                ItemGradeEffect(_itemData);
+                ItemGradeEffect(_itemData, landedPosition);
         }
 
         public void SetPosition(Vector3 dropPosition)
@@ -187,8 +255,7 @@ namespace NetWork.Item
             }
         }
 
-        // [수정] 네임스페이스 경로를 지우고 깔끔하게 수정
-        private void ItemGradeEffect(ItemDataSO itemInfo)
+        private void ItemGradeEffect(ItemDataSO itemInfo, Vector3 landedPosition)
         {
             string path = itemInfo.itemGrade switch
             {
@@ -202,7 +269,17 @@ namespace NetWork.Item
 
             if (string.IsNullOrEmpty(path)) return;
 
-            _vfxManager.InstantiateParticleInArea(path, transform.position, parentTr: transform);
+            Vector3 effectPosition = landedPosition;
+            if (_lootCollider != null)
+            {
+                float halfHeight = _lootCollider.bounds.extents.y;
+                effectPosition = new Vector3(
+                    landedPosition.x,
+                    landedPosition.y - halfHeight + LootEffectVerticalOffset,
+                    landedPosition.z);
+            }
+
+            _vfxManager.InstantiateParticleInArea(path, effectPosition, parentTr: transform);
         }
 
         public void Interaction(ModulePlayerInteraction caller)
@@ -212,16 +289,31 @@ namespace NetWork.Item
 
         public void PlayerPickup(ModulePlayerInteraction player)
         {
+            if (_isPickupRequested)
+                return;
+
             PlayerController baseController = player.PlayerController;
             baseController.CurrentStateType = baseController.PickupState;
 
             if (baseController.CurrentStateType != baseController.PickupState)
                 return;
 
-            if(_uiPlayerInventory != null && _itemData != null)
+            _isPickupRequested = true;
+            _canInteraction = false;
+
+            if (TryGetComponent(out CoinAmountNetwork coinAmountNetwork))
+            {
+                coinAmountNetwork.ApplyPickupReward(player);
+            }
+            else if(_uiPlayerInventory != null && _itemData != null)
             {
                 // [참고] 아이템을 주울 때 기본 1개 획득
                 _uiPlayerInventory.AddItem(_itemData);
+            }
+
+            if (player.transform.TryGetComponentInParents(out SoundPlayerBinder soundPlayerBinder))
+            {
+                soundPlayerBinder.PlayDetached(PickupSoundCueId);
             }
 
             player.DisEnable_Icon_UI();

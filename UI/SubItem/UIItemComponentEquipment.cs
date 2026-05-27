@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Data.DataType.ItemType;
 using Data.Item;
 using DataType.Item.Equipment;
-using GameManagers.Interface.ResourcesManager;
 using UnityEngine.EventSystems;
 using Zenject;
 using Data.Item.EquipSlot; 
@@ -13,6 +12,9 @@ namespace UI.SubItem
 {
     public class UIItemComponentEquipment : UIItemComponentInventory
     {
+        private const string EquipSoundCueId = "EquipSFX";
+        private const string WearingOffSoundCueId = "WearingOffSFX";
+
         public override void ItemRightClick(PointerEventData eventdata)
         {
             base.ItemRightClick(eventdata);
@@ -29,8 +31,7 @@ namespace UI.SubItem
             }
             else
             {
-                GetComponentInParent<EquipMentSlot>().ItemUnEquip();
-                AttachItemToSlot(gameObject, _contentofInventoryTr);
+                MoveToInventoryAfterUnEquip(_contentofInventoryTr);
             }
         }
 
@@ -61,6 +62,11 @@ namespace UI.SubItem
             {
                 slot.ItemEquip(this);
                 AttachItemToSlot(gameObject, slot.transform);
+
+                if (IsEquipped)
+                {
+                    _soundManagerServices.PlayUiSfx(gameObject, EquipSoundCueId);
+                }
             }
         }
 
@@ -79,16 +85,15 @@ namespace UI.SubItem
                 }
                 else if (uiResult.gameObject.TryGetComponentInChildren(out InventoryContentCoordinate contentTr) && IsEquipped == true)
                 {
-                    GetComponentInParent<EquipMentSlot>().ItemUnEquip();
-                    AttachItemToSlot(gameObject, contentTr.transform);
+                    MoveToInventoryAfterUnEquip(contentTr.transform);
                 }
             }
         }
 
         protected override void DropItemOnGround()
         {
+            UnEquipItem();
             base.DropItemOnGround(); 
-            UnEquipItem(); 
         }
 
         protected override void RemoveItemFromInventory()
@@ -96,13 +101,24 @@ namespace UI.SubItem
             _resourcesServices.DestroyObject(gameObject);
         }
 
-        private void UnEquipItem()
+        private void UnEquipItem(bool playSound = true)
         {
             if (IsEquipped == true)
             {
                 GetComponentInParent<EquipMentSlot>().ItemUnEquip();
                 SetItemEquipedState(false);
+
+                if (playSound)
+                {
+                    _soundManagerServices.PlayUiSfx(gameObject, WearingOffSoundCueId);
+                }
             }
+        }
+
+        public void MoveToInventoryAfterUnEquip(Transform inventoryTarget, bool playSound = true)
+        {
+            UnEquipItem(playSound);
+            AttachItemToSlot(gameObject, inventoryTarget);
         }
     }
 }

@@ -1,10 +1,9 @@
+using Controller;
 using CoreScripts;
 using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.InputManager;
-using GameManagers.Interface.UIManager;
+using GameManagers.InputManagement;
+using GameManagers.UIManagement;
 using Module.CommonModule;
-using Player;
 using UI.WorldSpace;
 using UnityEngine;
 using UnityEngine.InputSystem;

@@ -1,24 +1,24 @@
 using System.Collections.Generic;
+using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
 using Controller.BossState;
+using Controller.BossState.BossGolem;
 using Controller.ControllerStats;
-using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
 using NetWork;
-using NetWork.Boss_NGO;
-using NetWork.NGO.Interface;
+using NetWork.BossGolem_NGO;
 using Stats.BaseStats;
 using Stats.BossStats;
+using Unity.Netcode;
 using UnityEngine;
 using Util;
 using VFX;
-using Zenject;
 
 namespace BehaviourTreeNode.BossGolem.Task
 {
-    public class BossAttack : Action, IBossAnimationChanged
+    [TaskCategory("CustomNode/StoneGolem")]
+    public class BossAttack : Action
     {
         private IResourcesServices _resourcesServices;
         private RelayManager _relayManager;
@@ -51,22 +51,26 @@ namespace BehaviourTreeNode.BossGolem.Task
         [SerializeField] private SharedProjector _attackIndicator;
         [SerializeField] private int _radiusStep = 0;
         [SerializeField] private int _angleStep = 0;
+        [SerializeField]private SharedGameObject _targetObject;
         
-        private readonly float _addIndicatorAddDurationTime = 0f;
+        [SerializeField, Min(0f)] private float _indicatorDuration = 0f;
         private readonly float _attackAnimStopThreshold = 0.06f;
 
         private BossGolemController _controller;
-        private BossGolemNetworkController _networkController;
+        private NGOBossNetworkController _networkController;
         private float _animLength = 0f;
         private List<Vector3> _attackRangeParticlePos;
         private BossStats _stats;
         private bool _hasSpawnedParticles;
 
         private NgoIndicatorController _indicatorController;
-        private BossGolemAnimationNetworkController _bossGolemAnimationNetworkController;
+
+        private float GetIndicatorDuration()
+        {
+            return _indicatorDuration > 0f ? _indicatorDuration : _animLength;
+        }
 
         
-        public BossGolemAnimationNetworkController BossAnimNetworkController => _bossGolemAnimationNetworkController;
 
         public override void OnAwake()
         {
@@ -81,8 +85,7 @@ namespace BehaviourTreeNode.BossGolem.Task
                 _controller = Owner.GetComponent<BossGolemController>();
                 _stats = _controller.GetComponent<BossStats>();
                 _animLength = Utill.GetAnimationLength("Anim_Attack1", _controller.Anim);
-                _networkController = Owner.GetComponent<BossGolemNetworkController>();
-                _bossGolemAnimationNetworkController = Owner.GetComponent<BossGolemAnimationNetworkController>();
+                _networkController = Owner.GetComponent<NGOBossNetworkController>();
             }
         }
 
@@ -96,7 +99,7 @@ namespace BehaviourTreeNode.BossGolem.Task
 
             void SpawnAttackIndicator()
             {
-                OnBossGolemAnimationChanged(BossAnimNetworkController, _controller.BaseAttackState);
+                _controller.CurrentStateType = _controller.BaseAttackState;
                 _hasSpawnedParticles = false;
                 _indicatorController = ResourcesServicesInstance.
                     InstantiateByKey("Prefabs/Enemy/Boss/Indicator/Boss_Attack_Indicator")
@@ -104,7 +107,11 @@ namespace BehaviourTreeNode.BossGolem.Task
                 _attackIndicator.Value = _indicatorController;
                 _indicatorController = RelayManagerInstance.SpawnNetworkObj(_indicatorController.gameObject)
                     .GetComponent<NgoIndicatorController>();
-                float totalIndicatorDurationTime = _addIndicatorAddDurationTime + _animLength;
+                if (Owner.TryGetComponent(out NetworkObject ownerNetworkObject))
+                {
+                    _indicatorController.SetSpawnerBossNetworkObjectId(ownerNetworkObject.NetworkObjectId);
+                }
+                float totalIndicatorDurationTime = GetIndicatorDuration();
                 _indicatorController.SetValue(_stats.ViewDistance, _stats.ViewAngle, _controller.transform,
                     totalIndicatorDurationTime, IndicatorDoneEvent);
 
@@ -147,10 +154,10 @@ namespace BehaviourTreeNode.BossGolem.Task
                     false)
                     return;
 
-
-                CurrentAnimInfo animInfo = new CurrentAnimInfo(_animLength, decelerationRatio, _attackAnimStopThreshold,
-                    _addIndicatorAddDurationTime, RelayManagerInstance.NetworkManagerEx.ServerTime.Time);
-                _networkController.StartAnimChagnedRpc(animInfo,
+                float indicatorAddDuration = GetIndicatorDuration() - _animLength;
+                NetworkAnimationInfo animInfo = new NetworkAnimationInfo(_animLength, decelerationRatio, _attackAnimStopThreshold,
+                    indicatorAddDuration, RelayManagerInstance.NetworkManagerEx.ServerTime.Time);
+                _networkController.StartAnimChangedRpc(animInfo,
                     RelayManagerInstance.GetNetworkObject(_indicatorController.gameObject));
                 //호스트가 pretime 뽑아서 모든 클라이언트 들에게 던져야함.
             }
@@ -168,11 +175,7 @@ namespace BehaviourTreeNode.BossGolem.Task
             base.OnEnd();
             _attackRangeParticlePos = null;
             _hasSpawnedParticles = false;
-        }
-
-        public void OnBossGolemAnimationChanged(BossGolemAnimationNetworkController bossAnimController, IState state)
-        {
-            bossAnimController.SyncBossStateToClients(state);
+            _controller.CurrentStateType = _controller.BaseIDleState;
         }
     }
 }

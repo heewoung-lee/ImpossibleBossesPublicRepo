@@ -1,0 +1,8 @@
+namespace ScenesScripts.GamePlayScene.Spawner
+{
+    public interface ISceneSpawnBehaviour
+    {
+        public void SpawnObj();
+        public void Init();
+    }
+}

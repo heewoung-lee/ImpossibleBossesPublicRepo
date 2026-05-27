@@ -1,7 +1,6 @@
 using System;
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using UnityEngine;
 using Util;
 using Zenject;

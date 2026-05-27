@@ -1,18 +1,11 @@
 ﻿using System;
 using System.Linq;
-using Character.Skill.AllofSkills.Mage;
 using Controller;
 using DataType.Skill.Factory.Decorator.Def;
-using GameManagers.Interface.VFXManager;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
 using Module.PlayerModule.PlayerClassModule;
-using Module.PlayerModule.PlayerClassModule.Mage;
 using Skill;
 using Unity.Netcode;
 using UnityEngine;
-using Util;
-using Zenject;
 
 namespace DataType.Skill.Factory.Decorator.Strategy
 {
@@ -48,6 +41,28 @@ namespace DataType.Skill.Factory.Decorator.Strategy
             public Module(ChainVfxDecoratorDef def)
             {
                 _def = def;
+            }
+
+            private static ulong ResolveNetworkObjectId(Transform target)
+            {
+                if (target == null)
+                {
+                    return 0;
+                }
+
+                if (target.TryGetComponent(out NetworkObject networkObject))
+                {
+                    return networkObject.NetworkObjectId;
+                }
+
+                // 드래곤처럼 피격 부위가 자식 본에 있을 수 있어서 부모 NetworkObject까지 따라 올라간다.
+                NetworkObject parentNetworkObject = target.GetComponentInParent<NetworkObject>();
+                if (parentNetworkObject != null)
+                {
+                    return parentNetworkObject.NetworkObjectId;
+                }
+
+                return 0;
             }
 
             public void Run(DecoratorPhase phase, SkillExecutionContext ctx, Action onComplete, Action onCancel)
@@ -94,13 +109,9 @@ namespace DataType.Skill.Factory.Decorator.Strategy
                     lifeSeconds = _def.hitVfxDuration.Resolve(ctx);
 
                 // A. 데이터 준비
-                ulong startAnchorID = 0;
-                if (startAnchor.TryGetComponent(out NetworkObject startNetworkObject))
-                    startAnchorID = startNetworkObject.NetworkObjectId;
+                ulong startAnchorID = ResolveNetworkObjectId(startAnchor);
 
-                ulong curNetworkObjectID = 0;
-                if (curTransform.TryGetComponent(out NetworkObject curNetworkObject))
-                    curNetworkObjectID = curNetworkObject.NetworkObjectId;
+                ulong curNetworkObjectID = ResolveNetworkObjectId(curTransform);
 
                 var casterNetObj = ctx.Caster.GetComponent<NetworkObject>();
 

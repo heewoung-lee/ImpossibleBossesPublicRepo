@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using Scene;
-using Scene.GamePlayScene;
+using ScenesScripts;
 using UnityEngine;
 
 namespace CustomEditor.Interfaces

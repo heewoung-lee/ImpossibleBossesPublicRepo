@@ -2,7 +2,8 @@ using System;
 using System.Threading;
 using Character.Skill.AllofSkills.Acher;
 using Cysharp.Threading.Tasks;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Mage;
 using NetWork.BaseNGO;
 using NetWork.NGO;
@@ -14,6 +15,10 @@ namespace Character.Skill.AllofSkills.Mage
 {
     public class NgoMageSkillTeleportInitialize : NgoPoolingInitializeBase
     {
+        private const string TeleportSoundCueId = "TelePortSFX";
+
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class NgoMageSkillTeleportFactory : NgoZenjectFactory<NgoMageSkillTeleportInitialize>,
             IMageFactoryMarker
         {
@@ -26,10 +31,16 @@ namespace Character.Skill.AllofSkills.Mage
             }
         }
 
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+
 
         public override void StartParticleOption(GameObject targetGo, float duration)
         {
             base.StartParticleOption(targetGo, duration);
+            _soundPlayerBinder.PlayDetached(TeleportSoundCueId);
             MoveToCallerRoutine(targetGo,duration).Forget();
         }
         

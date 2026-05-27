@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using GameManagers.Target;
-using Scene.CommonInstaller.InGameInstaller;
+using GameManagers.TargetManagement;
 using UnityEngine;
 
 namespace Module.CommonModule

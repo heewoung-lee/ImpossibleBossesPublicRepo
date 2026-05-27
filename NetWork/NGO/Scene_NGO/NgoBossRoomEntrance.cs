@@ -1,10 +1,8 @@
-using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
+using System.Collections.Generic;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
 using NetWork.BaseNGO;
 using Stats;
-using UI.WorldSpace;
 using UI.WorldSpace.PortalIndicator;
 using Unity.Netcode;
 using UnityEngine;
@@ -21,6 +19,30 @@ namespace NetWork.NGO.Scene_NGO
             TownPortalPosition = position;
         }
         public Vector3 TownPortalPosition { get; }
+    }
+
+    public struct SpawnPosition : INetworkSerializable
+    {
+        public SpawnPosition(Vector3 bossSpawnPosition, Vector3 playerSpawnPosition)
+        {
+            BossSpawnPosition = bossSpawnPosition;
+            PlayerSpawnPosition = playerSpawnPosition;
+        }
+
+        public Vector3 BossSpawnPosition { get; private set; }
+        public Vector3 PlayerSpawnPosition { get; private set; }
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            Vector3 bossSpawnPosition = BossSpawnPosition;
+            Vector3 playerSpawnPosition = PlayerSpawnPosition;
+
+            serializer.SerializeValue(ref bossSpawnPosition);
+            serializer.SerializeValue(ref playerSpawnPosition);
+
+            BossSpawnPosition = bossSpawnPosition;
+            PlayerSpawnPosition = playerSpawnPosition;
+        }
     }
     
     
@@ -45,6 +67,10 @@ namespace NetWork.NGO.Scene_NGO
         private RelayManager _relayManager;
         private BossRoomEntrancePosition _entrancePosition; 
         // 이 값은 단순 위치 벡터값만 있음. 나중에 테스트할때 포탈위치를 옮기고 싶다면 테스트 인스톨러에 ReBind해서 위치를 바꾸고 사용할 것;
+        
+        private readonly HashSet<ulong> _playersInPortal = new HashSet<ulong>();
+        private readonly List<ulong> _exitedPlayerIds = new List<ulong>();
+        private CapsuleCollider _portalCollider;
         
         private NgoStageTimerController _timerController;
         public NgoStageTimerController TimerController
@@ -80,68 +106,97 @@ namespace NetWork.NGO.Scene_NGO
             if (IsHost == false)
                 return;
 
+            _portalCollider = GetComponent<CapsuleCollider>();
             gameObject.transform.position = _entrancePosition.TownPortalPosition;
-
-
-            _playerCountInPortal.OnValueChanged -= OnChangedCountPlayer;
-            _playerCountInPortal.OnValueChanged += OnChangedCountPlayer;
         }
 
-
-
-        private void OnChangedCountPlayer(int previousValue, int newValue)
+        public override void OnNetworkDespawn()
         {
+            base.OnNetworkDespawn();
+            _playersInPortal.Clear();
+            _exitedPlayerIds.Clear();
+        }
 
-            if(newValue == _relayManager.NetworkManagerEx.ConnectedClientsList.Count)
-            {
-                _isAllplayersinPortal.Value = true;
-                TimerController.SetPortalInAllPlayersCountRpc();
-            }
-            else
-            {
-                if (_isAllplayersinPortal.Value == false)
-                    return;
+        private void Update()
+        {
+            if (IsHost == false)
+                return;
 
-                _isAllplayersinPortal.Value = false;
-                TimerController.SetNormalCountRpc();
-            }
+            RefreshPlayersInPortal();
         }
 
         protected override void StartInit()
         {
         }
 
-        private void OnTriggerEnter(Collider other)
+        private void RefreshPlayersInPortal()
         {
-            if (IsHost == false)
+            if (_portalCollider == null)
                 return;
-            
 
-            if (other.transform.TryGetComponentInParents(out PlayerStats playerStats) == true)
+            _exitedPlayerIds.Clear();
+            foreach (ulong playerId in _playersInPortal)
             {
-                _playerCountInPortal.Value++;
+                _exitedPlayerIds.Add(playerId);
+            }
 
-                if (playerStats.TryGetComponent(out NetworkObject playerNgo))
+            int playerCount = 0;
+            int alivePlayerCount = 0;
+            foreach (NetworkObject playerNgo in _relayManager.NetworkManagerEx.SpawnManager.SpawnedObjectsList)
+            {
+                if (playerNgo.TryGetComponent(out PlayerStats playerStats) == false)
+                    continue;
+
+                if (playerStats.IsDead)
+                    continue;
+
+                alivePlayerCount++;
+
+                CapsuleCollider playerCollider = playerStats.GetComponent<CapsuleCollider>();
+                if (playerCollider == null || playerCollider.enabled == false)
+                    continue;
+
+                if (_portalCollider.bounds.Intersects(playerCollider.bounds) == false)
+                    continue;
+
+                playerCount++;
+                _exitedPlayerIds.Remove(playerNgo.NetworkObjectId);
+
+                if (_playersInPortal.Add(playerNgo.NetworkObjectId))
                 {
                     EnteredPlayerInPortalRpc(playerNgo.NetworkObjectId);
                 }
             }
+
+            for (int i = 0; i < _exitedPlayerIds.Count; i++)
+            {
+                ulong exitedPlayerId = _exitedPlayerIds[i];
+                _playersInPortal.Remove(exitedPlayerId);
+                ExitedPlayerInPortalRpc(exitedPlayerId);
+            }
+
+            if (_playerCountInPortal.Value != playerCount)
+            {
+                _playerCountInPortal.Value = playerCount;
+            }
+
+            UpdatePortalState(playerCount, alivePlayerCount);
         }
 
-
-        private void OnTriggerExit(Collider other)
+        private void UpdatePortalState(int playerCountInPortal, int alivePlayerCount)
         {
-            if (IsHost == false)
+            bool isAllAlivePlayersInPortal = alivePlayerCount > 0 && playerCountInPortal == alivePlayerCount;
+            if (_isAllplayersinPortal.Value == isAllAlivePlayersInPortal)
                 return;
 
-            if (other.transform.TryGetComponentInParents(out PlayerStats playerStats) == true)
+            _isAllplayersinPortal.Value = isAllAlivePlayersInPortal;
+            if (isAllAlivePlayersInPortal)
             {
-                _playerCountInPortal.Value--;
-                if (playerStats.TryGetComponent(out NetworkObject playergo))
-                {
-                    ExitedPlayerInPortalRpc(playergo.NetworkObjectId);
-                }
+                TimerController.SetPortalInAllPlayersCountRpc();
+                return;
             }
+
+            TimerController.SetNormalCountRpc();
         }
 
         protected override void AwakeInit()
@@ -155,8 +210,10 @@ namespace NetWork.NGO.Scene_NGO
         {
             if (_relayManager.NetworkManagerEx.SpawnManager.SpawnedObjects.TryGetValue(playerIndex,out NetworkObject player))
             {
-                player.gameObject.TryGetComponentInChildren(out UIPortalIndicator indicator);
-                indicator.SetIndicatorOn();
+                if (player.gameObject.TryGetComponentInChildren(out UIPortalIndicator indicator))
+                {
+                    indicator.SetIndicatorOn();
+                }
             }
         }
 
@@ -166,8 +223,10 @@ namespace NetWork.NGO.Scene_NGO
         {
             if (_relayManager.NetworkManagerEx.SpawnManager.SpawnedObjects.TryGetValue(playerIndex, out NetworkObject player))
             {
-                player.gameObject.TryGetComponentInChildren(out UIPortalIndicator indicator);
-                indicator.SetIndicatorOff();
+                if (player.gameObject.TryGetComponentInChildren(out UIPortalIndicator indicator))
+                {
+                    indicator.SetIndicatorOff();
+                }
             }
         }
     }

@@ -1,9 +1,12 @@
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using GameManagers;
-using GameManagers.Scene;
+using GameManagers.LobbyManagement;
+using GameManagers.SceneManagement;
+using GameManagers.UIManagement;
 using TMPro;
 using UI.Popup.PopupUI;
+using UI.Scene.SceneUI;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
@@ -15,9 +18,13 @@ namespace UI.SubItem
 {
     public class UIRoomInfoPanel : UIBase
     {
+        private const string JoinLoadingTitle = "방에 접속중";
+        private const string JoinLoadingBody = "방 정보를 확인하고 캐릭터 선택창으로 이동하고 있습니다.";
+
         private IUIManagerServices _uIManagerServices;
         private LobbyManager _lobbyManager;
         private SceneManagerEx _sceneManagerEx;
+        private UILoadingProgress _uiLoadingProgress;
         public IUIManagerServices UIManagerServices => _uIManagerServices;
         
         [Inject]
@@ -48,6 +55,19 @@ namespace UI.SubItem
 
 
         public Lobby LobbyRegisteredPanel => _lobbyRegisteredPanel;
+        private UILoadingProgress UILoadingProgress
+        {
+            get
+            {
+                if (_uiLoadingProgress == null)
+                {
+                    _uiLoadingProgress = UIManagerServices.GetOrCreateSceneUI<UILoadingProgress>();
+                }
+
+                return _uiLoadingProgress;
+            }
+        }
+
         protected override void AwakeInit()
         {
             Bind<TMP_Text>(typeof(Texts));
@@ -89,12 +109,20 @@ namespace UI.SubItem
             }
             else
             {
+                UILoadingProgress.ShowLoading(JoinLoadingTitle, JoinLoadingBody);
                 try
                 {
                     await _lobbyManager.LoadingPanel(async () =>
                     {
-                        await _lobbyManager.JoinLobbyByID(_lobbyRegisteredPanel.Id);
-                        _sceneManagerEx.LoadScene(Define.Scene.RoomScene);
+                        UtilDebug.Log("버튼을 눌렀을때 넘어가는 메서드");
+                        Lobby joinedLobby = await _lobbyManager.JoinLobbyByID(_lobbyRegisteredPanel.Id);
+                        if (joinedLobby == null)
+                        {
+                            _joinButton.interactable = true;
+                            return;
+                        }
+
+                        _sceneManagerEx.LoadScene(Define.SceneName.RoomScene);
                     });
 
                 }
@@ -113,6 +141,10 @@ namespace UI.SubItem
                     }
                     _joinButton.interactable = true;
                     _lobbyManager.TriggerLobbyLoadingEvent(false);
+                }
+                finally
+                {
+                    UILoadingProgress.HideLoading();
                 }
             }
         }

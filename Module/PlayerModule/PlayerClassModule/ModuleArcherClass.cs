@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Data.DataType.StatType;
 using GameManagers;
-using GameManagers.Interface.DataManager;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.VFXManager;
-using GameManagers.RelayManager;
+using GameManagers.DataManagement;
+using GameManagers.VFXManagement;
+
+
 using Stats;
 using UnityEngine;
 using Util;
@@ -16,6 +16,7 @@ namespace Module.PlayerModule.PlayerClassModule
 {
     public class ModuleArcherClass : ModulePlayerClass
     {
+        private static readonly int ArcherVictoryAnimHash = Animator.StringToHash("Victory");
         private IAllData _allData;
         private IVFXManagerServices _vfxManagerServices;
         private Dictionary<int, ArcherStat> _originData;
@@ -32,6 +33,7 @@ namespace Module.PlayerModule.PlayerClassModule
         }
 
         public override Define.PlayerClass PlayerClass => Define.PlayerClass.Archer;
+        public override int VictoryAnimHash => ArcherVictoryAnimHash;
 
         
         
@@ -43,7 +45,7 @@ namespace Module.PlayerModule.PlayerClassModule
         public void AttackArrow()
         {
             if(IsOwner == false) return; // 12.31 수정 자신만 호출해야함 안그러면 평타가 모든 클라한테 호출 되어서 여러발 발사됨 
-             _vfxManagerServices.InstantiateParticleWithTarget("Prefabs/Player/VFX/Archer/ArcherAttack",transform);
+            _vfxManagerServices.InstantiateParticleWithTarget("Prefabs/Player/VFX/Archer/ArcherAttack",transform);
             _vfxManagerServices.InstantiateParticleWithTarget("Prefabs/Player/VFX/Archer/ArcherAttackMuzzle",transform);
             
         }

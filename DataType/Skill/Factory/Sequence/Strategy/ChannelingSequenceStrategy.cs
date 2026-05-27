@@ -10,9 +10,11 @@ using DataType.Skill.Factory.Sequence.Def;
 using DataType.Skill.Factory.Sequence.GetLength.Strategy;
 using DataType.Skill.Factory.Target;
 using DataType.Skill.ShareDataDef;
+using Module.CommonModule;
 using Module.PlayerModule.PlayerClassModule;
 using Skill;
 using Stats.BaseStats;
+using UI.WorldSpace;
 using UnityEngine;
 using Util;
 
@@ -122,6 +124,13 @@ namespace DataType.Skill.Factory.Sequence.Strategy
                 if (ctx.Caster != null)
                     destroyToken = ctx.Caster.GetCancellationTokenOnDestroy();
 
+                UICastingBar castingBar = null;
+                bool isCastingBarShowing = false;
+                if (ctx.Caster.TryGetComponent(out ModuleCastingBar castingBarModule))
+                {
+                    castingBar = castingBarModule.CastingBar;
+                }
+
                 //ctx토큰과 캐스터의 토큰 둘중 하나만 사라져도 멈추게 작동
                 CancellationTokenSource linked =
                     CancellationTokenSource.CreateLinkedTokenSource(runCts.Token, destroyToken);
@@ -147,6 +156,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
                     }
                     
                     float channelingElapsedTime = 0;
+                    ShowCastingBar(0f);
                     if ((ctx.Caster.CurrentStateType is CommonSkillState skillState) == true)
                     {
                         _animHash = skillState.CurrentAnimHash;
@@ -162,6 +172,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
                         }
 
                         channelingElapsedTime += Time.deltaTime;
+                        ShowCastingBar(channelingElapsedTime / channelingSecond);
                         if (CheckInterruption())
                         {
                             FinishComplete(); //종료처리 성공으로 돌려서 쿨타임을 돌아가게 만들어야함.
@@ -170,6 +181,8 @@ namespace DataType.Skill.Factory.Sequence.Strategy
 
                         await UniTask.Yield(PlayerLoopTiming.Update, token);
                     }
+
+                    FadeOutCastingBar();
 
                     //채널링 이후 강제로 애니메이션 변경
                     //이걸 안하면 채널링 애니메이션이 루프타입이여서 안끝나서 어색할 수 있음.
@@ -213,7 +226,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
                     HitEventDef[] hits = _def.hits;
                     if (hits == null || hits.Length == 0)
                     {
-                        onComplete?.Invoke();
+                        FinishComplete();
                         Debug.Assert(false, "hit is null");
                         return;
                     }
@@ -280,6 +293,7 @@ namespace DataType.Skill.Factory.Sequence.Strategy
                 {
                     if (finished) return;
                     finished = true;
+                    FadeOutCastingBar();
                     onCancel?.Invoke();
                 }
 
@@ -289,7 +303,26 @@ namespace DataType.Skill.Factory.Sequence.Strategy
 
                     if (finished) return;
                     finished = true;
+                    FadeOutCastingBar();
                     onComplete?.Invoke();
+                }
+
+                void ShowCastingBar(float normalizedProgress)
+                {
+                    if (castingBar == null)
+                        return;
+
+                    isCastingBarShowing = true;
+                    castingBar.Show(normalizedProgress);
+                }
+
+                void FadeOutCastingBar()
+                {
+                    if (castingBar == null || isCastingBarShowing == false)
+                        return;
+
+                    isCastingBarShowing = false;
+                    castingBar.FadeOut();
                 }
 
 

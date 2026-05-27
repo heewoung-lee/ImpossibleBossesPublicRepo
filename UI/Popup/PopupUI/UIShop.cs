@@ -5,10 +5,10 @@ using Data.Item;
 using DataType; 
 using DataType.Item;
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.UIManager;
-using GameManagers.ItamData.Interface;
-using GameManagers.ItamDataManager.Interface;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.SoundManagement;
+using GameManagers.UIManagement;
 using Stats;
 using TMPro;
 using UI.Scene.SceneUI;
@@ -19,7 +19,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Util;
 using Zenject;
-using Random = UnityEngine.Random;
 
 namespace UI.Popup.PopupUI
 {
@@ -30,6 +29,12 @@ namespace UI.Popup.PopupUI
         [Inject] private IItemDataManager _itemDataManager; 
 
         private const string ShopItemPrefabPath = "Prefabs/UI/Item/UIShopItemComponent";
+        private const int EquipmentShopItemCount = 5;
+        private const int NormalEquipmentWeight = 50;
+        private const int MagicEquipmentWeight = 30;
+        private const int RareEquipmentWeight = 13;
+        private const int UniqueEquipmentWeight = 5;
+        private const int EpicEquipmentWeight = 2;
 
         enum ItemShopText { EquipItemTapText, ConsumableItemTapText, ETCItemTapText, PlayerHasGoldText }
         enum IconImages { EquipItemTap, ConsumableItemTap, ETCItemTap, TabFocusLine }
@@ -109,6 +114,13 @@ namespace UI.Popup.PopupUI
                 _gameManagerEx.OnPlayerSpawnEvent += InitializePlayerStatEvent;
             }
         }
+        private void OnDestroy() //파괴 되면 구독해제
+        {
+            if (_gameManagerEx != null)
+            {
+                _gameManagerEx.OnPlayerSpawnEvent -= InitializePlayerStatEvent;
+            }
+        }
 
         protected override void ZenjectEnable()
         {
@@ -158,6 +170,7 @@ namespace UI.Popup.PopupUI
 
         public void ClickToTab(PointerEventData eventData)
         {
+            _soundManagerServices.PlayUiSfx(gameObject, UICommonSoundCueId.Hover);
             _currentFocusText.color = _nonFocusColor;
 
             if (_moveCoroutine != null)
@@ -210,19 +223,91 @@ namespace UI.Popup.PopupUI
                 UpdateHasGoldChanged(_playerStats.Gold);
             }
             
-            RandomItemRespawn();
+            RespawnShopItems();
             ShowItemTypeForSelectedTab(ItemType.Equipment);
         }
 
-        public void RandomItemRespawn()
+        public void RespawnShopItems()
         {
-            for (int i = 0; i < 5; i++)
-            {
-                ItemDataSO consumeData = _itemDataManager.GetRandomItemData(ItemType.Consumable);
-                CreateShopItem(consumeData, Random.Range(10, 21), Random.Range(1, 6));
+            CreateSellValueShopItems(ItemType.Consumable);
+            CreateSellValueShopItems(ItemType.ETC);
 
-                ItemDataSO equipData = _itemDataManager.GetRandomItemData(ItemType.Equipment);
-                CreateShopItem(equipData, Random.Range(10, 21), 1);
+            for (int i = 0; i < EquipmentShopItemCount; i++)
+            {
+                ItemGradeType grade = GetWeightedEquipmentGrade();
+                ItemDataSO equipData = _itemDataManager.GetRandomItemData(ItemType.Equipment, grade);
+                CreateShopItem(equipData, GetEquipmentPrice(grade), 1);
+            }
+        }
+
+        /// <summary>
+        /// 가중치 기반 랜덤 선택.
+        /// 전체 가중치 합 안에서 난수 하나를 뽑고, 앞 등급의 가중치를 차례로 빼면서
+        /// 현재 난수가 어느 등급 구간에 들어가는지 확인한다.
+        /// 예: 50/30/13/5/2이면 0~49 Normal, 50~79 Magic, 80~92 Rare,
+        /// 93~97 Unique, 98~99 Epic 구간이 된다.
+        /// </summary>
+        private ItemGradeType GetWeightedEquipmentGrade()
+        {
+            int totalWeight =
+                NormalEquipmentWeight +
+                MagicEquipmentWeight +
+                RareEquipmentWeight +
+                UniqueEquipmentWeight +
+                EpicEquipmentWeight;
+
+            if (totalWeight <= 0)
+                return ItemGradeType.Normal;
+
+            int roll = UnityEngine.Random.Range(0, totalWeight);
+            if (roll < NormalEquipmentWeight)
+                return ItemGradeType.Normal;
+
+            roll -= NormalEquipmentWeight;
+            if (roll < MagicEquipmentWeight)
+                return ItemGradeType.Magic;
+
+            roll -= MagicEquipmentWeight;
+            if (roll < RareEquipmentWeight)
+                return ItemGradeType.Rare;
+
+            roll -= RareEquipmentWeight;
+            if (roll < UniqueEquipmentWeight)
+                return ItemGradeType.Unique;
+
+            return ItemGradeType.Epic;
+        }
+
+        private int GetEquipmentPrice(ItemGradeType grade)
+        {
+            switch (grade)
+            {
+                case ItemGradeType.Normal:
+                    return UnityEngine.Random.Range(5, 11);
+                case ItemGradeType.Magic:
+                    return UnityEngine.Random.Range(8, 13);
+                case ItemGradeType.Rare:
+                    return UnityEngine.Random.Range(10, 26);
+                case ItemGradeType.Unique:
+                    return UnityEngine.Random.Range(15, 36);
+                case ItemGradeType.Epic:
+                    return UnityEngine.Random.Range(20, 51);
+                default:
+                    return UnityEngine.Random.Range(5, 11);
+            }
+        }
+
+        private void CreateSellValueShopItems(ItemType type)
+        {
+            List<ItemDataSO> sellValueItems = _itemDataManager.GetItemDataList(type);
+
+            foreach (ItemDataSO itemData in sellValueItems)
+            {
+                IHasSellValue sellValueItem = itemData as IHasSellValue;
+                if (sellValueItem == null)
+                    continue;
+
+                CreateShopItem(itemData, sellValueItem.SellValue, 1);
             }
         }
 

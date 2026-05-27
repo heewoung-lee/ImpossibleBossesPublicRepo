@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using Controller;
 using DataType.Skill.Factory.Target.Def;
-using GameManagers.Target;
+using GameManagers.TargetManagement;
 using Skill;
 using Stats.BaseStats;
 using UnityEngine;
@@ -42,7 +42,7 @@ namespace DataType.Skill.Factory.Target.Strategy
             private Action _onCancel;
             private bool _released;
             private readonly float _chainDistance;
-            private HashSet<GameObject> _targets;
+            private readonly HashSet<GameObject> _targets;
 
             public Module(ChainTargetingDef def, TargetManagerProvider tm)
             {
@@ -50,6 +50,68 @@ namespace DataType.Skill.Factory.Target.Strategy
                 _tm = tm;
                 _chainDistance = _def.chainDistance;
                 _targets = new HashSet<GameObject>();
+            }
+
+            private BaseStats GetTargetStats(GameObject target)
+            {
+                if (target == null)
+                {
+                    return null;
+                }
+
+                BaseStats stats = target.GetComponent<BaseStats>();
+                if (stats != null)
+                {
+                    return stats;
+                }
+
+                stats = target.GetComponentInParent<BaseStats>();
+                if (stats != null)
+                {
+                    return stats;
+                }
+
+                return target.GetComponentInChildren<BaseStats>();
+            }
+
+            private BaseStats GetTargetStats(Collider targetCollider)
+            {
+                if (targetCollider == null)
+                {
+                    return null;
+                }
+
+                BaseStats stats = targetCollider.GetComponentInParent<BaseStats>();
+                if (stats != null)
+                {
+                    return stats;
+                }
+
+                return targetCollider.GetComponentInChildren<BaseStats>();
+            }
+
+            private GameObject GetTargetKey(GameObject target)
+            {
+                // 다중 부위 콜라이더가 있어도 같은 BaseStats 루트면 같은 체인 대상로 본다.
+                BaseStats stats = GetTargetStats(target);
+                if (stats != null)
+                {
+                    return stats.gameObject;
+                }
+
+                return target;
+            }
+
+            private GameObject GetTargetKey(Collider targetCollider)
+            {
+                // 체인 후보 탐색도 콜라이더가 아니라 실제 대상 엔티티 기준으로 중복을 막는다.
+                BaseStats stats = GetTargetStats(targetCollider);
+                if (stats != null)
+                {
+                    return stats.gameObject;
+                }
+
+                return targetCollider != null ? targetCollider.gameObject : null;
             }
 
             public void BeginSelection(SkillExecutionContext ctx, Action onComplete, Action onCancel)
@@ -92,7 +154,7 @@ namespace DataType.Skill.Factory.Target.Strategy
                 bool IsValidTarget(GameObject target)
                 {
                     if (_def.extraCondition == null) return true;
-                    BaseStats baseStats = target.GetComponentInChildren<BaseStats>();
+                    BaseStats baseStats = GetTargetStats(target);
                     if (baseStats == null) return false;
 
                     return _def.extraCondition.CheckValidState(baseStats);
@@ -122,8 +184,12 @@ namespace DataType.Skill.Factory.Target.Strategy
                     nextColliders = target.GetComponentInChildren<Collider>(false);
                     if (nextColliders != null)
                     {
-                        if (_targets.Contains(nextColliders.gameObject)) return;
-                        _targets.Add(nextColliders.gameObject);
+                        GameObject targetKey = GetTargetKey(target);
+                        if (targetKey != null)
+                        {
+                            if (_targets.Contains(targetKey)) return;
+                            _targets.Add(targetKey);
+                        }
                     }
                 }
                 else
@@ -140,14 +206,20 @@ namespace DataType.Skill.Factory.Target.Strategy
                     foreach (Collider col in candidates)
                     {
                         if (col == sourceCol) continue;
-                        if (_targets.Contains(col.gameObject)) continue;
-                        if (col.TryGetComponent(out BaseStats stats))
+
+                        GameObject targetKey = GetTargetKey(col);
+                        if (targetKey != null && _targets.Contains(targetKey)) continue;
+
+                        BaseStats stats = GetTargetStats(col);
+                        if (_def.extraCondition != null)
                         {
-                            if (_def.extraCondition != null && _def.extraCondition.CheckValidState(stats) == false)
+                            if (stats == null) continue;
+                            if (_def.extraCondition.CheckValidState(stats) == false)
                             {
-                               continue;
+                                continue;
                             }
                         }
+
                         float dstSqr = (col.bounds.center - sourcePos).sqrMagnitude;
 
                         if (dstSqr < minDstSqr)
@@ -160,7 +232,12 @@ namespace DataType.Skill.Factory.Target.Strategy
                     if (nearestCol != null)
                     {
                         nextColliders = nearestCol;
-                        _targets.Add(nearestCol.gameObject);
+
+                        GameObject targetKey = GetTargetKey(nearestCol);
+                        if (targetKey != null)
+                        {
+                            _targets.Add(targetKey);
+                        }
                     }
                 }
                 if (nextColliders == null)

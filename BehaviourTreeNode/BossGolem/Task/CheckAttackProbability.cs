@@ -3,14 +3,10 @@ using UnityEngine;
 
 namespace BehaviourTreeNode.BossGolem.Task
 {
+    [TaskCategory("CustomNode/StoneGolem")]
     public class CheckAttackProbability : Conditional
     {
         [SerializeField] private int _successRate = 0;
-
-        public override void OnStart()
-        {
-            base.OnStart();
-        }
 
         public override TaskStatus OnUpdate()
         {
@@ -21,10 +17,6 @@ namespace BehaviourTreeNode.BossGolem.Task
             return TaskStatus.Failure;
         }
 
-        public override void OnEnd()
-        {
-            base.OnEnd();
-        }
 
     }
 }

@@ -1,12 +1,10 @@
 using System;
-using Controller;
 using Controller.ControllerStats.BaseStates;
 using Controller.PlayerState;
 using Data;
-using GameManagers;
-using GameManagers.Interface.InputManager;
+using GameManagers.InputManagement;
+using Module.PlayerModule.PlayerClassModule;
 using Stats;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
@@ -14,7 +12,7 @@ using UnityEngine.InputSystem;
 using Util;
 using Zenject;
 
-namespace Player
+namespace Controller
 {
     public class PlayerController : MoveableController
     {
@@ -22,6 +20,7 @@ namespace Player
         [Inject]private IInputAsset _inputmanager;
         private NavMeshAgent _agent;
         private PlayerStats _stats;
+        private CrowdControl.PlayerCrowdControlNetworkReceiver _crowdControlReceiver;
 
         private PlayerInput _playerInput;
         private InputAction _moveAction;
@@ -43,12 +42,14 @@ namespace Player
         protected override int HashMove => PlayerAnimHash.Run;
         protected override int HashAttack => PlayerAnimHash.Attack;
         protected override int HashDie => PlayerAnimHash.Die;
+        private int HashVictory => _playerClassModule.VictoryAnimHash;
         private int _hashPickUp => Animator.StringToHash("Pickup");
 
         public override AttackState BaseAttackState => _baseAttackState;
         public override IDleState BaseIDleState => _baseIDleState;
         public override DieState BaseDieState => _baseDieState;
         public override MoveState BaseMoveState => _baseMoveState;
+        public VictoryState BaseVictoryState => _baseVictoryState;
 
         public PickUpState PickupState => _pickupState;
 
@@ -56,7 +57,9 @@ namespace Player
         private IDleState _baseIDleState;
         private DieState _baseDieState;
         private MoveState _baseMoveState;
+        private VictoryState _baseVictoryState;
         private PickUpState _pickupState;
+        private ModulePlayerClass _playerClassModule;
 
 
         protected override void AwakeInit()
@@ -64,11 +67,14 @@ namespace Player
             _stats = gameObject.GetComponent<PlayerStats>();
             _agent = gameObject.GetComponent<NavMeshAgent>();
             _playerInput = gameObject.GetComponent<PlayerInput>();
+            _crowdControlReceiver = gameObject.GetComponent<CrowdControl.PlayerCrowdControlNetworkReceiver>();
+            _playerClassModule = gameObject.GetComponent<ModulePlayerClass>();
 
             _baseAttackState = new AttackState(UpdateAttack);
             _baseMoveState = new MoveState(UpdateMove);
             _baseDieState = new DieState(UpdateDie);
             _baseIDleState = new IDleState(UpdateIdle);
+            _baseVictoryState = new VictoryState(UpdateVictory);
             _pickupState = new PickUpState(UpdatePickup);
         }
 
@@ -148,8 +154,17 @@ namespace Player
             CurrentStateType = BaseDieState;
         }
 
+        public void PlayVictory()
+        {
+            CurrentStateType = _baseVictoryState;
+        }
+
         private void Attack(InputAction.CallbackContext context)
         {
+            // Stun blocks skill input. Root still allows skill usage.
+            if (_crowdControlReceiver != null && _crowdControlReceiver.IsActionLocked)
+                return;
+
             if (CurrentStateType == BaseAttackState)
                 return;
 
@@ -163,6 +178,14 @@ namespace Player
 
         public override void UpdateMove()
         {
+            // Movement update also rotates the player, so Root/Stun both stop move and facing here.
+            if (_crowdControlReceiver != null && _crowdControlReceiver.IsMovementLocked)
+            {
+                _agent.ResetPath();
+                CurrentStateType = _baseIDleState;
+                return;
+            }
+
             Vector3 dir = new Vector3(_destPos.x, 0, _destPos.z) -
                           new Vector3(transform.position.x, 0,
                               transform.position.z); //높이에 대한 값을 빼야 근사값에 더 정확한 수치를 뽑을 수 있음.
@@ -201,11 +224,23 @@ namespace Player
 
         public override void UpdateAttack()
         {
+            // Only Stun interrupts the attack state. Root keeps the current skill flow alive.
+            if (_crowdControlReceiver != null && _crowdControlReceiver.IsActionLocked)
+            {
+                CurrentStateType = _baseIDleState;
+                return;
+            }
+
             ChangeAnimIfCurrentIsDone(HashAttack, _baseIDleState);
+        }
+
+        public void UpdateVictory()
+        {
         }
 
         protected override void AddInitalizeStateDict()
         {
+            StateAnimDict.RegisterState(_baseVictoryState, () => RunAnimation(HashVictory, TransitionIdle));
             StateAnimDict.RegisterState(_pickupState, () => RunAnimation(_hashPickUp, DefaultTransitionPickup));
         }
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Controller;
 using DataType.Skill.Factory.Effect.Def;
-using GameManagers.Interface.VFXManager;
+using GameManagers.VFXManagement;
 using Skill;
 using UnityEngine;
 using Util;

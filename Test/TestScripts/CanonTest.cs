@@ -1,9 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.VFXManager;
-using GameManagers.ResourcesEx;
+using GameManagers.GameManagerExManagement;
+using GameManagers.ResourcesExManagement;
+using GameManagers.VFXManagement;
 using UnityEngine;
 using Zenject;
 
@@ -14,13 +13,12 @@ namespace Test.TestScripts
         [Inject] private IResourcesServices _resourceManager;
         [Inject] private IPlayerSpawnManager _gameManagerEx;
         [Inject] private IVFXManagerServices _vfxManager;
-        
-        
-        public Transform startTransform;  // 시작 위치
-        public Transform targetTransform; // 목표 위치
-        public GameObject projectilePrefab; // 발사체 프리팹
-        public float maxHeight = 5f;    // 최대 높이
-        public float flightSpeed = 8f; // 비행 속도 (거리 기반)
+
+        public Transform startTransform;
+        public Transform targetTransform;
+        public GameObject projectilePrefab;
+        public float maxHeight = 5f;
+        public float flightSpeed = 8f;
 
         private void Update()
         {
@@ -32,56 +30,20 @@ namespace Test.TestScripts
 
         private void Start()
         {
-            startTransform = transform; 
+            startTransform = transform;
         }
+
         public void Launch()
         {
             targetTransform = _gameManagerEx.GetPlayer().transform;
-
-            // 발사체 생성
-            GameObject projectile = _resourceManager.InstantiateByKey("Prefabs/Enemy/Boss/AttackPattern/BossSkill1");
-
-            projectile.transform.SetParent(_vfxManager.VFXRootNgo);
-            projectile.transform.position += Vector3.up * GetComponent<Collider>().bounds.max.y;
-            projectile.transform.rotation = Quaternion.Euler(Random.Range(0, 360f), Random.Range(0, 360f), Random.Range(0, 360f));
-
-            // 코루틴 시작
-            StartCoroutine(Parabola(projectile.transform));
+            _vfxManager.InstantiateParticleInArea(
+                "Prefabs/Enemy/Boss/AttackPattern/StoneGolem/NgoBossSkill1AttackHit",
+                targetTransform.position);
         }
 
         private IEnumerator Parabola(Transform projectile)
         {
-            Vector3 startPoint = startTransform.position + projectile.transform.position;
-            Vector3 targetPoint = targetTransform.position;
-
-            // 거리 기반 비행 시간 계산
-            float distance = Vector3.Distance(startPoint, targetPoint);
-            //float duration = distance/ flightSpeed;
-            float duration = 1f;
-
-            float elapsedTime = 0f;
-            while (elapsedTime < duration)
-            {
-                elapsedTime += Time.deltaTime;
-
-                // t: 진행 비율 (0~1)
-                float t = elapsedTime / duration;
-
-                // XZ 위치 보간
-                Vector3 currentXZ = Vector3.Lerp(startPoint, targetPoint, t);
-
-                // Y 값은 포물선 계산
-                float currentY = Mathf.Lerp(startPoint.y, targetPoint.y, t) +
-                                 maxHeight * Mathf.Sin(Mathf.PI * t);
-
-                // 최종 위치 설정
-                projectile.position = new Vector3(currentXZ.x, currentY, currentXZ.z);
-
-                yield return null;
-            }
-
-            // 포물선 이동 완료 후 파괴
-            _resourceManager.DestroyObject(projectile.gameObject, 2f);
+            yield break;
         }
     }
 }

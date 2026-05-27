@@ -3,10 +3,10 @@ using Controller;
 using DataType.Item.Consumable;
 using DataType.Skill.Factory.Decorator.Def;
 using DataType.Skill.Factory.Effect.Def;
-using GameManagers.Interface.BufferManager;
-using GameManagers.RelayManager;
+using GameManagers.BufferManagement;
+
 using Skill;
-using Unity.Netcode;
+using Stats.BaseStats;
 using UnityEngine;
 using Zenject;
 
@@ -56,7 +56,14 @@ namespace DataType.Skill.Factory.Effect.Strategy
                     return;
                 }
                 Collider[] targets = skillContext.HitTargets;
-                StatEffect effect = new StatEffect(_def.buffType,_def.Value,ctx.Data.dataName);
+                float value = _def.Value;
+                if (_def.useCasterAttack)
+                {
+                    BaseStats stats = ctx.Caster.GetComponent<BaseStats>();
+                    value = Mathf.RoundToInt(stats.Attack * _def.attackMultiplier);
+                }
+                
+                StatEffect effect = new StatEffect(_def.buffType,value,ctx.Data.dataName);
                 float duration = 1f;
                 if (_def != null)
                 {

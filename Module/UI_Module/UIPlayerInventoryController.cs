@@ -1,8 +1,9 @@
 using CoreScripts;
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
-using GameManagers.Interface.InputManager;
-using GameManagers.UIFactory.UIController;
+using GameManagers.GameManagerExManagement;
+using GameManagers.InputManagement;
+using GameManagers.UIFactoryManagement.UIController;
+using GameManagers.UIManagement;
 using UI.Popup.PopupUI;
 using UnityEngine;
 using UnityEngine.InputSystem;

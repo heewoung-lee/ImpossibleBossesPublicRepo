@@ -1,5 +1,5 @@
 using GameManagers;
-using GameManagers.Interface.DataManager;
+using GameManagers.DataManagement;
 using UnityEngine;
 using Zenject;
 

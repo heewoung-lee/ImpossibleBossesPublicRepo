@@ -1,5 +1,6 @@
 using System;
 using GameManagers;
+using GameManagers.UIManagement;
 using UI.Popup.PopupUI;
 using UnityEngine.UI;
 using Zenject;
@@ -9,16 +10,27 @@ namespace UI.Scene.SceneUI
     public class UILoginSceneSettingButton : UIScene
     {
         [Inject] private IUIManagerServices _uiManager;
-        
-        private UISettingsPopup _settingsPopup;
-        private Button _settingButton; 
-        
-        private void Awake()
+
+        private enum Buttons
         {
-            _settingButton = GetComponent<Button>();
-            _settingButton.onClick.AddListener(ShowSettingPopupUI);
+            ButtonSetting
         }
 
+        private UISettingsPopup _settingsPopup;
+        private Button _settingButton;
+
+        protected override void AwakeInit()
+        {
+            base.AwakeInit();
+            AddBind<Button>(typeof(Buttons), out string[] _);
+            _settingButton = GetButton((int)Buttons.ButtonSetting);
+        }
+
+        protected override void StartInit()
+        {
+            base.StartInit();
+            _settingButton.onClick.AddListener(ShowSettingPopupUI);
+        }
 
         private void ShowSettingPopupUI()
         {

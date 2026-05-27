@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Data.DataType.ItemType.Interface;
 using DataType.Strategies;
+using DataType.Strategies.Item;
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
@@ -11,7 +12,7 @@ using Util;
 namespace DataType.Item.Consumable
 {
     [CreateAssetMenu(fileName = "Consume_", menuName = "DataSO/Item/Consumable")]
-    public class ConsumableItemSO : ItemDataSO
+    public class ConsumableItemSO : ItemDataSO, IHasSellValue, ICanDrop
     {
         [Serializable]
         public class ConsumableBuffData
@@ -72,6 +73,12 @@ namespace DataType.Item.Consumable
         [Title("Effects List")]
         [TableList(ShowIndexLabels = true)] 
         public List<ConsumableBuffData> itemEffects = new List<ConsumableBuffData>();
+
+        [Title("Shop Data")]
+        [MinValue(0)]
+        public int sellValue;
+
+        public int SellValue => sellValue;
 
         public override Type GetStrategyType() => typeof(ConsumableStrategy);
 

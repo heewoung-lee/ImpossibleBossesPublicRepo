@@ -1,0 +1,36 @@
+using System;
+using Cysharp.Threading.Tasks;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using Unity.Networking.Transport.Relay;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
+using Util;
+
+namespace GameManagers.RelayManagement.Implementation
+{
+    public class RelayConnection: IConnectionStrategy
+    {
+        public async UniTask<string> StartHostAsync(NetworkManager networkManager, int maxConnections)
+        {
+            try
+            {
+                Allocation allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
+                RelayServerData relaydata = AllocationUtils.ToRelayServerData(allocation, "dtls");
+                networkManager.GetComponent<UnityTransport>().SetRelayServerData(relaydata);
+                string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+                UtilDebug.Log($"호출 됐나요 릴레이코드: {joinCode}");
+                if (networkManager.StartHost())
+                {
+                    return joinCode;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                UtilDebug.LogError(ex);
+                return null;
+            }
+        }
+    }
+}

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using GameManagers;
-using GameManagers.RelayManager;
+using GameManagers.RelayManagement;
+
+
 using UnityEngine.SceneManagement;
 using Util;
 using Zenject;
@@ -40,7 +42,7 @@ namespace UI.WorldSpace.PortalIndicator
         private void OnChangeSceneEvent(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
         {
 
-            if (sceneName != Define.Scene.GamePlayScene.ToString() && sceneName != Define.Scene.BattleScene.ToString())
+            if (sceneName != Define.SceneName.GamePlayScene.ToString() && sceneName != Define.SceneName.FirstBossScene.ToString())
                 return;
 
             if (!clientsCompleted.Contains(_relayManager.NetworkManagerEx.LocalClientId))

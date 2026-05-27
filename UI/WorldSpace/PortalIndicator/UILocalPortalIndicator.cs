@@ -1,5 +1,4 @@
 using System;
-using Scene.CommonInstaller.Interfaces;
 using Stats;
 using UnityEngine;
 using UnityEngine.UI;

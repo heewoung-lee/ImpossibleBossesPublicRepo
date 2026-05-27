@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Archer;
 using NetWork.BaseNGO;
 using NetWork.NGO;
@@ -14,11 +15,20 @@ namespace Character.Skill.AllofSkills.Acher
 {
     public class NgoArcherSkillFlashInitialize : NgoPoolingInitializeBase
     {
+        private const string FlashSoundCueId = "FlashSFX";
+
         private IResourcesServices _resourcesServices;
+        private SoundPlayerBinder _soundPlayerBinder;
+
         [Inject]
         public void Construct(IResourcesServices resourcesServices)
         {
             _resourcesServices = resourcesServices;
+        }
+
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
         }
         
         public class NgoArcherSkillFlashFactory : NgoZenjectFactory<NgoArcherSkillFlashInitialize>,IArcherFactoryMarker
@@ -40,6 +50,7 @@ namespace Character.Skill.AllofSkills.Acher
             base.StartParticleOption(targetGo, duration);
 
             MoveToCallerRoutine(targetGo,duration).Forget();
+            _soundPlayerBinder.PlayDetached(FlashSoundCueId);
         }
         
         private async UniTaskVoid MoveToCallerRoutine(GameObject caller, float duration)

@@ -1,8 +1,7 @@
 using System.IO;
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Pool;
-using GameManagers.ResourcesEx;
+using GameManagers.NGOPoolManagement;
+using GameManagers.ResourcesExManagement;
 using NetWork.BaseNGO;
 using Unity.Collections;
 using Unity.Netcode;
@@ -83,6 +82,11 @@ namespace NetWork.NGO.InitializeNGO
 
         private void GeneratePoolObj(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
             _poolManager.NGO_Pool_RegisterPrefab(path,this);
         }
 

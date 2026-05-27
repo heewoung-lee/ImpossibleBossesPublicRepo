@@ -4,10 +4,8 @@ using System.Linq;
 using Controller.PlayerState.FighterState;
 using Data.DataType.StatType;
 using GameManagers;
-using GameManagers.Data;
-using GameManagers.Interface.DataManager;
-using GameManagers.Interface.GameManagerEx;
-using Player;
+using GameManagers.DataManagement;
+using GameManagers.SoundManagement;
 using Stats;
 using Stats.BaseStats;
 using UnityEngine;
@@ -20,8 +18,18 @@ namespace Module.PlayerModule.PlayerClassModule
 
     public class ModuleFighterClass : ModulePlayerClass
     {
+        private static readonly int FighterVictoryAnimHash = Animator.StringToHash("Victory");
+        private const string FighterAttackSoundCueId = "FigherAttackSFX";
+        private const string BuffSoundCueId = "BuffSFX";
+        private const string SlashSfx1CueId = "SlashSFX1";
+        private const string SlashSfx2CueId = "SlashSFX2";
+        private const string SlashSfx3CueId = "SlashSFX3";
+        private const string TauntSfxCueId = "TauntSFX";
+
         private IAllData _allData;
         private Dictionary<int, FighterStat> _originData;
+        private SoundPlayerBinder _soundPlayerBinder;
+
         [Inject]
         public void Construct(IAllData allData)
         {
@@ -32,17 +40,55 @@ namespace Module.PlayerModule.PlayerClassModule
             InitializeStatTable(_originData);
         }
         public override Define.PlayerClass PlayerClass => Define.PlayerClass.Fighter;
+        public override int VictoryAnimHash => FighterVictoryAnimHash;
+
+        protected override void InitOnAwake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
 
 
         #region AnimationClipMethod
 
         public void AttackEvent()
         {
-            if (IsOwner == false) return;
+            _soundPlayerBinder.PlayDetached(FighterAttackSoundCueId);
             
+            
+            if (IsOwner == false) return;
             TargetInSight.AttackTargetInSector(Stats);
         }
 
+        public void BuffSkillSfxEvent()
+        {
+            PlayDetachedSfx(BuffSoundCueId);
+        }
+
+        public void SlashSfx1Event()
+        {
+            PlayDetachedSfx(SlashSfx1CueId);
+        }
+
+        public void SlashSfx2Event()
+        {
+            PlayDetachedSfx(SlashSfx2CueId);
+        }
+
+        public void SlashSfx3Event()
+        {
+            PlayDetachedSfx(SlashSfx3CueId);
+        }
+
+        public void TauntSfxEvent()
+        {
+            PlayDetachedSfx(TauntSfxCueId);
+        }
+
         #endregion
+
+        private void PlayDetachedSfx(string cueId)
+        {
+            _soundPlayerBinder.PlayDetached(cueId);
+        }
     }
 }

@@ -3,6 +3,7 @@ using BehaviorDesigner.Runtime.Tasks;
 
 namespace BehaviourTreeNode.BossGolem.Task
 {
+    [TaskCategory("CustomNode/StoneGolem")]
     public class CheckPhaseSkillUsed : Conditional
     {
 

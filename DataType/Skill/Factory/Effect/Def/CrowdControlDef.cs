@@ -1,16 +1,12 @@
-﻿using System;
+using System;
+using Controller.CrowdControl;
 
 namespace DataType.Skill.Factory.Effect.Def
 {
-    public enum CCType
-    {
-        Taunt
-    }
-    
     [Serializable]
-    public class CrowdControlDef: IEffectDef
+    public class CrowdControlDef : IEffectDef
     {
         public CCType ccType;
-        public float Value { get; }
+        public DurationRefDef hitVfxDuration = new DurationRefDef();
     }
 }

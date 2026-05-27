@@ -4,7 +4,7 @@ using System.Linq;
 using Data.DataType.ItemType.Interface;
 using DataType.Item;
 using GameManagers;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIManagement;
 using UI.Popup;
 using UI.Scene;
 using UI.Scene.SceneUI;

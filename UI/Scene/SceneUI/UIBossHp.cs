@@ -1,6 +1,5 @@
 using System.Collections;
-using GameManagers;
-using GameManagers.Interface.GameManagerEx;
+using GameManagers.GameManagerExManagement;
 using Stats.BossStats;
 using TMPro;
 using UnityEngine;
@@ -11,20 +10,29 @@ namespace UI.Scene.SceneUI
 {
     public class UIBossHp : UIScene
     {
-        [Inject] IBossSpawnManager _bossSpawnManager;
-        enum HpSlider
+        private IBossSpawnManager _bossSpawnManager;
+
+        [Inject]
+        public void Construct(IBossSpawnManager bossSpawnManager)
+        {
+            _bossSpawnManager = bossSpawnManager;
+        }
+
+        private enum HpSlider
         {
             BossHpSlider
         }
-        enum HpText
+
+        private enum HpText
         {
             HpText
         }
-    
+
         private Slider _hpSlider;
         private TMP_Text _hpText;
         private BossStats _stats;
-        private int _currentHp;
+        private Coroutine _hpAnimationCoroutine;
+
         protected override void AwakeInit()
         {
             base.AwakeInit();
@@ -33,64 +41,107 @@ namespace UI.Scene.SceneUI
 
             _hpText = GetText((int)HpText.HpText);
             _hpSlider = Get<Slider>((int)HpSlider.BossHpSlider);
+            _hpSlider.value = 0f;
         }
 
         protected override void StartInit()
         {
-
-            if(_bossSpawnManager.GetBossMonster() != null)
+            if (_bossSpawnManager.GetBossMonster() != null)
             {
-                SetBossStatUI();
-            }
-            else
-            {
-                _bossSpawnManager.OnBossSpawnEvent += SetBossStatUI;
+                BindBossStats();
+                return;
             }
 
-            void SetBossStatUI()
+            _bossSpawnManager.OnBossSpawnEvent += BindBossStats;
+        }
+
+        private void OnDestroy()
+        {
+            _bossSpawnManager.OnBossSpawnEvent -= BindBossStats;
+            UnbindBossStats();
+        }
+
+        private void BindBossStats()
+        {
+            _bossSpawnManager.OnBossSpawnEvent -= BindBossStats;
+            BossStats nextStats = _bossSpawnManager.GetBossMonster().GetComponent<BossStats>();
+
+            if (_stats == nextStats)
             {
-                _stats = _bossSpawnManager.GetBossMonster().GetComponent<BossStats>();
-                _stats.CurrentHpValueChangedEvent += Stats_CurrentHPValueChangedEvent;
-                _stats.MaxHpValueChangedEvent += Stats_CurrentMAXHPValueChangedEvent;
-
-                if (_stats.MaxHp <= 0)
-                    return;
-
-                _hpText.text = $"{_stats.Hp} / {_stats.MaxHp}";
+                return;
             }
+
+            UnbindBossStats();
+            _stats = nextStats;
+            _stats.CurrentHpValueChangedEvent += Stats_CurrentHPValueChangedEvent;
+            _stats.MaxHpValueChangedEvent += Stats_CurrentMAXHPValueChangedEvent;
+
+            if (_stats.MaxHp <= 0)
+            {
+                return;
+            }
+
+            _hpText.text = $"{_stats.Hp} / {_stats.MaxHp}";
+            RestartSliderAnimation(0f, GetCurrentHpRatio(), 1f);
+        }
+
+        private void UnbindBossStats()
+        {
+            if (_stats == null)
+            {
+                return;
+            }
+
+            _stats.CurrentHpValueChangedEvent -= Stats_CurrentHPValueChangedEvent;
+            _stats.MaxHpValueChangedEvent -= Stats_CurrentMAXHPValueChangedEvent;
+            _stats = null;
         }
 
         private void Stats_CurrentMAXHPValueChangedEvent(int preCurrentMaxHp, int currentMaxHp)
         {
             _hpText.text = $"{_stats.Hp} / {currentMaxHp}";
-            _hpSlider.value = (float)_stats.Hp / (float)currentMaxHp;
+            RestartSliderAnimation(_hpSlider.value, GetCurrentHpRatio(), 0.2f);
         }
 
         private void Stats_CurrentHPValueChangedEvent(int preCurrentHp, int currentHp)
         {
             if (_stats.MaxHp <= 0)
+            {
                 return;
-            StartCoroutine(AnimationHp(preCurrentHp- currentHp));
+            }
+
             _hpText.text = $"{currentHp} / {_stats.MaxHp}";
+            RestartSliderAnimation(_hpSlider.value, GetCurrentHpRatio(), 0.35f);
         }
 
-        private IEnumerator AnimationHp(int damage)
+        private float GetCurrentHpRatio()
         {
-            float duration = 1.0f;
-            float elapsedTime = 0f;
-            float beforeHp = ((float)_stats.Hp+ damage) / (float)_stats.MaxHp;
-            float afterHp = ((float)_stats.Hp) / (float)_stats.MaxHp;
+            return (float)_stats.Hp / _stats.MaxHp;
+        }
 
-            while(elapsedTime < duration)
+        private void RestartSliderAnimation(float fromValue, float toValue, float duration)
+        {
+            if (_hpAnimationCoroutine != null)
             {
-                //흘러가는 경과시간
-                elapsedTime += Time.deltaTime * 3f;
-                _hpSlider.value = Mathf.Lerp(beforeHp, afterHp, elapsedTime);
+                StopCoroutine(_hpAnimationCoroutine);
+            }
+
+            _hpAnimationCoroutine = StartCoroutine(AnimationHp(fromValue, toValue, duration));
+        }
+
+        private IEnumerator AnimationHp(float fromValue, float toValue, float duration)
+        {
+            float elapsedTime = 0f;
+
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+                _hpSlider.value = Mathf.Lerp(fromValue, toValue, elapsedTime / duration);
                 yield return null;
             }
-            _hpSlider.value = afterHp;
-        }
 
-  
+            _hpSlider.value = toValue;
+            _hpAnimationCoroutine = null;
+        }
     }
 }

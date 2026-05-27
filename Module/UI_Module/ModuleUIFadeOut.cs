@@ -7,53 +7,128 @@ namespace Module.UI_Module
 {
     public class ModuleUIFadeOut : MonoBehaviour
     {
+        [SerializeField] private bool _playOnEnable = true;
+        [SerializeField] private bool _disableGameObjectOnComplete = true;
+
         private Graphic[] _graphics;
+        private Coroutine _fadeOutCoroutine;
         private bool _isPlayingFadeout = false;
+
         public bool IsPlayingFadeOut => _isPlayingFadeout;
+        public bool PlayOnEnable => _playOnEnable;
+        public bool DisableGameObjectOnComplete => _disableGameObjectOnComplete;
 
         public Action DoneFadeoutEvent;
 
         private void Awake()
         {
-            _graphics = GetComponentsInChildren<Graphic>();
+            CacheGraphics();
         }
 
         private void OnEnable()
         {
-            StartCoroutine(FadeOutImage());
+            if (_playOnEnable == true)
+            {
+                PlayFadeOut();
+            }
         }
 
         private void OnDisable()
         {
-            _isPlayingFadeout = false;
-            DoneFadeoutEvent?.Invoke();
-            // Disable될 때 컬러를 알파1로 초기화
-            foreach (Graphic g in _graphics)
+            StopFadeOut(resetAlpha: true);
+        }
+
+        public void PlayFadeOut()
+        {
+            CacheGraphics();
+            StopFadeOut(resetAlpha: true);
+
+            if (gameObject.activeInHierarchy == false)
             {
-                Color c = g.color;
-                c.a = 1f;
-                g.color = c;
+                return;
+            }
+
+            _fadeOutCoroutine = StartCoroutine(FadeOutImage());
+        }
+
+        public void HideImmediate()
+        {
+            StopFadeOut(resetAlpha: true);
+
+            if (gameObject.activeSelf == true)
+            {
+                gameObject.SetActive(false);
             }
         }
 
-        IEnumerator FadeOutImage()
+        private void CacheGraphics()
+        {
+            if (_graphics != null && _graphics.Length > 0)
+            {
+                return;
+            }
+
+            _graphics = GetComponentsInChildren<Graphic>(true);
+        }
+
+        private void StopFadeOut(bool resetAlpha)
+        {
+            if (_fadeOutCoroutine != null)
+            {
+                StopCoroutine(_fadeOutCoroutine);
+                _fadeOutCoroutine = null;
+            }
+
+            _isPlayingFadeout = false;
+
+            if (resetAlpha == true)
+            {
+                SetAlpha(1f);
+            }
+        }
+
+        private void SetAlpha(float alpha)
+        {
+            CacheGraphics();
+
+            foreach (Graphic graphic in _graphics)
+            {
+                Color color = graphic.color;
+                color.a = alpha;
+                graphic.color = color;
+            }
+        }
+
+        private IEnumerator FadeOutImage()
         {
             _isPlayingFadeout = true;
             float duration = 1f;
+            SetAlpha(1f);
+
             while (duration > 0)
             {
                 duration -= Time.deltaTime / 2f;
+                float alpha = Mathf.Clamp01(duration);
 
-                foreach (Graphic g in _graphics)
+                foreach (Graphic graphic in _graphics)
                 {
-                    Color c = g.color;
-                    c.a = duration;
-                    g.color = c;
+                    Color color = graphic.color;
+                    color.a = alpha;
+                    graphic.color = color;
                 }
 
                 yield return null;
             }
-            gameObject.SetActive(false);
+
+            _fadeOutCoroutine = null;
+            _isPlayingFadeout = false;
+
+            if (_disableGameObjectOnComplete == true)
+            {
+                gameObject.SetActive(false);
+            }
+
+            DoneFadeoutEvent?.Invoke();
         }
     }
 }

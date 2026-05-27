@@ -3,7 +3,6 @@ using Data.Item;
 using DataType.Item;
 using DataType.Item.Consumable;
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
 using TMPro;
 using UI.Scene.SceneUI;
 using UnityEngine;
@@ -15,6 +14,9 @@ namespace UI.SubItem
 {
     public class UIItemComponentConsumable : UIItemComponentInventory
     {
+        private const string EquipConsumableSoundCueId = "EquipConsumableSFX";
+        private const string UnEquipConsumableSoundCueId = "UnEquipConsumableSFX";
+
         enum Texts { ItemCountText }
         private TMP_Text _itemCountText;
         private string _itemGuid;
@@ -98,7 +100,7 @@ namespace UI.SubItem
             if (IsEquipped == false) ConsumableItemEquip(this);
             else 
             {
-                AttachItemToSlot(gameObject, _contentofInventoryTr);
+                MoveToInventoryWithSound(_contentofInventoryTr);
                 CombineConsumableItems();
             }
         }
@@ -115,14 +117,14 @@ namespace UI.SubItem
 
             foreach (Transform parentTr in _consumableBar.FrameTrs)
             {
-                if (CombineConsumableItems(parentTr)) return;
+                if (TryCombineConsumableItemsWithSound(parentTr, EquipConsumableSoundCueId)) return;
             }
 
             for (int i = 0; i < _consumableBar.FrameTrs.Length; i++)
             {
                 if (_consumableBar.FrameTrs[i].childCount < 1)
                 {
-                    AttachItemToSlot(itemcomponent.gameObject, _consumableBar.FrameTrs[i].transform);
+                    MoveToConsumableBarWithSound(itemcomponent.gameObject, _consumableBar.FrameTrs[i].transform);
                     break;
                 }
             }
@@ -140,7 +142,7 @@ namespace UI.SubItem
                         if (frameTr.gameObject.TryGetComponentInChildren(out UIItemComponentConsumable uiConsumableItem))
                         {
                             if (uiConsumableItem.ItemNumber != ItemNumber) continue;
-                            CombineConsumableItems(frameTr); 
+                            TryCombineConsumableItemsWithSound(frameTr, EquipConsumableSoundCueId); 
                             return; 
                         }
                     }
@@ -148,17 +150,50 @@ namespace UI.SubItem
                     if (uiResult.gameObject.TryGetComponentInChildren(out UIItemComponentConsumable uiAlreadyitem)
                         && uiAlreadyitem.ItemNumber != ItemNumber)
                     {
-                        AttachItemToSlot(uiAlreadyitem.gameObject, transform.parent);
+                        uiAlreadyitem.MoveToInventoryWithSound(transform.parent);
                     }
 
-                    AttachItemToSlot(gameObject, uiResult.gameObject.transform);
+                    MoveToConsumableBarWithSound(gameObject, uiResult.gameObject.transform);
                     break;
                 }
                 else if (uiResult.gameObject.TryGetComponentInChildren(out InventoryContentCoordinate contextTr))
                 {
-                    AttachItemToSlot(gameObject, contextTr.transform);
+                    MoveToInventoryWithSound(contextTr.transform);
                     CombineConsumableItems(); 
                 }
+            }
+        }
+
+        private bool TryCombineConsumableItemsWithSound(Transform parentTr, string cueId)
+        {
+            if (CombineConsumableItems(parentTr) == false)
+            {
+                return false;
+            }
+
+            _soundManagerServices.PlayUiSfx(gameObject, cueId);
+            return true;
+        }
+
+        private void MoveToConsumableBarWithSound(GameObject targetItem, Transform targetTr)
+        {
+            bool wasEquipped = IsEquipped;
+            AttachItemToSlot(targetItem, targetTr);
+
+            if (wasEquipped == false && IsEquipped)
+            {
+                _soundManagerServices.PlayUiSfx(gameObject, EquipConsumableSoundCueId);
+            }
+        }
+
+        private void MoveToInventoryWithSound(Transform targetTr)
+        {
+            bool wasEquipped = IsEquipped;
+            AttachItemToSlot(gameObject, targetTr);
+
+            if (wasEquipped && IsEquipped == false)
+            {
+                _soundManagerServices.PlayUiSfx(gameObject, UnEquipConsumableSoundCueId);
             }
         }
 

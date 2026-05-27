@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using Controller;
+using Controller.CrowdControl;
 using DataType.Skill.Factory.Effect.Def;
 using Skill;
 using UnityEngine;
@@ -7,12 +8,6 @@ using Util;
 
 namespace DataType.Skill.Factory.Effect.Strategy
 {
-    public interface ICCReceiver
-    {
-        void ApplyCC(CCType ccType, GameObject caster);
-    }
-
-
     public class CrowdControlStrategy : IEffectStrategy
     {
         public Type DefType => typeof(CrowdControlDef);
@@ -21,7 +16,6 @@ namespace DataType.Skill.Factory.Effect.Strategy
         {
             return new Module((CrowdControlDef)def, owner);
         }
-
 
         private sealed class Module : IEffectModule
         {
@@ -38,7 +32,7 @@ namespace DataType.Skill.Factory.Effect.Strategy
             {
                 if (ctx == null)
                 {
-                    if (onCancel != null) onCancel.Invoke();
+                    onCancel?.Invoke();
                     return;
                 }
 
@@ -53,25 +47,24 @@ namespace DataType.Skill.Factory.Effect.Strategy
                 {
                     if (target.TryGetComponent(out BaseController enemyController))
                     {
-                        ApplyCC(_caster, enemyController, _def);
+                        ApplyCC(_caster, enemyController, _def, _def.hitVfxDuration.Resolve(skillContext));
                     }
                 }
+
                 onComplete?.Invoke();
             }
 
-            private void ApplyCC(BaseController caster, BaseController enemy, CrowdControlDef def)
+            private void ApplyCC(BaseController caster, BaseController enemy, CrowdControlDef def, float duration)
             {
                 switch (def.ccType)
                 {
                     case CCType.Taunt:
-                        // 도발: 적의 타겟을 '나'로 강제 변경
                         if (enemy.TryGetComponent(out ICCReceiver ccReceiver))
                         {
-                            ccReceiver.ApplyCC(def.ccType, caster.gameObject);
+                            ccReceiver.ApplyCC(def.ccType, caster.gameObject, duration);
                         }
 
                         break;
-                    // TODO: 나중에 추가될 모든 CC는 여기서 처리
                 }
             }
         }

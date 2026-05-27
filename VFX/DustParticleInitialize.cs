@@ -1,10 +1,8 @@
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.VFXManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.VFXManagement;
 using NetWork;
 using NetWork.NGO.Interface;
-using Scene.CommonInstaller.Interfaces;
 using UnityEngine;
 using Zenject;
 using ZenjectContext.GameObjectContext;

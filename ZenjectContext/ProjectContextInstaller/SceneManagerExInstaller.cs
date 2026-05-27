@@ -1,4 +1,4 @@
-using GameManagers.Scene;
+using GameManagers.SceneManagement;
 using Zenject;
 
 namespace ZenjectContext.ProjectContextInstaller

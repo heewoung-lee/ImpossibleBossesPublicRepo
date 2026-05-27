@@ -1,4 +1,5 @@
 using GameManagers;
+using GameManagers.GameManagerExManagement;
 using UnityEngine;
 using Zenject;
 
@@ -9,7 +10,7 @@ namespace ProjectContextInstaller
     {
         public override void InstallBindings()
         {
-            Container.BindInterfacesTo<GameManagerEx>().AsSingle();
+            Container.BindInterfacesAndSelfTo<GameManagerEx>().AsSingle();
         }
     }
 }

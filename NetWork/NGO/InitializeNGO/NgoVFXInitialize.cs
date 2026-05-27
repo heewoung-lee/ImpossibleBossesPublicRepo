@@ -1,7 +1,6 @@
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.VFXManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.VFXManagement;
 using NetWork.BaseNGO;
 using Unity.Netcode;
 using UnityEngine;

@@ -1,15 +1,12 @@
-using System;
 using Controller;
 using DataType.Item.Consumable;
-using DataType.Skill;
-using GameManagers.Interface.BufferManager;
-using GameManagers.RelayManager;
-using Skill; 
+using GameManagers.BufferManagement;
+using GameManagers.RelayManagement;
 using Unity.Netcode;
 using UnityEngine;
 using Zenject;
 
-namespace DataType.Strategies
+namespace DataType.Strategies.Item
 {
     public class ConsumableStrategy : IStrategy
     {

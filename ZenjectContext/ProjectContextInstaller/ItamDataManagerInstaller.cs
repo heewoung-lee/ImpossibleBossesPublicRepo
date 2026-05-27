@@ -1,7 +1,6 @@
 using GameManagers;
-using GameManagers.ItamData;
-using GameManagers.ItamDataManager;
-using GameManagers.UIFactory.SubItemUI;
+using GameManagers.ItemDataManagement;
+using GameManagers.UIFactoryManagement.SubItemUI;
 using UnityEngine;
 using Zenject;
 

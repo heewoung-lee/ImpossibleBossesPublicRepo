@@ -1,5 +1,4 @@
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using NetWork.NGO;
 using Unity.Netcode;
 using UnityEngine;

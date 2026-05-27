@@ -2,7 +2,7 @@
 using Controller;
 using DataType.Skill.Factory.Decorator.Def;
 using DataType.Skill.Factory.Decorator.Def.Start;
-using GameManagers.Interface.VFXManager;
+using GameManagers.VFXManagement;
 using Skill;
 using UnityEngine;
 using Zenject;

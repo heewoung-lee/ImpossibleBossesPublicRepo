@@ -1,9 +1,7 @@
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using Module.PlayerModule.PlayerClassModule.Fighter;
 using NetWork.BaseNGO;
 using NetWork.NGO;
-using Scene.CommonInstaller.Interfaces;
 using UnityEngine;
 using Zenject;
 using ZenjectContext.GameObjectContext;

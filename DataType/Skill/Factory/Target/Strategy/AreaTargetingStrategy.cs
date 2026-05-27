@@ -2,7 +2,7 @@
  using System.Collections.Generic;
  using Controller;
  using DataType.Skill.Factory.Target.Def;
- using GameManagers.Target;
+ using GameManagers.TargetManagement;
  using Skill;
  using UnityEngine;
  using Zenject;

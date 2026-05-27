@@ -1,8 +1,5 @@
 using System;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.Interface.VFXManager;
-using GameManagers.ResourcesEx;
-using Scene.CommonInstaller.Interfaces;
+using GameManagers.ResourcesExManagement;
 using Stats;
 using UnityEngine;
 using UnityEngine.SceneManagement;

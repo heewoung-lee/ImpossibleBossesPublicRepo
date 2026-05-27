@@ -1,5 +1,5 @@
 using GameManagers;
-using GameManagers.Interface.GameManagerEx;
+using GameManagers.GameManagerExManagement;
 using Stats.BaseStats;
 using UnityEngine;
 using Util;

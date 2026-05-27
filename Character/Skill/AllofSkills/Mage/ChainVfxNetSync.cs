@@ -1,6 +1,5 @@
 using System;
 using DataType.Skill.Factory.Decorator.Strategy;
-using GameManagers.ResourcesEx;
 using Unity.Netcode;
 using UnityEngine;
 using Zenject;

@@ -1,7 +1,6 @@
 using Data.DataType.ItemType.Interface;
 using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
 using Stats.BaseStats;
 using UnityEngine;
 using Zenject;

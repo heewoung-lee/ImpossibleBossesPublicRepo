@@ -5,8 +5,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DataType;
 using DataType.Skill;
-using DataType.Skill.Factory.Decorator.Def;
-using DataType.Skill.Factory.Effect.Def;
 using Stats;
 using Stats.BaseStats;
 using UnityEngine;
@@ -106,6 +104,44 @@ namespace Util
                 return null;
 
             return transform.gameObject;
+        }
+
+        public static GameObject FindChildGameObject(GameObject target, string childName)
+        {
+            if (target == null)
+            {
+                throw new MissingReferenceException($"Target is null. Could not find child: {childName}");
+            }
+
+            Transform[] transforms = target.GetComponentsInChildren<Transform>(true);
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                if (transforms[i].name == childName)
+                {
+                    return transforms[i].gameObject;
+                }
+            }
+
+            throw new MissingReferenceException($"Could not find child: {childName}");
+        }
+
+        public static T FindChildComponent<T>(GameObject target, string childName) where T : Component
+        {
+            if (target == null)
+            {
+                throw new MissingReferenceException($"Target is null. Could not find child component: {childName}");
+            }
+
+            T[] components = target.GetComponentsInChildren<T>(true);
+            for (int i = 0; i < components.Length; i++)
+            {
+                if (components[i].name == childName)
+                {
+                    return components[i];
+                }
+            }
+
+            throw new MissingReferenceException($"Could not find child component: {childName}");
         }
 
 
@@ -265,25 +301,8 @@ namespace Util
             return Regex.Replace(rawText, @"\{(.*?)\}", match =>
             {
                 string keyword = match.Groups[1].Value;
-                return ResolveKeyword(keyword, data, stats);
+                return SkillDescriptionKeywordResolver.Resolve(keyword, data, stats);
             });
-        }
-
-        private static string ResolveKeyword(string keyword, BaseDataSO data, PlayerStats stats)
-        {
-            if (data is SkillDataSO skilldata)
-            {
-                // {AttackDamage} 키워드를 발견했을 때
-                if (keyword == "AttackDamage")
-                {
-                    if (skilldata.effect is AttackEffectDef attackEffect)
-                    {
-                        float finalDamage = stats.Attack * attackEffect.multiplier + attackEffect.additional;
-                        return $"<color=red>{finalDamage:F0}</color>"; 
-                    }
-                }
-            }
-            return keyword;
         }
         
 

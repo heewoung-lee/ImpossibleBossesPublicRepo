@@ -2,8 +2,7 @@ using System;
 using BehaviorDesigner.Runtime;
 using Data.DataType.ItemType.Interface;
 using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIManagement;
 using UI;
 using UI.Popup.PopupUI;
 using UI.SubItem;
@@ -97,6 +96,17 @@ namespace Util
         {
             image.enabled = isLobbyLoading;
             return image;
+        }
+
+        public static UIMessageErrorToast GetMessageErrorToast(this IUIManagerServices uiManagerServices)
+        {
+            UIMessageErrorToast toast = uiManagerServices.Root.FindChild<UIMessageErrorToast>(nameof(UIMessageErrorToast), true);
+            if (toast != null)
+            {
+                return toast;
+            }
+
+            return uiManagerServices.MakeSubItem<UIMessageErrorToast>(uiManagerServices.Root.transform);
         }
     }
 }

@@ -1,10 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using GameManagers.Interface.LoginManager;
-using Scene.CommonInstaller;
-using Scene.CommonInstaller.Interfaces;
-using Scene.RoomScene;
+using GameManagers.LoginManagement;
+using ScenesScripts.CommonInstaller.Interfaces;
 using Unity.Multiplayer.Playmode;
 using Unity.Services.Authentication;
 using Unity.Services.Core;

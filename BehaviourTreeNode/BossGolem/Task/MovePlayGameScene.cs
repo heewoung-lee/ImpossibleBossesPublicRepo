@@ -1,17 +1,13 @@
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
-using GameManagers;
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.RelayManager;
-using NetWork.Boss_NGO;
+using GameManagers.RelayManagement;
+using NetWork;
+using NetWork.BossGolem_NGO;
 using NetWork.NGO.Scene_NGO;
-using Scene;
-using UI.Scene.SceneUI;
-using UnityEngine.SceneManagement;
-using Zenject;
 
 namespace BehaviourTreeNode.BossGolem.Task
 {
+    [TaskCategory("CustomNode")]
     public class MovePlayGameScene : Action
     {
          private RelayManager _relayManager;
@@ -31,7 +27,7 @@ namespace BehaviourTreeNode.BossGolem.Task
         public override void OnStart()
         {
             base.OnStart();
-            GetComponent<BossGolemAnimationNetworkController>().RemoveBossHpBarRpc();
+            GetComponent<BossAnimationNetworkController>().RemoveBossHpBarRpc();
             _ngoStageTimerController = RelayManager.SpawnNetworkObj("Prefabs/NGO/Scene_NGO/NgoStageTimerController").GetComponent<NgoStageTimerController>();
             _tree = Owner.GetComponent<BehaviorTree>();
         }

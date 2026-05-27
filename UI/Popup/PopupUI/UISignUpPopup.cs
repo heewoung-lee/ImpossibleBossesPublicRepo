@@ -1,12 +1,5 @@
-using System;
-using Cysharp.Threading.Tasks;
-using GameManagers;
-using GameManagers.Interface;
-using GameManagers.Interface.LoginManager;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIManagement;
 using TMPro;
-using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 using Util;
 using Zenject;
@@ -15,19 +8,13 @@ namespace UI.Popup.PopupUI
 {
     public class UISignUpPopup : IDPwPopup, IUIHasCloseButton
     {
-        
         [Inject] private IUIManagerServices _uiManagerServices;
-        [Inject] private IWriteGoogleSheet _writeGoogleSheet;
-        
-        Button _buttonClose;
-        Button _buttonSignup;
-        TMP_InputField _idInputField;
-        TMP_InputField _pwInputField;
-        private UIAlertPopupBase _alertPopup;
-        private UIAlertPopupBase _confirmPopup;
-        
-        
-        
+
+        private Button _buttonClose;
+        private Button _buttonSignup;
+        private TMP_InputField _idInputField;
+        private TMP_InputField _pwInputField;
+
         public override TMP_InputField IdInputField => _idInputField;
 
         public override TMP_InputField PwInputField => _pwInputField;
@@ -39,6 +26,7 @@ namespace UI.Popup.PopupUI
             ButtonClose,
             ButtonSignup
         }
+
         enum InputFields
         {
             IDInputField,
@@ -55,39 +43,12 @@ namespace UI.Popup.PopupUI
             _buttonClose = Get<Button>((int)Buttons.ButtonClose);
             _buttonSignup = Get<Button>((int)Buttons.ButtonSignup);
             _buttonClose.onClick.AddListener(OnClickCloseButton);
-            _buttonSignup.onClick.AddListener(()=>CreateID().Forget());
+            _buttonSignup.gameObject.SetActive(false);
         }
-        public async UniTaskVoid CreateID()
+
+        public void CreateID()
         {
-            if (string.IsNullOrEmpty(_idInputField.text) || string.IsNullOrEmpty(_pwInputField.text))
-                return;
-
-            _buttonSignup.interactable = false;
-
-            try
-            {
-                (bool isCheckResult, string message) = await _writeGoogleSheet.WriteToGoogleSheet(_idInputField.text, _pwInputField.text);
-
-                if (isCheckResult == false)
-                {
-                    _alertPopup = ShowAlertDialogUI<UIAlertDialog>(_alertPopup, "오류", message);
-                }
-                else
-                {
-                    _confirmPopup = ShowAlertDialogUI<UIConfirmDialog>(_confirmPopup, "성공", message, ShowLoginAfterSignUp);
-                    ClearIDAndPw();
-                }
-            }
-            catch (Exception ex)
-            {
-                UtilDebug.LogError($"[SignUp Error]: {ex}");
-                _alertPopup = ShowAlertDialogUI<UIAlertDialog>(_alertPopup, "오류", "알 수 없는 오류가 발생했습니다.");
-            }
-            finally
-            {
-                if (_buttonSignup != null) 
-                    _buttonSignup.interactable = true;
-            }
+            ShowSignUpDisabledMessage();
         }
 
         public void ClearIDAndPw()
@@ -98,25 +59,7 @@ namespace UI.Popup.PopupUI
 
         public void ShowLoginAfterSignUp()
         {
-            _uiManagerServices.CloseAllPopupUI();
-            UILoginPopup uiLoginPopup = _uiManagerServices.GetImportant_Popup_UI<UILoginPopup>();
-            _uiManagerServices.ShowPopupUI(uiLoginPopup);
-        }
-
-        private UIAlertPopupBase ShowAlertDialogUI<T>(UIAlertPopupBase alertBasePopup,string titleMessage,string bodyText,UnityAction closeButtonAction = null) where T: UIAlertPopupBase
-        {
-            if(alertBasePopup == null)
-            {
-                alertBasePopup = _uiManagerServices.GetPopupInDict<T>();
-            }
-            alertBasePopup.SetText(titleMessage, bodyText);
-            if (closeButtonAction != null)
-            {
-                alertBasePopup.SetCloseButtonOverride(closeButtonAction);
-            }
-            _uiManagerServices.ShowPopupUI(alertBasePopup);
-
-            return alertBasePopup;
+            _uiManagerServices.ClosePopupUI(this);
         }
 
         protected override void StartInit()
@@ -126,6 +69,11 @@ namespace UI.Popup.PopupUI
         public void OnClickCloseButton()
         {
             _uiManagerServices.ClosePopupUI(this);
+        }
+
+        private void ShowSignUpDisabledMessage()
+        {
+            _uiManagerServices.GetMessageErrorToast().Show("회원가입은 더 이상 사용하지 않습니다.");
         }
     }
 }

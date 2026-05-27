@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
-using Scene.CommonInstaller;
+using GameManagers.RelayManagement;
+using GameManagers.ResourcesExManagement;
+using ScenesScripts.CommonInstaller.Interfaces;
 using UI.Scene.Interface;
 using Unity.Netcode;
 using UnityEngine;
@@ -109,16 +109,23 @@ namespace NetWork.NGO
 
         public void SpawnControllerOption(NetworkObject ngo, Action spawnLogic)
         {
-            if (ngo.SpawnWithObservers == true)
-            {
-                ngo.SpawnWithObservers = false;
-            }
+            ngo.SpawnWithObservers = true;
+            ngo.CheckObjectVisibility = IsVisibleToReadyClient;
         
             spawnLogic.Invoke();
-            ShowNgoForReadyClient(ngo);
         }
-        
 
+        private bool IsVisibleToReadyClient(ulong clientId)
+        {
+            if (_relayManager != null &&
+                _relayManager.NetworkManagerEx != null &&
+                clientId == _relayManager.NetworkManagerEx.LocalClientId)
+            {
+                return true;
+            }
+
+            return _spawnedClients != null && _spawnedClients.Contains(clientId);
+        }
 
         public void Dispose()
         {

@@ -1,6 +1,7 @@
-using GameManagers.Interface.ResourcesManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Archer;
+using NetWork;
 using NetWork.BaseNGO;
 using NetWork.NGO;
 using UnityEngine;
@@ -11,6 +12,10 @@ namespace Character.Attack.Archer
 {
     public class NgoArcherAttackHitInitialize: NgoPoolingInitializeBase
     {
+        private const string ArcherHitSoundCueId = "ArcherHitSFX";
+
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class ArcherAttackHitFactory : NgoZenjectFactory<NgoArcherAttackHitInitialize>,IArcherFactoryMarker
         {
             [Inject]
@@ -21,8 +26,18 @@ namespace Character.Attack.Archer
                 _requestGO = loadService.Load<GameObject>( "Prefabs/Player/VFX/Archer/ArcherAttackHit");
             }
         }
-        
-        
+
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+
+        public override void StartParticleOption(float duration, NetworkParams networkParams)
+        {
+            base.StartParticleOption(duration, networkParams);
+            _soundPlayerBinder.PlayDetached(ArcherHitSoundCueId);
+        }
+
         public override string PoolingNgoPath => "Prefabs/Player/VFX/Archer/ArcherAttackHit";
         public override int PoolingCapacity => 5;
     }

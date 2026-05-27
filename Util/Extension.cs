@@ -27,7 +27,6 @@ namespace Util
                     tr = tr.parent;
                 }
             }
-            UtilDebug.Log("Can't Find Object");
             findObject = null;
             return false;
         }

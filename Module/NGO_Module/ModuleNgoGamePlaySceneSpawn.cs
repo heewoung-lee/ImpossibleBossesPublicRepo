@@ -1,5 +1,5 @@
-using Scene.GamePlayScene;
-using Scene.GamePlayScene.Spawner;
+
+using ScenesScripts.GamePlayScene.Spawner;
 using UnityEngine;
 
 namespace Module.NGO_Module

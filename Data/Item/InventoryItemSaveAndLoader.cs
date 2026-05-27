@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using DataType.Item;
-using GameManagers.ItamData.Interface;
-using GameManagers.ItamDataManager.Interface;
-using GameManagers.Scene;
+using GameManagers.ItemDataManagement.Interface;
+using GameManagers.SceneManagement;
 using UI.Popup.PopupUI;
 using UI.SubItem;
 using UnityEngine;

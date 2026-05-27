@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace BehaviourTreeNode.BossGolem.Task
 {
+    [TaskCategory("CustomNode")]
     public class CheckBossHpBelowCondition : Conditional
     {
         [SerializeField]private int _hpPercent;
@@ -20,10 +21,6 @@ namespace BehaviourTreeNode.BossGolem.Task
                 return TaskStatus.Success;
             }
             return TaskStatus.Failure;
-        }
-        public override void OnEnd()
-        {
-            base.OnEnd();
         }
     }
 }

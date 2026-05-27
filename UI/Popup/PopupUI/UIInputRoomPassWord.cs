@@ -1,15 +1,13 @@
 using System;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using GameManagers;
-using GameManagers.Scene;
-using Module.UI_Module;
+using GameManagers.LobbyManagement;
+using GameManagers.SceneManagement;
+using GameManagers.UIManagement;
 using TMPro;
 using UI.SubItem;
 using Unity.Multiplayer.Center.NetcodeForGameObjectsExample.DistributedAuthority;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
-using UnityEngine;
 using UnityEngine.UI;
 using Util;
 using Zenject;
@@ -20,8 +18,8 @@ namespace UI.Popup.PopupUI
     {
         private IUIManagerServices _uiManagerServices;
         private LobbyManager _lobbyManager;
-        SceneManagerEx _sceneManagerEx;
-        
+        private SceneManagerEx _sceneManagerEx;
+
         [Inject]
         public void Construct(
             IUIManagerServices uiManagerServices,
@@ -32,7 +30,7 @@ namespace UI.Popup.PopupUI
             _lobbyManager = lobbyManager;
             _sceneManagerEx = sceneManagerEx;
         }
-        
+
         enum InputFields
         {
             RoomPassWordInputField
@@ -43,29 +41,21 @@ namespace UI.Popup.PopupUI
             ConfirmButton
         }
 
-        enum GameObjects
-        {
-            MessageError
-        }
-
         private TMP_InputField _roomPwInputField;
         private UIRoomInfoPanel _roomInfoPanel;
         private Button _confirmButton;
-        private GameObject _messageError;
-        private TMP_Text _errorMessageText;
-        private ModuleUIFadeOut _errorMessageTextFadeOutMoudule;
-
-        public PlayerLoginInfo PlayerLoginInfo { get; set; }
-
 
         protected override void ZenjectEnable()
         {
             base.ZenjectEnable();
             _roomPwInputField.text = "";
+            _confirmButton.interactable = true;
+
             if (_roomInfoPanel != null)
             {
                 _roomInfoPanel.JoinButtonInteractive(true);
             }
+
             _roomInfoPanel = null;
         }
 
@@ -78,15 +68,9 @@ namespace UI.Popup.PopupUI
             base.AwakeInit();
             Bind<TMP_InputField>(typeof(InputFields));
             Bind<Button>(typeof(Buttons));
-            Bind<GameObject>(typeof(GameObjects));
             _roomPwInputField = Get<TMP_InputField>((int)InputFields.RoomPassWordInputField);
             _confirmButton = Get<Button>((int)Buttons.ConfirmButton);
-            _messageError = Get<GameObject>((int)GameObjects.MessageError);
-            _errorMessageText = _messageError.GetComponentInChildren<TMP_Text>();
-            _errorMessageTextFadeOutMoudule = _messageError.GetComponent<ModuleUIFadeOut>();
-            _errorMessageTextFadeOutMoudule.DoneFadeoutEvent += () => _confirmButton.interactable = true;
-            _confirmButton.onClick.AddListener(()=>CheckJoinRoom().Forget());
-            _messageError.SetActive(false);
+            _confirmButton.onClick.AddListener(() => CheckJoinRoom().Forget());
         }
 
         public void SetRoomInfoPanel(UIRoomInfoPanel infoPanel)
@@ -98,19 +82,20 @@ namespace UI.Popup.PopupUI
         {
             _confirmButton.interactable = false;
             Lobby lobby = _roomInfoPanel.LobbyRegisteredPanel;
+            Lobby joinedLobby = null;
+
             try
             {
                 await _lobbyManager.LoadingPanel(async () =>
                 {
-                    await _lobbyManager.JoinLobbyByID(lobby.Id, _roomPwInputField.text);
+                    joinedLobby = await _lobbyManager.JoinLobbyByID(lobby.Id, _roomPwInputField.text);
                 });
             }
             catch (Unity.Services.Lobbies.LobbyServiceException wrongPw) when
                 (wrongPw.Reason == Unity.Services.Lobbies.LobbyExceptionReason.IncorrectPassword ||
                  wrongPw.Reason == LobbyExceptionReason.ValidationError)
             {
-                _errorMessageText.text = "비밀번호가 틀렸습니다";
-                _messageError.SetActive(true);
+                _uiManagerServices.GetMessageErrorToast().Show("비밀번호가 틀렸습니다", () => _confirmButton.interactable = true);
                 return;
             }
             catch (LobbyServiceException notfound) when (notfound.Reason == LobbyExceptionReason.LobbyNotFound)
@@ -127,6 +112,7 @@ namespace UI.Popup.PopupUI
                             await _lobbyManager.ReFreshRoomList();
                         });
                 }
+
                 return;
             }
             catch (Exception error)
@@ -140,8 +126,13 @@ namespace UI.Popup.PopupUI
                 _lobbyManager.TriggerLobbyLoadingEvent(false);
             }
 
+            if (joinedLobby == null)
+            {
+                _confirmButton.interactable = true;
+                return;
+            }
 
-            _sceneManagerEx.LoadScene(Define.Scene.RoomScene);
+            _sceneManagerEx.LoadScene(Define.SceneName.RoomScene);
         }
     }
 }

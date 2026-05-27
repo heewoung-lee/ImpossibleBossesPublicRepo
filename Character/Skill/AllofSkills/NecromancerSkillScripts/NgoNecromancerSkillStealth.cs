@@ -1,4 +1,5 @@
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Necromancer;
 using NetWork.BaseNGO;
 using NetWork.NGO;
@@ -10,6 +11,10 @@ namespace Character.Skill.AllofSkills.NecromancerSkillScripts
 {
     public class NgoNecromancerSkillStealth: NgoPoolingInitializeBase
     {
+        private const string StealthSoundCueId = "StealthSFX";
+
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class NecromancerStealthFactory : NgoZenjectFactory<NgoNecromancerSkillStealth>,INecromancerFactoryMarker
         {
             [Inject]
@@ -22,12 +27,18 @@ namespace Character.Skill.AllofSkills.NecromancerSkillScripts
       
         }
 
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+
         public override void StartParticleOption(GameObject targetGo, float duration)
         {
             base.StartParticleOption(targetGo, duration);
             transform.position = targetGo.transform.position + (Vector3.up * 0.5f);
             
             _vfxManager.FollowParticleRoutine(targetGo.transform,gameObject);
+            _soundPlayerBinder.PlayDetached(StealthSoundCueId);
             
         }
 

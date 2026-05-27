@@ -1,4 +1,5 @@
 using GameManagers;
+using GameManagers.VFXManagement;
 using Zenject;
 
 namespace ZenjectContext.ProjectContextInstaller

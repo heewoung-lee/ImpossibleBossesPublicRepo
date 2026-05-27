@@ -1,5 +1,5 @@
 using GameManagers;
-using GameManagers.Interface.UIManager;
+using GameManagers.UIManagement;
 using Zenject;
 
 namespace UI.Scene.SceneUI
@@ -10,7 +10,6 @@ namespace UI.Scene.SceneUI
         UIUserInfoPanel _uiUserPanel;
         UILobbyChat _uiLobbyChat;
         UIRoomInventory _uiRoomInventory;
-        UILoadingPanel _uiLoadingPanel;
         protected override void AwakeInit()
         {
             base.AwakeInit();
@@ -23,7 +22,6 @@ namespace UI.Scene.SceneUI
             _uiUserPanel = _uiManagerServices.GetSceneUIFromResource<UIUserInfoPanel>();
             _uiLobbyChat = _uiManagerServices.GetSceneUIFromResource<UILobbyChat>();
             _uiRoomInventory = _uiManagerServices.GetSceneUIFromResource<UIRoomInventory>();
-            _uiLoadingPanel = _uiManagerServices.GetSceneUIFromResource<UILoadingPanel>();
         }
     }
 }

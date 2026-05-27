@@ -1,6 +1,5 @@
-using System;
-using GameManagers.RelayManager;
-using GameManagers.ResourcesEx;
+using GameManagers.ResourcesExManagement;
+using GameManagers.SoundManagement;
 using Module.PlayerModule.PlayerClassModule.Mage;
 using NetWork.BaseNGO;
 using NetWork.NGO;
@@ -12,6 +11,10 @@ namespace Character.Skill.AllofSkills.Mage
 {
     public class NgoMageSkillFrostNovaInitialize : NgoPoolingInitializeBase
     {
+        private const string FrostNovaSoundCueId = "ProstNovaSFX";
+
+        private SoundPlayerBinder _soundPlayerBinder;
+
         public class NgoFrostNovaSkillFactory : NgoZenjectFactory<NgoMageSkillFrostNovaInitialize>, IMageFactoryMarker
         {
             [Inject]
@@ -23,11 +26,17 @@ namespace Character.Skill.AllofSkills.Mage
             }
         }
 
+        private void Awake()
+        {
+            _soundPlayerBinder = GetComponent<SoundPlayerBinder>();
+        }
+
         public override void StartParticleOption(GameObject targetGo, float duration)
         {
             base.StartParticleOption(targetGo, duration);
 
             transform.position = targetGo.transform.position + (Vector3.up * 0.5f);
+            _soundPlayerBinder.PlayDetached(FrostNovaSoundCueId);
         }
 
 
